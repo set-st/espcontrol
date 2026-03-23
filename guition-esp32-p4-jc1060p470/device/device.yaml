@@ -65,6 +65,8 @@ http_request:
 web_server:
   port: 80
   version: 3
+  js_include: web/preview.js
+  css_include: web/preview.css
   sorting_groups:
     - id: sg_button
       name: "Button Configuration"

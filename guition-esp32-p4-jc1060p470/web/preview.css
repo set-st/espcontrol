@@ -1,0 +1,105 @@
+.sp-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px 8px;
+}
+
+.sp-screen {
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 1024 / 600;
+  background: #000;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.35);
+  border: 2px solid #1a1a1a;
+  container-type: inline-size;
+  font-family: 'Roboto', sans-serif;
+  user-select: none;
+}
+
+/* Top bar — temperature + clock overlay */
+.sp-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4.1cqw;
+  display: flex;
+  align-items: center;
+  padding: 0.78cqw;
+  z-index: 1;
+}
+
+.sp-temp {
+  color: #fff;
+  font-size: 1.95cqw;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.sp-temp.sp-visible {
+  opacity: 1;
+}
+
+.sp-clock {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 1.95cqw;
+  white-space: nowrap;
+}
+
+/* Main area — flex container for buttons */
+.sp-main {
+  position: absolute;
+  top: 4.1cqw;
+  left: 0.49cqw;
+  right: 0.49cqw;
+  bottom: 0.49cqw;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 0.98cqw;
+  padding: 0.49cqw;
+}
+
+/* Button widget */
+.sp-btn {
+  width: 19.53cqw;
+  height: 12.7cqw;
+  border-radius: 0.78cqw;
+  padding: 1.37cqw;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background-color 0.25s;
+  box-sizing: border-box;
+}
+
+.sp-btn-icon {
+  font-size: 4.69cqw;
+  line-height: 1;
+  color: #fff;
+}
+
+.sp-btn-label {
+  font-size: 2.15cqw;
+  line-height: 1.2;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Hint text below preview */
+.sp-hint {
+  text-align: center;
+  font-size: 11px;
+  opacity: 0.45;
+  padding: 6px 0 0;
+}
