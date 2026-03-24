@@ -948,6 +948,10 @@
       state.selectedSlot = -1;
       orderReceived = false;
       if (els.banner) els.banner.className = "sp-banner";
+      els.root.querySelectorAll(".sp-apply-btn").forEach(function (btn) {
+        btn.disabled = false;
+        btn.textContent = "Apply Configuration";
+      });
     });
 
     source.addEventListener("error", function () {
