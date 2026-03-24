@@ -8,12 +8,23 @@
 # Touch wake is handled by the touchscreen on_touch in device.yaml.
 # =============================================================================
 
+globals:
+  - id: display_asleep
+    type: bool
+    initial_value: 'false'
+
 script:
   # Screensaver idle timer (restartable)
   - id: screensaver_idle_check
     mode: restart
     then:
-      - delay: !lambda 'return (int)(id(screensaver_timeout).state * 1000);'
+      - delay: !lambda |-
+          float val = id(screensaver_timeout).state;
+          if (std::isnan(val) || val <= 0) val = 300;
+          return (int)(val * 1000);
+      - globals.set:
+          id: display_asleep
+          value: 'true'
       - light.turn_off: display_backlight
       - lvgl.pause:
           show_snow: true
@@ -23,6 +34,9 @@ script:
     mode: restart
     then:
       - delay: 120s
+      - globals.set:
+          id: display_asleep
+          value: 'true'
       - light.turn_on:
           id: display_backlight
           brightness: 50%
@@ -32,10 +46,17 @@ script:
   - id: screensaver_wake
     mode: restart
     then:
-      - script.stop: screensaver_idle_check
-      - lvgl.resume:
-      - delay: 100ms
-      - light.turn_on:
-          id: display_backlight
-          brightness: 90%
+      - if:
+          condition:
+            lambda: 'return id(display_asleep);'
+          then:
+            - script.stop: screensaver_idle_check
+            - lvgl.resume:
+            - delay: 100ms
+            - light.turn_on:
+                id: display_backlight
+                brightness: 90%
+            - globals.set:
+                id: display_asleep
+                value: 'false'
       - script.execute: screensaver_idle_check

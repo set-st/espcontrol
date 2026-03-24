@@ -324,8 +324,7 @@ esphome:
                 std::function<void(const std::string &)>([](const std::string &state) {
                   if (state == "on") {
                     lv_disp_trig_activity(NULL);
-                    id(display_backlight).turn_on().perform();
-                    id(screensaver_idle_check).execute();
+                    id(screensaver_wake).execute();
                   }
                 })
               );
