@@ -32,7 +32,9 @@ script:
   - id: screensaver_wake
     mode: restart
     then:
+      - script.stop: screensaver_idle_check
       - lvgl.resume:
+      - delay: 100ms
       - light.turn_on:
           id: display_backlight
           brightness: 90%
