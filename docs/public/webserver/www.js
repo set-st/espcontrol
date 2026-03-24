@@ -325,7 +325,16 @@
     // Connection banner
     ".sp-banner{padding:10px 16px;font-size:13px;text-align:center;display:none}" +
     ".sp-banner.sp-error{display:block;background:#d32f2f;color:#fff}" +
-    ".sp-banner.sp-offline{display:block;background:#f57c00;color:#fff}";
+    ".sp-banner.sp-offline{display:block;background:#f57c00;color:#fff}" +
+    ".sp-banner.sp-success{display:block;background:#2e7d32;color:#fff}" +
+
+    // Backup buttons
+    ".sp-backup-btns{display:flex;gap:8px;margin-top:4px}" +
+    ".sp-backup-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;" +
+    "padding:10px 16px;border:none;border-radius:6px;font-size:13px;font-weight:500;" +
+    "cursor:pointer;font-family:inherit;transition:filter .15s;background:#333;color:#e0e0e0}" +
+    ".sp-backup-btn:hover{filter:brightness(1.15)}" +
+    ".sp-backup-btn .mdi{font-size:16px}";
 
   var state = {
     order: [],
@@ -467,7 +476,7 @@
     if (!els.banner) return;
     els.banner.textContent = msg;
     els.banner.className = "sp-banner sp-" + type;
-    if (type === "error") {
+    if (type === "error" || type === "success") {
       clearTimeout(els._bannerTimer);
       els._bannerTimer = setTimeout(function () {
         els.banner.className = "sp-banner";
@@ -701,6 +710,30 @@
     els.setPresence = presInp;
 
     config.appendChild(ssPanel);
+
+    // --- Backup ---
+    config.appendChild(sectionTitle("Backup"));
+
+    var backupPanel = document.createElement("div");
+    backupPanel.className = "sp-panel";
+
+    var backupRow = document.createElement("div");
+    backupRow.className = "sp-backup-btns";
+
+    var exportBtn = document.createElement("button");
+    exportBtn.className = "sp-backup-btn";
+    exportBtn.innerHTML = '<span class="mdi mdi-download"></span>Export';
+    exportBtn.addEventListener("click", exportConfig);
+    backupRow.appendChild(exportBtn);
+
+    var importBtn = document.createElement("button");
+    importBtn.className = "sp-backup-btn";
+    importBtn.innerHTML = '<span class="mdi mdi-upload"></span>Import';
+    importBtn.addEventListener("click", importConfig);
+    backupRow.appendChild(importBtn);
+
+    backupPanel.appendChild(backupRow);
+    config.appendChild(backupPanel);
 
     page.appendChild(config);
     page.appendChild(buildApplyBar());
@@ -1383,6 +1416,147 @@
     postText("Button " + slot + " Sensor", "");
     postText("Button " + slot + " Sensor Unit", "");
     postSelect("Button " + slot + " Icon", "Auto");
+  }
+
+  // ── Export / Import ─────────────────────────────────────────────────
+
+  function exportConfig() {
+    var data = {
+      version: 1,
+      exported_at: new Date().toISOString(),
+      button_order: state.order.join(","),
+      button_on_color: state.onColor,
+      button_off_color: state.offColor,
+      buttons: state.buttons.map(function (b) {
+        return {
+          entity: b.entity,
+          label: b.label,
+          icon: b.icon,
+          sensor: b.sensor,
+          unit: b.unit,
+        };
+      }),
+      settings: {
+        indoor_temp_enable: state._indoorOn,
+        outdoor_temp_enable: state._outdoorOn,
+        indoor_temp_entity: state.indoorEntity,
+        outdoor_temp_entity: state.outdoorEntity,
+        presence_sensor_entity: state.presenceEntity,
+        screensaver_timeout: state.screensaverTimeout,
+      },
+    };
+
+    var json = JSON.stringify(data, null, 2);
+    var blob = new Blob([json], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var now = new Date();
+    var name = "espcontrol-config-" +
+      now.getFullYear() + "-" +
+      String(now.getMonth() + 1).padStart(2, "0") + "-" +
+      String(now.getDate()).padStart(2, "0") + ".json";
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function importConfig() {
+    var input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.style.display = "none";
+
+    input.addEventListener("change", function () {
+      if (!input.files || !input.files[0]) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        var data;
+        try { data = JSON.parse(reader.result); } catch (_) {
+          showBanner("Invalid file \u2014 could not parse JSON", "error");
+          return;
+        }
+
+        if (!data.version || !Array.isArray(data.buttons)) {
+          showBanner("Invalid config file \u2014 missing required fields", "error");
+          return;
+        }
+        if (data.buttons.length !== NUM_SLOTS) {
+          showBanner("Invalid config file \u2014 expected " + NUM_SLOTS + " button slots", "error");
+          return;
+        }
+
+        postText("Button On Color", data.button_on_color || "FF8C00");
+        postText("Button Off Color", data.button_off_color || "313131");
+
+        for (var i = 0; i < NUM_SLOTS; i++) {
+          var b = data.buttons[i];
+          var n = i + 1;
+          postText("Button " + n + " Entity", b.entity || "");
+          postText("Button " + n + " Label", b.label || "");
+          postText("Button " + n + " Sensor", b.sensor || "");
+          postText("Button " + n + " Sensor Unit", b.unit || "");
+          postSelect("Button " + n + " Icon", b.icon || "Auto");
+
+          state.buttons[i] = {
+            entity: b.entity || "",
+            label: b.label || "",
+            icon: b.icon || "Auto",
+            sensor: b.sensor || "",
+            unit: b.unit || "",
+          };
+        }
+
+        var orderStr = data.button_order || "";
+        postText("Button Order", orderStr);
+        state.order = parseOrder(orderStr);
+        state.onColor = data.button_on_color || "FF8C00";
+        state.offColor = data.button_off_color || "313131";
+
+        if (els.setOnColor && els.setOnColor._syncColor) els.setOnColor._syncColor(state.onColor);
+        if (els.setOffColor && els.setOffColor._syncColor) els.setOffColor._syncColor(state.offColor);
+
+        if (data.settings) {
+          var s = data.settings;
+
+          postSwitch("Indoor Temp Enable", !!s.indoor_temp_enable);
+          postSwitch("Outdoor Temp Enable", !!s.outdoor_temp_enable);
+          postText("Indoor Temp Entity", s.indoor_temp_entity || "");
+          postText("Outdoor Temp Entity", s.outdoor_temp_entity || "");
+          postText("Presence Sensor Entity", s.presence_sensor_entity || "");
+          postNumber("Screensaver Timeout", s.screensaver_timeout || 300);
+
+          state._indoorOn = !!s.indoor_temp_enable;
+          state._outdoorOn = !!s.outdoor_temp_enable;
+          state.indoorEntity = s.indoor_temp_entity || "";
+          state.outdoorEntity = s.outdoor_temp_entity || "";
+          state.presenceEntity = s.presence_sensor_entity || "";
+          state.screensaverTimeout = s.screensaver_timeout || 300;
+
+          els.setIndoorToggle.checked = state._indoorOn;
+          els.setIndoorField.className = "sp-cond-field" + (state._indoorOn ? " sp-visible" : "");
+          syncInput(els.setIndoorEntity, state.indoorEntity);
+          els.setOutdoorToggle.checked = state._outdoorOn;
+          els.setOutdoorField.className = "sp-cond-field" + (state._outdoorOn ? " sp-visible" : "");
+          syncInput(els.setOutdoorEntity, state.outdoorEntity);
+          syncInput(els.setPresence, state.presenceEntity);
+          syncInput(els.setSSTimeout, String(state.screensaverTimeout));
+          updateTempPreview();
+        }
+
+        state.selectedSlot = -1;
+        renderPreview();
+        renderButtonSettings();
+        showBanner("Configuration imported successfully", "success");
+      };
+      reader.readAsText(input.files[0]);
+    });
+
+    document.body.appendChild(input);
+    input.click();
+    document.body.removeChild(input);
   }
 
   // ── Clock ───────────────────────────────────────────────────────────
