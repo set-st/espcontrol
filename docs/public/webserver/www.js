@@ -267,28 +267,28 @@
     });
   }
 
-  function postText(name, value) {
-    post("/text/" + encodeURIComponent(name) + "?value=" + encodeURIComponent(value));
+  function postText(id, value) {
+    post("/text/" + id + "?value=" + encodeURIComponent(value));
   }
 
-  function postSelect(name, option) {
-    post("/select/" + encodeURIComponent(name) + "?option=" + encodeURIComponent(option));
+  function postSelect(id, option) {
+    post("/select/" + id + "?option=" + encodeURIComponent(option));
   }
 
-  function postButtonPress(name) {
-    post("/button/" + encodeURIComponent(name) + "/press");
+  function postButtonPress(id) {
+    post("/button/" + id + "/press");
   }
 
-  function postSwitch(name, on) {
-    post("/switch/" + encodeURIComponent(name) + "/" + (on ? "turn_on" : "turn_off"));
+  function postSwitch(id, on) {
+    post("/switch/" + id + "/" + (on ? "turn_on" : "turn_off"));
   }
 
-  function postNumber(name, value) {
-    post("/number/" + encodeURIComponent(name) + "?value=" + encodeURIComponent(value));
+  function postNumber(id, value) {
+    post("/number/" + id + "?value=" + encodeURIComponent(value));
   }
 
-  function postLight(name, brightness) {
-    post("/light/" + encodeURIComponent(name) + "/turn_on?brightness=" + brightness);
+  function postLight(id, brightness) {
+    post("/light/" + id + "/turn_on?brightness=" + brightness);
   }
 
   function escHtml(s) {
@@ -462,7 +462,7 @@
     appearPanel.appendChild(fieldLabel("On Color"));
     var onInp = textInput("sp-set-on-color", "FF8C00", "6-digit hex e.g. FF8C00");
     appearPanel.appendChild(onInp);
-    onInp.addEventListener("blur", function () { postText("Button On Color", this.value); });
+    onInp.addEventListener("blur", function () { postText("button_on_color", this.value); });
     onInp.addEventListener("keydown", function (e) { if (e.key === "Enter") this.blur(); });
     els.setOnColor = onInp;
 
@@ -470,7 +470,7 @@
     appearPanel.appendChild(fieldLabel("Off Color"));
     var offInp = textInput("sp-set-off-color", "313131", "6-digit hex e.g. 313131");
     appearPanel.appendChild(offInp);
-    offInp.addEventListener("blur", function () { postText("Button Off Color", this.value); });
+    offInp.addEventListener("blur", function () { postText("button_off_color", this.value); });
     offInp.addEventListener("keydown", function (e) { if (e.key === "Enter") this.blur(); });
     els.setOffColor = offInp;
 
@@ -488,7 +488,7 @@
     blVal.className = "sp-range-val";
     blVal.textContent = "255";
     blRange.addEventListener("input", function () { blVal.textContent = this.value; });
-    blRange.addEventListener("change", function () { postLight("Display Backlight", this.value); });
+    blRange.addEventListener("change", function () { postLight("display_backlight", this.value); });
     blRow.appendChild(blRange);
     blRow.appendChild(blVal);
     appearPanel.appendChild(blRow);
@@ -512,9 +512,9 @@
     indoorField.appendChild(indoorInp);
     tempPanel.appendChild(indoorField);
     indoorToggle.input.addEventListener("change", function () {
-      postSwitch("Indoor Temp Enable", this.checked);
+      postSwitch("indoor_temp_enable", this.checked);
     });
-    indoorInp.addEventListener("blur", function () { postText("Indoor Temp Entity", this.value); });
+    indoorInp.addEventListener("blur", function () { postText("indoor_temp_entity", this.value); });
     indoorInp.addEventListener("keydown", function (e) { if (e.key === "Enter") this.blur(); });
     els.setIndoorToggle = indoorToggle.input;
     els.setIndoorField = indoorField;
@@ -529,9 +529,9 @@
     outdoorField.appendChild(outdoorInp);
     tempPanel.appendChild(outdoorField);
     outdoorToggle.input.addEventListener("change", function () {
-      postSwitch("Outdoor Temp Enable", this.checked);
+      postSwitch("outdoor_temp_enable", this.checked);
     });
-    outdoorInp.addEventListener("blur", function () { postText("Outdoor Temp Entity", this.value); });
+    outdoorInp.addEventListener("blur", function () { postText("outdoor_temp_entity", this.value); });
     outdoorInp.addEventListener("keydown", function (e) { if (e.key === "Enter") this.blur(); });
     els.setOutdoorToggle = outdoorToggle.input;
     els.setOutdoorField = outdoorField;
@@ -559,7 +559,7 @@
     var numUnit = document.createElement("span");
     numUnit.className = "sp-number-unit";
     numUnit.textContent = "seconds";
-    numInp.addEventListener("blur", function () { postNumber("Screensaver Timeout", this.value); });
+    numInp.addEventListener("blur", function () { postNumber("screensaver_timeout", this.value); });
     numInp.addEventListener("keydown", function (e) { if (e.key === "Enter") this.blur(); });
     numRow.appendChild(numInp);
     numRow.appendChild(numUnit);
@@ -569,7 +569,7 @@
     ssPanel.appendChild(fieldLabel("Presence Sensor Entity"));
     var presInp = textInput("sp-set-presence", "", "e.g. binary_sensor.presence");
     ssPanel.appendChild(presInp);
-    presInp.addEventListener("blur", function () { postText("Presence Sensor Entity", this.value); });
+    presInp.addEventListener("blur", function () { postText("presence_sensor_entity", this.value); });
     presInp.addEventListener("keydown", function (e) { if (e.key === "Enter") this.blur(); });
     els.setPresence = presInp;
 
@@ -650,7 +650,7 @@
       }
       btn.disabled = true;
       btn.textContent = "Restarting\u2026";
-      setTimeout(function () { postButtonPress("Apply Configuration"); }, 600);
+      setTimeout(function () { postButtonPress("apply_configuration"); }, 600);
     });
     bar.appendChild(btn);
     var note = document.createElement("div");
@@ -791,7 +791,7 @@
 
         expand.querySelector("#sp-inp-entity").addEventListener("blur", function () {
           state.buttons[slot - 1].entity = this.value;
-          postText("Button " + slot + " Entity", this.value);
+          postText("button_" + slot + "_entity", this.value);
           renderPreview();
           updateListItemHeader(item, slot);
         });
@@ -800,7 +800,7 @@
         });
         expand.querySelector("#sp-inp-label").addEventListener("blur", function () {
           state.buttons[slot - 1].label = this.value;
-          postText("Button " + slot + " Label", this.value);
+          postText("button_" + slot + "_label", this.value);
           renderPreview();
           updateListItemHeader(item, slot);
         });
@@ -809,7 +809,7 @@
         });
         expand.querySelector("#sp-inp-icon").addEventListener("change", function () {
           state.buttons[slot - 1].icon = this.value;
-          postSelect("Button " + slot + " Icon", this.value);
+          postSelect("button_" + slot + "_icon", this.value);
           renderPreview();
           updateListItemHeader(item, slot);
         });
@@ -884,7 +884,7 @@
       var newOrder = state.order.slice();
       var moved = newOrder.splice(dragSrcPos, 1)[0];
       newOrder.splice(toPos, 0, moved);
-      postText("Button Order", newOrder.join(","));
+      postText("button_order", newOrder.join(","));
       dragSrcPos = -1;
     });
   }
@@ -913,7 +913,7 @@
     }
     if (slot < 0) return;
     state.order = state.order.concat(slot);
-    postText("Button Order", state.order.join(","));
+    postText("button_order", state.order.join(","));
     selectButton(slot);
   }
 
@@ -922,10 +922,10 @@
     if (state.selectedSlot === slot) state.selectedSlot = -1;
     renderPreview();
     renderButtonList();
-    postText("Button Order", state.order.join(","));
-    postText("Button " + slot + " Entity", "");
-    postText("Button " + slot + " Label", "");
-    postSelect("Button " + slot + " Icon", "Auto");
+    postText("button_order", state.order.join(","));
+    postText("button_" + slot + "_entity", "");
+    postText("button_" + slot + "_label", "");
+    postSelect("button_" + slot + "_icon", "Auto");
   }
 
   // ── Clock ───────────────────────────────────────────────────────────
@@ -1093,7 +1093,7 @@
         state.order = autoOrder;
         renderPreview();
         renderButtonList();
-        postText("Button Order", autoOrder.join(","));
+        postText("button_order", autoOrder.join(","));
       }
     }, 2000);
   }
