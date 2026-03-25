@@ -1,8 +1,9 @@
 # =============================================================================
 # BUTTON WIDGET - Parameterized LVGL button (included per slot via ${num})
 # =============================================================================
-# Single button tile for the main page grid. Each button shows an icon (or
-# sensor value when the entity is on), a text label, and toggles its bound
+# Single button tile for the main page grid. Each button shows an icon (which
+# can swap to a different icon or sensor value when the entity is on), a text
+# label, and toggles its bound
 # Home Assistant entity on press. Hidden by default; sensors.yaml unhides
 # and positions active buttons at boot based on button_order.
 # =============================================================================
@@ -14,7 +15,7 @@ button:
   hidden: true
   styles: control
   widgets:
-    # Icon (shown when entity is off or no sensor configured)
+    # Icon (swaps to icon_on or hides for sensor overlay when entity is on)
     - label:
         text_font: $icon_font
         align: top_left

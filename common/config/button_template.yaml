@@ -69,7 +69,7 @@ select:
     optimistic: true
     restore_value: true
     initial_option: "Auto"
-    options:
+    options: &icon_options
       - "Auto"
       - "Account"
       - "Air Conditioner"
@@ -260,5 +260,17 @@ select:
       - "Window"
     entity_category: config
     icon: "mdi:image-outline"
+    web_server:
+      sorting_group_id: sg_button
+
+  - platform: template
+    name: "Button ${num} Icon On"
+    id: button_${num}_icon_on
+    optimistic: true
+    restore_value: true
+    initial_option: "Auto"
+    options: *icon_options
+    entity_category: config
+    icon: "mdi:image-check-outline"
     web_server:
       sorting_group_id: sg_button

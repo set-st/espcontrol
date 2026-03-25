@@ -345,7 +345,7 @@
 
     // Toggle switch
     ".sp-toggle-row{display:flex;align-items:center;justify-content:space-between;" +
-    "min-height:36px;margin-bottom:4px}" +
+    "min-height:36px;margin-bottom:14px}" +
     ".sp-toggle-row:last-child{margin-bottom:0}" +
     ".sp-cond-field+.sp-toggle-row{margin-top:16px}" +
     ".sp-toggle-row span{font-size:.9rem}" +
@@ -484,6 +484,8 @@
     activeTab: "screen",
     _indoorOn: false,
     _outdoorOn: false,
+    _indoorVal: null,
+    _outdoorVal: null,
     indoorEntity: "",
     outdoorEntity: "",
     presenceEntity: "",
@@ -499,7 +501,7 @@
   };
 
   for (var i = 0; i < NUM_SLOTS; i++) {
-    state.buttons.push({ entity: "", label: "", icon: "Auto", sensor: "", unit: "" });
+    state.buttons.push({ entity: "", label: "", icon: "Auto", icon_on: "Auto", sensor: "", unit: "" });
   }
 
   var els = {};
@@ -721,7 +723,7 @@
 
     var hint = document.createElement("div");
     hint.className = "sp-hint";
-    hint.textContent = "tap a button to configure \u2022 tap + to add";
+    hint.textContent = "tap a button to configure \u2022 tap + to add \u2022 right click to manage";
     page.appendChild(hint);
 
     // Button settings (shown when a preview button is selected)
@@ -1191,8 +1193,10 @@
       btn.className = "sp-btn" + (state.selectedSlot === slot ? " sp-selected" : "");
       btn.style.backgroundColor = "#" + (color.length === 6 ? color : "313131");
       btn.draggable = true;
-      var sensorBadge = b.sensor
-        ? '<span class="sp-sensor-badge mdi mdi-gauge"></span>'
+      var hasWhenOn = b.sensor || (b.icon_on && b.icon_on !== "Auto");
+      var badgeIcon = b.sensor ? "gauge" : "swap-horizontal";
+      var sensorBadge = hasWhenOn
+        ? '<span class="sp-sensor-badge mdi mdi-' + badgeIcon + '"></span>'
         : '';
       btn.innerHTML =
         sensorBadge +
@@ -1277,38 +1281,118 @@
 
     initIconPicker(iconPicker, b.icon, slot);
 
-    var sensorOn = !!b.sensor;
-    var sensorToggle = toggleRow("Sensor When On", "sp-inp-sensor-toggle", sensorOn);
-    panel.appendChild(sensorToggle.row);
-    var sensorCond = condField();
-    if (sensorOn) sensorCond.classList.add("sp-visible");
-    sensorCond.appendChild(fieldLabel("Sensor Entity"));
+    var hasIconOn = b.icon_on && b.icon_on !== "Auto";
+    var hasSensor = !!b.sensor;
+    var whenOnEnabled = hasIconOn || hasSensor;
+    var whenOnMode = hasSensor ? "sensor" : "icon";
+
+    var whenOnToggle = toggleRow("When Entity On", "sp-inp-whenon-toggle", whenOnEnabled);
+    panel.appendChild(whenOnToggle.row);
+
+    var whenOnCond = condField();
+    if (whenOnEnabled) whenOnCond.classList.add("sp-visible");
+
+    var seg = document.createElement("div");
+    seg.className = "sp-segment";
+    var btnIcon = document.createElement("button");
+    btnIcon.type = "button";
+    btnIcon.textContent = "Different Icon";
+    if (whenOnMode === "icon") btnIcon.classList.add("active");
+    var btnSensor = document.createElement("button");
+    btnSensor.type = "button";
+    btnSensor.textContent = "Sensor Data";
+    if (whenOnMode === "sensor") btnSensor.classList.add("active");
+    seg.appendChild(btnIcon);
+    seg.appendChild(btnSensor);
+    whenOnCond.appendChild(seg);
+
+    var iconOnSection = condField();
+    if (whenOnMode === "icon") iconOnSection.classList.add("sp-visible");
+    var ionLabel = fieldLabel("Icon When On");
+    iconOnSection.appendChild(ionLabel);
+    var iconOnPicker = document.createElement("div");
+    iconOnPicker.className = "sp-icon-picker";
+    iconOnPicker.id = "sp-inp-icon-on-picker";
+    var iconOnVal = hasIconOn ? b.icon_on : "Auto";
+    iconOnPicker.innerHTML =
+      '<span class="sp-icon-picker-preview mdi mdi-' + (ICON_MAP[iconOnVal] || "cog") + '"></span>' +
+      '<input class="sp-icon-picker-input" id="sp-inp-icon-on" type="text" ' +
+      'placeholder="Search icons\u2026" value="' + escAttr(iconOnVal) + '" autocomplete="off">' +
+      '<div class="sp-icon-dropdown"></div>';
+    iconOnSection.appendChild(iconOnPicker);
+    var iconOnHint = document.createElement("div");
+    iconOnHint.className = "sp-field-hint";
+    iconOnHint.textContent = "Show a different icon when entity is on";
+    iconOnSection.appendChild(iconOnHint);
+    whenOnCond.appendChild(iconOnSection);
+
+    initIconPicker(iconOnPicker, iconOnVal, slot, function (opt) {
+      state.buttons[slot - 1].icon_on = opt;
+      postSelect("Button " + slot + " Icon On", opt);
+      renderPreview();
+    });
+
+    var sensorSection = condField();
+    if (whenOnMode === "sensor") sensorSection.classList.add("sp-visible");
+    sensorSection.appendChild(fieldLabel("Sensor Entity"));
     var sensorInp = textInput("sp-inp-sensor", b.sensor, "e.g. sensor.printer_percent_complete");
-    sensorCond.appendChild(sensorInp);
-    sensorCond.appendChild(fieldLabel("Unit"));
+    sensorSection.appendChild(sensorInp);
+    sensorSection.appendChild(fieldLabel("Unit"));
     var unitInp = textInput("sp-inp-unit", b.unit, "e.g. %");
     unitInp.className = "sp-input sp-input--narrow";
-    sensorCond.appendChild(unitInp);
+    sensorSection.appendChild(unitInp);
     var sensorHint = document.createElement("div");
     sensorHint.className = "sp-field-hint";
     sensorHint.textContent = "Show sensor value instead of icon when on";
-    sensorCond.appendChild(sensorHint);
-    panel.appendChild(sensorCond);
+    sensorSection.appendChild(sensorHint);
+    whenOnCond.appendChild(sensorSection);
 
-    sensorToggle.input.addEventListener("change", function () {
-      if (this.checked) {
-        sensorCond.classList.add("sp-visible");
-      } else {
-        sensorCond.classList.remove("sp-visible");
+    panel.appendChild(whenOnCond);
+
+    function setWhenOnMode(mode) {
+      whenOnMode = mode;
+      btnIcon.classList.toggle("active", mode === "icon");
+      btnSensor.classList.toggle("active", mode === "sensor");
+      iconOnSection.classList.toggle("sp-visible", mode === "icon");
+      sensorSection.classList.toggle("sp-visible", mode === "sensor");
+      if (mode === "icon") {
         sensorInp.value = "";
         unitInp.value = "";
         state.buttons[slot - 1].sensor = "";
         state.buttons[slot - 1].unit = "";
         postText("Button " + slot + " Sensor", "");
         postText("Button " + slot + " Sensor Unit", "");
+      } else {
+        state.buttons[slot - 1].icon_on = "Auto";
+        postSelect("Button " + slot + " Icon On", "Auto");
+        var ionPreview = iconOnPicker.querySelector(".sp-icon-picker-preview");
+        if (ionPreview) ionPreview.className = "sp-icon-picker-preview mdi mdi-cog";
+        var ionInput = iconOnPicker.querySelector(".sp-icon-picker-input");
+        if (ionInput) ionInput.value = "Auto";
+      }
+      renderPreview();
+    }
+
+    btnIcon.addEventListener("click", function () { setWhenOnMode("icon"); });
+    btnSensor.addEventListener("click", function () { setWhenOnMode("sensor"); });
+
+    whenOnToggle.input.addEventListener("change", function () {
+      if (this.checked) {
+        whenOnCond.classList.add("sp-visible");
+      } else {
+        whenOnCond.classList.remove("sp-visible");
+        sensorInp.value = "";
+        unitInp.value = "";
+        state.buttons[slot - 1].sensor = "";
+        state.buttons[slot - 1].unit = "";
+        state.buttons[slot - 1].icon_on = "Auto";
+        postText("Button " + slot + " Sensor", "");
+        postText("Button " + slot + " Sensor Unit", "");
+        postSelect("Button " + slot + " Icon On", "Auto");
         renderPreview();
       }
     });
+
     bindTextPost(sensorInp, "Button " + slot + " Sensor", {
       onBlur: function (v) { state.buttons[slot - 1].sensor = v; },
       rerender: true,
@@ -1322,7 +1406,7 @@
 
   // ── Searchable icon picker ──────────────────────────────────────────
 
-  function initIconPicker(picker, currentIcon, slot) {
+  function initIconPicker(picker, currentIcon, slot, onSelectOpt) {
     var input = picker.querySelector(".sp-icon-picker-input");
     var dropdown = picker.querySelector(".sp-icon-dropdown");
     var preview = picker.querySelector(".sp-icon-picker-preview");
@@ -1366,9 +1450,13 @@
       input.value = opt;
       preview.className = "sp-icon-picker-preview mdi mdi-" + iconClass(opt);
       closePicker();
-      state.buttons[slot - 1].icon = opt;
-      postSelect("Button " + slot + " Icon", opt);
-      renderPreview();
+      if (onSelectOpt) {
+        onSelectOpt(opt);
+      } else {
+        state.buttons[slot - 1].icon = opt;
+        postSelect("Button " + slot + " Icon", opt);
+        renderPreview();
+      }
     }
 
     function openPicker() {
@@ -1627,6 +1715,7 @@
       entity: src.entity,
       label: src.label,
       icon: src.icon,
+      icon_on: src.icon_on,
       sensor: src.sensor,
       unit: src.unit,
     };
@@ -1642,6 +1731,7 @@
     postText("Button " + newSlot + " Sensor", src.sensor);
     postText("Button " + newSlot + " Sensor Unit", src.unit);
     postSelect("Button " + newSlot + " Icon", src.icon || "Auto");
+    postSelect("Button " + newSlot + " Icon On", src.icon_on || "Auto");
     selectButton(newSlot);
   }
 
@@ -1656,6 +1746,7 @@
     postText("Button " + slot + " Sensor", "");
     postText("Button " + slot + " Sensor Unit", "");
     postSelect("Button " + slot + " Icon", "Auto");
+    postSelect("Button " + slot + " Icon On", "Auto");
   }
 
   // ── Export / Import ─────────────────────────────────────────────────
@@ -1672,6 +1763,7 @@
           entity: b.entity,
           label: b.label,
           icon: b.icon,
+          icon_on: b.icon_on,
           sensor: b.sensor,
           unit: b.unit,
         };
@@ -1739,11 +1831,13 @@
           postText("Button " + n + " Sensor", b.sensor || "");
           postText("Button " + n + " Sensor Unit", b.unit || "");
           postSelect("Button " + n + " Icon", b.icon || "Auto");
+          postSelect("Button " + n + " Icon On", b.icon_on || "Auto");
 
           state.buttons[i] = {
             entity: b.entity || "",
             label: b.label || "",
             icon: b.icon || "Auto",
+            icon_on: b.icon_on || "Auto",
             sensor: b.sensor || "",
             unit: b.unit || "",
           };
@@ -1960,6 +2054,26 @@
           }
         },
       },
+      {
+        re: /^select-button_(\d+)_icon_on$/,
+        fn: function (m, val) {
+          var slot = parseInt(m[1], 10);
+          if (slot >= 1 && slot <= NUM_SLOTS) {
+            state.buttons[slot - 1].icon_on = val;
+            renderPreview();
+            if (state.selectedSlot === slot && isSettingsFocused()) {
+              syncInput(document.getElementById("sp-inp-icon-on"), val);
+              var prev = document.getElementById("sp-inp-icon-on-picker");
+              if (prev) {
+                var p = prev.querySelector(".sp-icon-picker-preview");
+                if (p) p.className = "sp-icon-picker-preview mdi mdi-" + (ICON_MAP[val] || "cog");
+              }
+            } else {
+              renderButtonSettings();
+            }
+          }
+        },
+      },
     ];
 
     source.addEventListener("state", function (e) {
@@ -2026,10 +2140,14 @@
   function updateTempPreview() {
     var show = state._indoorOn || state._outdoorOn;
     els.temp.className = "sp-temp" + (show ? " sp-visible" : "");
+    var indoor = state._indoorVal != null ? state._indoorVal + "\u00B0" : "24\u00B0";
+    var outdoor = state._outdoorVal != null ? state._outdoorVal + "\u00B0" : "17\u00B0";
     if (state._indoorOn && state._outdoorOn) {
-      els.temp.textContent = "-\u00B0 / -\u00B0";
-    } else if (state._indoorOn || state._outdoorOn) {
-      els.temp.textContent = "-\u00B0";
+      els.temp.textContent = indoor + " / " + outdoor;
+    } else if (state._indoorOn) {
+      els.temp.textContent = indoor;
+    } else if (state._outdoorOn) {
+      els.temp.textContent = outdoor;
     }
   }
 
