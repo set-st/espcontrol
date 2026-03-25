@@ -1320,10 +1320,6 @@
       'placeholder="Search icons\u2026" value="' + escAttr(iconOnVal) + '" autocomplete="off">' +
       '<div class="sp-icon-dropdown"></div>';
     iconOnSection.appendChild(iconOnPicker);
-    var iconOnHint = document.createElement("div");
-    iconOnHint.className = "sp-field-hint";
-    iconOnHint.textContent = "Show a different icon when entity is on";
-    iconOnSection.appendChild(iconOnHint);
     whenOnCond.appendChild(iconOnSection);
 
     initIconPicker(iconOnPicker, iconOnVal, slot, function (opt) {
