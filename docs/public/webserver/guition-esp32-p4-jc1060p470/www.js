@@ -223,7 +223,7 @@
 
     // App shell
     "#sp-app{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;" +
-    "color:var(--text);max-width:480px;margin:0 auto;-webkit-font-smoothing:antialiased}" +
+    "color:var(--text);max-width:960px;margin:0 auto;-webkit-font-smoothing:antialiased}" +
     "esp-app{display:none !important}" +
 
     // Header
@@ -242,8 +242,8 @@
     "@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}" +
 
     // Screen preview
-    ".sp-wrap{display:flex;justify-content:center;padding:20px var(--gap) 4px;overflow:visible}" +
-    ".sp-screen{width:400%;max-width:1920px;aspect-ratio:1024/600;background:#000;" +
+    ".sp-wrap{display:flex;justify-content:center;padding:20px var(--gap) 4px}" +
+    ".sp-screen{width:100%;aspect-ratio:1024/600;background:#000;" +
     "border-radius:var(--radius);position:relative;overflow:hidden;" +
     "box-shadow:0 2px 20px rgba(0,0,0,.35);border:2px solid var(--surface);" +
     "container-type:inline-size;font-family:Roboto,sans-serif;user-select:none}" +
