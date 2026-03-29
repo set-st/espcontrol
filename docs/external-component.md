@@ -13,6 +13,7 @@ external_components:
   - source:
       type: git
       url: https://github.com/jtenniswood/espcontrol
+      ref: main
       path: components
     components: [espcontrol]
     refresh: 0s

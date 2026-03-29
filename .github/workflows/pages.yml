@@ -94,6 +94,17 @@ jobs:
             done
           fi
 
+      - name: Verify firmware assets
+        env:
+          DEVICE_SLUGS: "espcontrol-7inch"
+        run: |
+          for SLUG in $DEVICE_SLUGS; do
+            MANIFEST="docs/.vitepress/dist/firmware/${SLUG}/manifest.json"
+            if [ ! -f "$MANIFEST" ]; then
+              echo "::warning::No firmware manifest found for ${SLUG} — install page will be non-functional"
+            fi
+          done
+
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v4
         with:

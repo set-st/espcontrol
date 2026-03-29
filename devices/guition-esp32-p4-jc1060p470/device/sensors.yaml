@@ -455,7 +455,7 @@ esphome:
                         lv_label_set_text(id(temperatures), buf);
                       } else {
                         char buf[16];
-                        snprintf(buf, sizeof(buf), "%.0f° / %.0f°", outdoor, val);
+                        snprintf(buf, sizeof(buf), "%.0f° / %.0f°", val, outdoor);
                         lv_label_set_text(id(temperatures), buf);
                       }
                     }
@@ -482,7 +482,7 @@ esphome:
                         lv_label_set_text(id(temperatures), buf);
                       } else {
                         char buf[16];
-                        snprintf(buf, sizeof(buf), "%.0f° / %.0f°", val, indoor);
+                        snprintf(buf, sizeof(buf), "%.0f° / %.0f°", indoor, val);
                         lv_label_set_text(id(temperatures), buf);
                       }
                     }

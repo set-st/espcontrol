@@ -24,7 +24,7 @@ esphome:
 globals:
   - id: update_check_counter
     type: int
-    initial_value: '0'
+    initial_value: '1'
   - id: manual_check_only
     type: bool
     initial_value: 'false'
