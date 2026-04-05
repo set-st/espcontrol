@@ -253,7 +253,7 @@
 
     // Screen preview
     ".sp-wrap{display:flex;justify-content:center;padding:20px var(--gap) 4px}" +
-    ".sp-screen{width:49.5%;aspect-ratio:1/1;background:#000;" +
+    ".sp-screen{width:66%;aspect-ratio:1/1;background:#000;" +
     "border-radius:var(--radius);position:relative;overflow:hidden;" +
     "box-shadow:0 2px 20px rgba(0,0,0,.35);border:2px solid var(--surface);" +
     "container-type:inline-size;font-family:Roboto,sans-serif;user-select:none}" +
