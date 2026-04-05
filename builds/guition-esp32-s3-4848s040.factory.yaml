@@ -1,0 +1,19 @@
+substitutions:
+  firmware_version: "0.0.0"
+
+packages:
+  core: !include guition-esp32-s3-4848s040.yaml
+
+esphome:
+  project:
+    name: jtenniswood.espcontrol
+    version: "${firmware_version}"
+
+dashboard_import:
+  package_import_url: github://jtenniswood/espcontrol/devices/guition-esp32-s3-4848s040/esphome.yaml@main
+
+web_server:
+  port: 80
+  version: 3
+  js_url: ""
+  js_include: "../docs/public/webserver/guition-esp32-s3-4848s040/www.js"

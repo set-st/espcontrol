@@ -1,18 +1,19 @@
 ---
 title: Install
 description:
-  How to flash Espcontrol firmware to a Guition ESP32-P4 touchscreen, connect it to WiFi, and add it to Home Assistant.
+  How to flash Espcontrol firmware to a Guition ESP32 touchscreen, connect it to WiFi, and add it to Home Assistant.
 ---
 
 # Install
 
-Flash the Espcontrol firmware to your Guition ESP32-P4 display directly from your browser — no special software or technical knowledge required.
+Flash the Espcontrol firmware to your Guition ESP32 display directly from your browser — no special software or technical knowledge required.
 
 ## What you need
 
-- **A supported Guition ESP32-P4 panel:**
+- **A supported Guition ESP32 panel:**
   - **JC1060P470** — 7-inch, 1024x600, landscape
   - **JC4880P443** — 4.3-inch, 480x800, portrait
+  - **4848S040** — 4-inch, 480x480, square
 - **USB-C cable** — must be a data cable, not a charge-only cable
 - **A computer** running Chrome or Edge (desktop). Safari and Firefox are not supported for flashing.
 - **Home Assistant** running on your network
@@ -28,6 +29,10 @@ Connect the display to your computer with the USB-C cable, then click the button
 **4.3-inch (JC4880P443):**
 
 <EspInstallButton slug="guition-esp32-p4-jc4880p443" />
+
+**4-inch square (4848S040):**
+
+<EspInstallButton slug="guition-esp32-s3-4848s040" />
 
 ::: tip Which cable?
 If the install button doesn't detect your device, try a different USB-C cable. Charge-only cables (often thinner and cheaper) won't work — you need one that supports data transfer.

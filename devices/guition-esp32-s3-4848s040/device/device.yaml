@@ -1,0 +1,186 @@
+# =============================================================================
+# DEVICE - Guition ESP32-S3-4848S040 hardware definition
+# =============================================================================
+# Pin assignments, peripherals, and platform config for the 4" square panel.
+# Includes the ESP32-S3 SoC (native WiFi), ST7701S SPI display, GT911
+# capacitive touchscreen, and backlight PWM.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# ESP32-S3 platform (ESP-IDF framework)
+# ---------------------------------------------------------------------------
+esp32:
+  board: esp32-s3-devkitc-1
+  framework:
+    type: esp-idf
+
+# ---------------------------------------------------------------------------
+# External component (sun_calc.h for on-device sunrise/sunset)
+# ---------------------------------------------------------------------------
+external_components:
+  - source:
+      type: git
+      url: https://github.com/jtenniswood/espcontrol
+      ref: main
+      path: components
+    components: [espcontrol]
+    refresh: 0s
+
+espcontrol:
+
+# ---------------------------------------------------------------------------
+# ESPHome core (device name from substitutions)
+# ---------------------------------------------------------------------------
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+# ---------------------------------------------------------------------------
+# PSRAM (video frame buffer memory)
+# ---------------------------------------------------------------------------
+psram:
+  mode: octal
+  speed: 80MHz
+
+# ---------------------------------------------------------------------------
+# OTA updates (ESPHome native + HTTP-based)
+# ---------------------------------------------------------------------------
+ota:
+  - platform: esphome
+  - platform: http_request
+
+# ---------------------------------------------------------------------------
+# Home Assistant API
+# ---------------------------------------------------------------------------
+api:
+  reboot_timeout: 0s
+  homeassistant_states: true
+
+# ---------------------------------------------------------------------------
+# Logging (light component silenced to WARN to reduce noise)
+# ---------------------------------------------------------------------------
+logger:
+  logs:
+    light: WARN
+
+# ---------------------------------------------------------------------------
+# HTTP client (used by firmware_update.yaml for OTA from GitHub)
+# ---------------------------------------------------------------------------
+http_request:
+  id: http_req
+  timeout: 10s
+
+# ---------------------------------------------------------------------------
+# Web server (v3 UI with custom JS and sorted config groups)
+# ---------------------------------------------------------------------------
+web_server:
+  port: 80
+  version: 3
+  js_url: https://jtenniswood.github.io/espcontrol/webserver/${device_slug}/www.js
+  sorting_groups:
+    - id: sg_button
+      name: "Button Configuration"
+      sorting_weight: 10
+    - id: sg_display
+      name: "Display Configuration"
+      sorting_weight: 20
+    - id: sg_brightness
+      name: "Brightness"
+      sorting_weight: 25
+    - id: sg_screensaver
+      name: "Screensaver"
+      sorting_weight: 30
+    - id: sg_firmware
+      name: "Firmware"
+      sorting_weight: 40
+
+# ---------------------------------------------------------------------------
+# Restart button (triggers reboot to apply config changes)
+# ---------------------------------------------------------------------------
+button:
+  - platform: restart
+    name: "Apply Configuration"
+    icon: mdi:restart
+    entity_category: config
+
+# ---------------------------------------------------------------------------
+# Backlight (LEDC PWM output + monochromatic light entity)
+# ---------------------------------------------------------------------------
+output:
+  - platform: ledc
+    pin: GPIO38
+    id: gpio_backlight_pwm
+    frequency: 150Hz
+    min_power: 0.01
+    zero_means_zero: true
+
+light:
+  - platform: monochromatic
+    output: gpio_backlight_pwm
+    name: Display Backlight
+    icon: mdi:lightbulb-on
+    id: display_backlight
+    restore_mode: ALWAYS_ON
+    default_transition_length: 0s
+    gamma_correct: 1.0
+
+# ---------------------------------------------------------------------------
+# SPI bus (display communication)
+# ---------------------------------------------------------------------------
+spi:
+  - id: lcd_spi
+    clk_pin: GPIO48
+    mosi_pin: GPIO47
+
+# ---------------------------------------------------------------------------
+# I2C bus and touchscreen (GT911 capacitive, wakes screensaver on touch)
+# ---------------------------------------------------------------------------
+i2c:
+  sda: GPIO19
+  scl:
+    number: 45
+    ignore_strapping_warning: true
+
+touchscreen:
+  - platform: gt911
+    id: my_touchscreen
+    display: my_display
+    on_touch:
+      - script.execute: screensaver_wake
+
+# ---------------------------------------------------------------------------
+# Display (4" 480x480 ST7701S SPI panel)
+# ---------------------------------------------------------------------------
+display:
+  - platform: st7701s
+    id: my_display
+    dimensions:
+      width: 480
+      height: 480
+    spi_mode: MODE3
+    data_rate: 2MHz
+    color_order: RGB
+    invert_colors: False
+    cs_pin: 39
+    de_pin: 18
+    hsync_pin: 16
+    vsync_pin: 17
+    pclk_pin: 21
+    pclk_frequency: 12MHz
+    pclk_inverted: False
+    hsync_pulse_width: 8
+    hsync_front_porch: 10
+    hsync_back_porch: 20
+    vsync_pulse_width: 8
+    vsync_front_porch: 10
+    vsync_back_porch: 10
+    update_interval: never
+    auto_clear_enabled: False
+    init_sequence:
+      - 1
+      - [0xFF, 0x77, 0x01, 0x00, 0x00, 0x10] # CMD2_BKSEL_BK0
+      - [0xCD, 0x00] # disable MDT flag
+    data_pins:
+      red: [11, 12, 13, 14, 0]
+      green: [8, 20, 3, 46, 9, 10]
+      blue: [4, 5, 6, 7, 15]

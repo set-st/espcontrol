@@ -11,7 +11,7 @@ If you already use ESPHome and prefer to compile firmware yourself, you can inst
 ## What you need
 
 - **ESPHome** — either the [Home Assistant add-on](https://esphome.io/guides/getting_started_hassio.html) or the [CLI](https://esphome.io/guides/getting_started_command_line.html)
-- **A supported Guition ESP32-P4 panel** (7-inch JC1060P470 or 4.3-inch JC4880P443)
+- **A supported Guition ESP32 panel** (7-inch JC1060P470, 4.3-inch JC4880P443, or 4-inch 4848S040)
 - **USB-C data cable** for the first flash (OTA updates work after that)
 
 ## Create the config file
@@ -51,6 +51,24 @@ packages:
   setup:
     url: https://github.com/jtenniswood/espcontrol/
     file: devices/guition-esp32-p4-jc4880p443/packages.yaml
+    refresh: 1sec
+```
+
+**For the 4-inch square (4848S040):**
+
+```yaml
+substitutions:
+  name: "office-screen"
+  friendly_name: "Office Screen"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+packages:
+  setup:
+    url: https://github.com/jtenniswood/espcontrol/
+    file: devices/guition-esp32-s3-4848s040/packages.yaml
     refresh: 1sec
 ```
 
@@ -101,7 +119,7 @@ wifi:
 packages:
   setup:
     url: https://github.com/jtenniswood/espcontrol/
-    file: devices/guition-esp32-p4-jc1060p470/packages.yaml  # or jc4880p443
+    file: devices/guition-esp32-p4-jc1060p470/packages.yaml  # or jc4880p443 or guition-esp32-s3-4848s040
     refresh: 1sec
 
 # Your own additions below

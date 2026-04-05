@@ -1,0 +1,11 @@
+# =============================================================================
+# LVGL BASE - Display binding
+# =============================================================================
+# Must be included before any screen files that define LVGL pages.
+# =============================================================================
+
+lvgl:
+  buffer_size: 100%
+  displays: my_display
+  byte_order: little_endian
+  touchscreens: my_touchscreen

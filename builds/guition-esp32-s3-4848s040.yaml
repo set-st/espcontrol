@@ -1,0 +1,14 @@
+substitutions:
+  name: "guition-esp32-s3-4848s040"
+  friendly_name: "Guition ESP32-S3-4848S040"
+
+esphome:
+  name_add_mac_suffix: true
+
+packages:
+  espcontrol: !include ../devices/guition-esp32-s3-4848s040/packages.yaml
+
+wifi:
+  ap:
+
+captive_portal:

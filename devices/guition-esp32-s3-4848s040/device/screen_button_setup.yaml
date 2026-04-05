@@ -1,0 +1,75 @@
+# =============================================================================
+# SCREEN: BUTTON SETUP
+# =============================================================================
+# Shown when WiFi is connected but no button entity is configured.
+# Directs the user to the device web UI to configure their buttons.
+# =============================================================================
+
+lvgl:
+  pages:
+    - id: button_setup_page
+      bg_color: 0x000000
+      scrollable: false
+      widgets:
+        - obj:
+            width: 480
+            height: 480
+            bg_opa: 0%
+            border_width: 0
+            pad_all: 0
+            scrollable: false
+            clickable: true
+            on_press:
+              then:
+                - script.stop: setup_screen_dim
+                - light.turn_on:
+                    id: display_backlight
+                    brightness: 90%
+                - script.execute: setup_screen_dim
+            widgets:
+              - obj:
+                  align: center
+                  width: 380
+                  height: SIZE_CONTENT
+                  bg_opa: 0%
+                  border_width: 0
+                  pad_all: 0
+                  scrollable: false
+                  clickable: false
+                  layout:
+                    type: flex
+                    flex_flow: COLUMN
+                    flex_align_main: center
+                    flex_align_cross: center
+                    pad_row: 20
+                  widgets:
+                    - label:
+                        text_font: icon_font_setup
+                        text: $icon_cog
+                        text_color: 0xFFFFFF
+                        text_align: center
+                    - label:
+                        text: "Setup"
+                        text_font: setup_title_font
+                        text_color: 0xFFFFFF
+                        width: 380
+                        text_align: center
+                    - label:
+                        text: "Open your browser and go to"
+                        text_font: setup_body_font
+                        text_color: 0x888888
+                        width: 380
+                        text_align: center
+                    - label:
+                        id: setup_ip_label
+                        text: "http://..."
+                        text_font: setup_title_font
+                        text_color: 0xFFFFFF
+                        width: 380
+                        text_align: center
+                    - label:
+                        text: "to configure your buttons\nand display"
+                        text_font: setup_body_font
+                        text_color: 0x888888
+                        width: 380
+                        text_align: center

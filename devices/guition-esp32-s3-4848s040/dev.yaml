@@ -1,0 +1,16 @@
+substitutions:
+  name: "guition-esp32-s3-4848s040-dev"
+  friendly_name: "Guition ESP32-S3-4848S040 Dev"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+external_components:
+  - source:
+      type: local
+      path: ../../components
+    components: [espcontrol]
+
+packages:
+  espcontrol: !include packages.yaml

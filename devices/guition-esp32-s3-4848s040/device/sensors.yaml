@@ -1,0 +1,518 @@
+# =============================================================================
+# SENSORS - Dynamic HA entity subscriptions
+# =============================================================================
+# On boot, parses button_order to determine which buttons are active,
+# shows/positions them on the LVGL display, and subscribes to Home
+# Assistant state updates. Temperature and presence subscriptions follow.
+# =============================================================================
+
+globals:
+  - id: indoor_temp
+    type: float
+    initial_value: 'NAN'
+  - id: outdoor_temp
+    type: float
+    initial_value: 'NAN'
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - lambda: |-
+            // --- Button slot descriptor ---
+            struct BtnSlot {
+              esphome::text::Text *entity;
+              esphome::text::Text *label;
+              esphome::text::Text *icon;
+              esphome::text::Text *icon_on;
+              esphome::text::Text *sensor;
+              esphome::text::Text *sensor_unit;
+              lv_obj_t *btn;
+              lv_obj_t *icon_lbl;
+              lv_obj_t *text_lbl;
+              lv_obj_t *sensor_container;
+              lv_obj_t *sensor_lbl;
+              lv_obj_t *unit_lbl;
+            };
+
+            BtnSlot slots[] = {
+              { id(button_1_entity),  id(button_1_label),  id(button_1_icon),  id(button_1_icon_on),  id(button_1_sensor),  id(button_1_sensor_unit),  id(button_1),  id(button_1_icon_label),  id(button_1_text_label),  id(button_1_sensor_container),  id(button_1_sensor_label),  id(button_1_unit_label) },
+              { id(button_2_entity),  id(button_2_label),  id(button_2_icon),  id(button_2_icon_on),  id(button_2_sensor),  id(button_2_sensor_unit),  id(button_2),  id(button_2_icon_label),  id(button_2_text_label),  id(button_2_sensor_container),  id(button_2_sensor_label),  id(button_2_unit_label) },
+              { id(button_3_entity),  id(button_3_label),  id(button_3_icon),  id(button_3_icon_on),  id(button_3_sensor),  id(button_3_sensor_unit),  id(button_3),  id(button_3_icon_label),  id(button_3_text_label),  id(button_3_sensor_container),  id(button_3_sensor_label),  id(button_3_unit_label) },
+              { id(button_4_entity),  id(button_4_label),  id(button_4_icon),  id(button_4_icon_on),  id(button_4_sensor),  id(button_4_sensor_unit),  id(button_4),  id(button_4_icon_label),  id(button_4_text_label),  id(button_4_sensor_container),  id(button_4_sensor_label),  id(button_4_unit_label) },
+              { id(button_5_entity),  id(button_5_label),  id(button_5_icon),  id(button_5_icon_on),  id(button_5_sensor),  id(button_5_sensor_unit),  id(button_5),  id(button_5_icon_label),  id(button_5_text_label),  id(button_5_sensor_container),  id(button_5_sensor_label),  id(button_5_unit_label) },
+              { id(button_6_entity),  id(button_6_label),  id(button_6_icon),  id(button_6_icon_on),  id(button_6_sensor),  id(button_6_sensor_unit),  id(button_6),  id(button_6_icon_label),  id(button_6_text_label),  id(button_6_sensor_container),  id(button_6_sensor_label),  id(button_6_unit_label) },
+              { id(button_7_entity),  id(button_7_label),  id(button_7_icon),  id(button_7_icon_on),  id(button_7_sensor),  id(button_7_sensor_unit),  id(button_7),  id(button_7_icon_label),  id(button_7_text_label),  id(button_7_sensor_container),  id(button_7_sensor_label),  id(button_7_unit_label) },
+              { id(button_8_entity),  id(button_8_label),  id(button_8_icon),  id(button_8_icon_on),  id(button_8_sensor),  id(button_8_sensor_unit),  id(button_8),  id(button_8_icon_label),  id(button_8_text_label),  id(button_8_sensor_container),  id(button_8_sensor_label),  id(button_8_unit_label) },
+              { id(button_9_entity),  id(button_9_label),  id(button_9_icon),  id(button_9_icon_on),  id(button_9_sensor),  id(button_9_sensor_unit),  id(button_9),  id(button_9_icon_label),  id(button_9_text_label),  id(button_9_sensor_container),  id(button_9_sensor_label),  id(button_9_unit_label) },
+              { id(button_10_entity), id(button_10_label), id(button_10_icon), id(button_10_icon_on), id(button_10_sensor), id(button_10_sensor_unit), id(button_10), id(button_10_icon_label), id(button_10_text_label), id(button_10_sensor_container), id(button_10_sensor_label), id(button_10_unit_label) },
+              { id(button_11_entity), id(button_11_label), id(button_11_icon), id(button_11_icon_on), id(button_11_sensor), id(button_11_sensor_unit), id(button_11), id(button_11_icon_label), id(button_11_text_label), id(button_11_sensor_container), id(button_11_sensor_label), id(button_11_unit_label) },
+              { id(button_12_entity), id(button_12_label), id(button_12_icon), id(button_12_icon_on), id(button_12_sensor), id(button_12_sensor_unit), id(button_12), id(button_12_icon_label), id(button_12_text_label), id(button_12_sensor_container), id(button_12_sensor_label), id(button_12_unit_label) },
+              { id(button_13_entity), id(button_13_label), id(button_13_icon), id(button_13_icon_on), id(button_13_sensor), id(button_13_sensor_unit), id(button_13), id(button_13_icon_label), id(button_13_text_label), id(button_13_sensor_container), id(button_13_sensor_label), id(button_13_unit_label) },
+              { id(button_14_entity), id(button_14_label), id(button_14_icon), id(button_14_icon_on), id(button_14_sensor), id(button_14_sensor_unit), id(button_14), id(button_14_icon_label), id(button_14_text_label), id(button_14_sensor_container), id(button_14_sensor_label), id(button_14_unit_label) },
+              { id(button_15_entity), id(button_15_label), id(button_15_icon), id(button_15_icon_on), id(button_15_sensor), id(button_15_sensor_unit), id(button_15), id(button_15_icon_label), id(button_15_text_label), id(button_15_sensor_container), id(button_15_sensor_label), id(button_15_unit_label) },
+              { id(button_16_entity), id(button_16_label), id(button_16_icon), id(button_16_icon_on), id(button_16_sensor), id(button_16_sensor_unit), id(button_16), id(button_16_icon_label), id(button_16_text_label), id(button_16_sensor_container), id(button_16_sensor_label), id(button_16_unit_label) },
+              { id(button_17_entity), id(button_17_label), id(button_17_icon), id(button_17_icon_on), id(button_17_sensor), id(button_17_sensor_unit), id(button_17), id(button_17_icon_label), id(button_17_text_label), id(button_17_sensor_container), id(button_17_sensor_label), id(button_17_unit_label) },
+              { id(button_18_entity), id(button_18_label), id(button_18_icon), id(button_18_icon_on), id(button_18_sensor), id(button_18_sensor_unit), id(button_18), id(button_18_icon_label), id(button_18_text_label), id(button_18_sensor_container), id(button_18_sensor_label), id(button_18_unit_label) },
+              { id(button_19_entity), id(button_19_label), id(button_19_icon), id(button_19_icon_on), id(button_19_sensor), id(button_19_sensor_unit), id(button_19), id(button_19_icon_label), id(button_19_text_label), id(button_19_sensor_container), id(button_19_sensor_label), id(button_19_unit_label) },
+              { id(button_20_entity), id(button_20_label), id(button_20_icon), id(button_20_icon_on), id(button_20_sensor), id(button_20_sensor_unit), id(button_20), id(button_20_icon_label), id(button_20_text_label), id(button_20_sensor_container), id(button_20_sensor_label), id(button_20_unit_label) },
+              { id(button_21_entity), id(button_21_label), id(button_21_icon), id(button_21_icon_on), id(button_21_sensor), id(button_21_sensor_unit), id(button_21), id(button_21_icon_label), id(button_21_text_label), id(button_21_sensor_container), id(button_21_sensor_label), id(button_21_unit_label) },
+              { id(button_22_entity), id(button_22_label), id(button_22_icon), id(button_22_icon_on), id(button_22_sensor), id(button_22_sensor_unit), id(button_22), id(button_22_icon_label), id(button_22_text_label), id(button_22_sensor_container), id(button_22_sensor_label), id(button_22_unit_label) },
+              { id(button_23_entity), id(button_23_label), id(button_23_icon), id(button_23_icon_on), id(button_23_sensor), id(button_23_sensor_unit), id(button_23), id(button_23_icon_label), id(button_23_text_label), id(button_23_sensor_container), id(button_23_sensor_label), id(button_23_unit_label) },
+              { id(button_24_entity), id(button_24_label), id(button_24_icon), id(button_24_icon_on), id(button_24_sensor), id(button_24_sensor_unit), id(button_24), id(button_24_icon_label), id(button_24_text_label), id(button_24_sensor_container), id(button_24_sensor_label), id(button_24_unit_label) },
+              { id(button_25_entity), id(button_25_label), id(button_25_icon), id(button_25_icon_on), id(button_25_sensor), id(button_25_sensor_unit), id(button_25), id(button_25_icon_label), id(button_25_text_label), id(button_25_sensor_container), id(button_25_sensor_label), id(button_25_unit_label) },
+              { id(button_26_entity), id(button_26_label), id(button_26_icon), id(button_26_icon_on), id(button_26_sensor), id(button_26_sensor_unit), id(button_26), id(button_26_icon_label), id(button_26_text_label), id(button_26_sensor_container), id(button_26_sensor_label), id(button_26_unit_label) },
+              { id(button_27_entity), id(button_27_label), id(button_27_icon), id(button_27_icon_on), id(button_27_sensor), id(button_27_sensor_unit), id(button_27), id(button_27_icon_label), id(button_27_text_label), id(button_27_sensor_container), id(button_27_sensor_label), id(button_27_unit_label) },
+              { id(button_28_entity), id(button_28_label), id(button_28_icon), id(button_28_icon_on), id(button_28_sensor), id(button_28_sensor_unit), id(button_28), id(button_28_icon_label), id(button_28_text_label), id(button_28_sensor_container), id(button_28_sensor_label), id(button_28_unit_label) },
+              { id(button_29_entity), id(button_29_label), id(button_29_icon), id(button_29_icon_on), id(button_29_sensor), id(button_29_sensor_unit), id(button_29), id(button_29_icon_label), id(button_29_text_label), id(button_29_sensor_container), id(button_29_sensor_label), id(button_29_unit_label) },
+              { id(button_30_entity), id(button_30_label), id(button_30_icon), id(button_30_icon_on), id(button_30_sensor), id(button_30_sensor_unit), id(button_30), id(button_30_icon_label), id(button_30_text_label), id(button_30_sensor_container), id(button_30_sensor_label), id(button_30_unit_label) },
+            };
+            constexpr int NUM_SLOTS = 30;
+
+            // --- Parse button_order (comma-separated 1-indexed slot numbers) ---
+            std::string order_str = id(button_order).state;
+            std::vector<int> order;
+            if (!order_str.empty()) {
+              size_t start = 0, comma;
+              while ((comma = order_str.find(',', start)) != std::string::npos) {
+                int v = atoi(order_str.substr(start, comma - start).c_str());
+                if (v >= 1 && v <= NUM_SLOTS) order.push_back(v);
+                start = comma + 1;
+              }
+              int v = atoi(order_str.substr(start).c_str());
+              if (v >= 1 && v <= NUM_SLOTS) order.push_back(v);
+            }
+
+            // --- Universal button colors ---
+            std::string on_hex = id(button_on_color).state;
+            std::string off_hex = id(button_off_color).state;
+            uint32_t on_val = 0, off_val = 0;
+            bool has_on = on_hex.length() == 6;
+            bool has_off = off_hex.length() == 6;
+            if (has_on) on_val = strtoul(on_hex.c_str(), nullptr, 16);
+            if (has_off) off_val = strtoul(off_hex.c_str(), nullptr, 16);
+
+            // --- Hide all buttons, then show active ones in order ---
+            for (int i = 0; i < NUM_SLOTS; i++) {
+              lv_obj_add_flag(slots[i].btn, LV_OBJ_FLAG_HIDDEN);
+            }
+
+            struct IconEntry { const char* name; const char* glyph; };
+            static const IconEntry icon_entries[] = {
+              // --- GENERATED:ICONS START ---
+              {"Account",                    "\U000F0004"},
+              {"Air Conditioner",            "\U000F001B"},
+              {"Air Filter",                 "\U000F0D43"},
+              {"Air Purifier",               "\U000F0D44"},
+              {"Alarm",                      "\U000F009E"},
+              {"Alarm Light",                "\U000F078F"},
+              {"Application",                "\U000F0614"},
+              {"Battery",                    "\U000F0079"},
+              {"Battery 10%",                "\U000F007A"},
+              {"Battery 20%",                "\U000F007B"},
+              {"Battery 30%",                "\U000F007C"},
+              {"Battery 40%",                "\U000F007D"},
+              {"Battery 50%",                "\U000F007E"},
+              {"Battery 60%",                "\U000F007F"},
+              {"Battery 70%",                "\U000F0080"},
+              {"Battery 80%",                "\U000F0081"},
+              {"Battery 90%",                "\U000F0082"},
+              {"Battery Alert",              "\U000F0083"},
+              {"Battery Charging",           "\U000F0084"},
+              {"Battery Charging 100",       "\U000F0085"},
+              {"Battery Charging 70",        "\U000F089E"},
+              {"Battery High",               "\U000F12A3"},
+              {"Battery Low",                "\U000F12A1"},
+              {"Battery Medium",             "\U000F12A2"},
+              {"Battery Off",                "\U000F125D"},
+              {"Battery Outline",            "\U000F008E"},
+              {"Battery Unknown",            "\U000F0091"},
+              {"Bed",                        "\U000F02E3"},
+              {"Bell",                       "\U000F009A"},
+              {"Blinds",                     "\U000F00AC"},
+              {"Blinds Horizontal",          "\U000F1A2B"},
+              {"Blinds Horizontal Closed",   "\U000F1A2C"},
+              {"Blinds Open",                "\U000F1011"},
+              {"Bluetooth",                  "\U000F00AF"},
+              {"Broom",                      "\U000F00E2"},
+              {"Camera",                     "\U000F0100"},
+              {"Car Electric",               "\U000F0B6C"},
+              {"Cast",                       "\U000F0118"},
+              {"CCTV",                       "\U000F07AE"},
+              {"Ceiling Fan",                "\U000F1797"},
+              {"Ceiling Light",              "\U000F0769"},
+              {"Chandelier",                 "\U000F1793"},
+              {"Clock",                      "\U000F0150"},
+              {"Coffee Maker",               "\U000F109F"},
+              {"Current AC",                 "\U000F1480"},
+              {"Current DC",                 "\U000F095C"},
+              {"Curtains",                   "\U000F1846"},
+              {"Curtains Closed",            "\U000F1847"},
+              {"Desk Lamp",                  "\U000F095F"},
+              {"Dishwasher",                 "\U000F0AAC"},
+              {"Dog",                        "\U000F0A43"},
+              {"Door",                       "\U000F081A"},
+              {"Door Open",                  "\U000F081C"},
+              {"Doorbell",                   "\U000F0869"},
+              {"Dryer",                      "\U000F0917"},
+              {"EV Charger",                 "\U000F05F1"},
+              {"Fan",                        "\U000F0210"},
+              {"Fire",                       "\U000F0238"},
+              {"Fireplace",                  "\U000F0E2E"},
+              {"Flash",                      "\U000F0241"},
+              {"Floor Lamp",                 "\U000F08DD"},
+              {"Fountain",                   "\U000F096B"},
+              {"Fridge",                     "\U000F0290"},
+              {"Gamepad",                    "\U000F0297"},
+              {"Garage",                     "\U000F0372"},
+              {"Garage Open",                "\U000F06DA"},
+              {"Gate",                       "\U000F0299"},
+              {"Gate Open",                  "\U000F116A"},
+              {"Gauge",                      "\U000F029A"},
+              {"Gauge Empty",                "\U000F0873"},
+              {"Gauge Full",                 "\U000F0874"},
+              {"Gauge Low",                  "\U000F0875"},
+              {"Grid Export",                "\U000F192C"},
+              {"Grid Import",                "\U000F192D"},
+              {"Grid Off",                   "\U000F19DD"},
+              {"Headphones",                 "\U000F02CB"},
+              {"Heater",                     "\U000F0438"},
+              {"Home",                       "\U000F02DC"},
+              {"Hot Tub",                    "\U000F0828"},
+              {"Humidifier",                 "\U000F1099"},
+              {"Humidity Alert",             "\U000F1509"},
+              {"Iron",                       "\U000F1824"},
+              {"Kettle",                     "\U000F05FA"},
+              {"Key",                        "\U000F030B"},
+              {"Lamp",                       "\U000F06B5"},
+              {"LAN",                        "\U000F0317"},
+              {"Lawnmower",                  "\U000F11F7"},
+              {"Leaf",                       "\U000F032A"},
+              {"LED Strip",                  "\U000F07D6"},
+              {"LED Strip Variant",          "\U000F1051"},
+              {"LED Strip Variant Off",      "\U000F1A4B"},
+              {"Light Switch",               "\U000F097E"},
+              {"Lightbulb",                  "\U000F0335"},
+              {"Lightbulb Group",            "\U000F1253"},
+              {"Lightbulb Group Outline",    "\U000F1254"},
+              {"Lightbulb Night",            "\U000F1A4C"},
+              {"Lightbulb Night Outline",    "\U000F1A4D"},
+              {"Lightbulb Off",              "\U000F0E4F"},
+              {"Lightbulb Outline",          "\U000F0336"},
+              {"Lightning Bolt",             "\U000F140B"},
+              {"Lock",                       "\U000F033E"},
+              {"Mailbox",                    "\U000F06EE"},
+              {"Message Video",              "\U000F036B"},
+              {"Meter Electric",             "\U000F1A57"},
+              {"Meter Gas",                  "\U000F1A59"},
+              {"Microwave",                  "\U000F0C99"},
+              {"Monitor",                    "\U000F0379"},
+              {"Motion Sensor",              "\U000F0D91"},
+              {"Movie Roll",                 "\U000F07DE"},
+              {"Music",                      "\U000F075A"},
+              {"Outdoor Lamp",               "\U000F1020"},
+              {"Oven",                       "\U000F04DE"},
+              {"Package",                    "\U000F03D6"},
+              {"Package Closed",             "\U000F03D7"},
+              {"Pool",                       "\U000F0606"},
+              {"Power",                      "\U000F0425"},
+              {"Power Plug",                 "\U000F0654"},
+              {"Printer",                    "\U000F042A"},
+              {"Printer 3D",                 "\U000F042B"},
+              {"Projector",                  "\U000F042E"},
+              {"Robot Vacuum",               "\U000F070D"},
+              {"Roller Shade",               "\U000F1A6B"},
+              {"Roller Shade Closed",        "\U000F1A6C"},
+              {"Router",                     "\U000F0469"},
+              {"Router Network",             "\U000F1087"},
+              {"Security",                   "\U000F068A"},
+              {"Shower",                     "\U000F09A1"},
+              {"Smoke Detector",             "\U000F0392"},
+              {"Snowflake",                  "\U000F0717"},
+              {"Snowflake Alert",            "\U000F0F29"},
+              {"Snowflake Thermometer",      "\U000F1A71"},
+              {"Sofa",                       "\U000F04B9"},
+              {"Solar Panel",                "\U000F0D9B"},
+              {"Solar Panel Large",          "\U000F0D9C"},
+              {"Solar Power",                "\U000F0A72"},
+              {"Solar Power Variant",        "\U000F1A73"},
+              {"Speaker",                    "\U000F04C3"},
+              {"Spotlight",                  "\U000F04C9"},
+              {"Sprinkler",                  "\U000F105F"},
+              {"String Lights",              "\U000F12BA"},
+              {"Sun",                        "\U000F05A8"},
+              {"Table",                      "\U000F05BC"},
+              {"Television",                 "\U000F0502"},
+              {"Thermometer",                "\U000F050F"},
+              {"Thermometer Alert",          "\U000F0E01"},
+              {"Thermometer High",           "\U000F10C2"},
+              {"Thermometer Low",            "\U000F10C3"},
+              {"Thermostat",                 "\U000F0393"},
+              {"Timer",                      "\U000F051B"},
+              {"Toilet",                     "\U000F09AB"},
+              {"Transmission Tower",         "\U000F0D3E"},
+              {"Trash Can",                  "\U000F0A79"},
+              {"Wall Outlet",                "\U000F0427"},
+              {"Washer",                     "\U000F072A"},
+              {"Water",                      "\U000F058C"},
+              {"Water Heater",               "\U000F0F92"},
+              {"Water Percent",              "\U000F058E"},
+              {"Weather Cloudy",             "\U000F0590"},
+              {"Weather Cloudy Alert",       "\U000F0F2F"},
+              {"Weather Dust",               "\U000F1B5A"},
+              {"Weather Fog",                "\U000F0591"},
+              {"Weather Hail",               "\U000F0592"},
+              {"Weather Hazy",               "\U000F0F30"},
+              {"Weather Hurricane",          "\U000F0898"},
+              {"Weather Lightning",          "\U000F0593"},
+              {"Weather Lightning Rainy",    "\U000F067E"},
+              {"Weather Night",              "\U000F0594"},
+              {"Weather Night Cloudy",       "\U000F0F31"},
+              {"Weather Partly Cloudy",      "\U000F0595"},
+              {"Weather Partly Lightning",   "\U000F0F32"},
+              {"Weather Partly Rainy",       "\U000F0F33"},
+              {"Weather Partly Snowy",       "\U000F0F34"},
+              {"Weather Partly Snowy Rainy", "\U000F0F35"},
+              {"Weather Pouring",            "\U000F0596"},
+              {"Weather Rainy",              "\U000F0597"},
+              {"Weather Snowy",              "\U000F0598"},
+              {"Weather Snowy Heavy",        "\U000F0F36"},
+              {"Weather Snowy Rainy",        "\U000F067F"},
+              {"Weather Sunny",              "\U000F0599"},
+              {"Weather Sunny Alert",        "\U000F0F37"},
+              {"Weather Sunny Off",          "\U000F14E4"},
+              {"Weather Sunset",             "\U000F059A"},
+              {"Weather Sunset Down",        "\U000F059B"},
+              {"Weather Sunset Up",          "\U000F059C"},
+              {"Weather Tornado",            "\U000F0F38"},
+              {"Weather Windy",              "\U000F059D"},
+              {"Weather Windy Variant",      "\U000F059E"},
+              {"Wind Power",                 "\U000F1A88"},
+              {"Wind Turbine",               "\U000F0DA5"},
+              {"Wind Turbine Alert",         "\U000F19AB"},
+              {"Wind Turbine Check",         "\U000F19AC"},
+              {"Window",                     "\U000F111C"},
+              // --- GENERATED:ICONS END ---
+            };
+            static constexpr size_t NUM_ICONS = sizeof(icon_entries) / sizeof(icon_entries[0]);
+
+            auto find_icon = [](const char* name) -> const char* {
+              for (size_t i = 0; i < NUM_ICONS; i++) {
+                if (strcmp(icon_entries[i].name, name) == 0) return icon_entries[i].glyph;
+              }
+              return "\U000F0493";  // cog fallback
+            };
+
+            static bool has_sensor[NUM_SLOTS] = {};
+            static bool has_icon_on[NUM_SLOTS] = {};
+            static const char* icon_off_cp[NUM_SLOTS] = {};
+            static const char* icon_on_cp[NUM_SLOTS] = {};
+
+            int pos = 0;
+            for (int idx : order) {
+              auto &s = slots[idx - 1];
+              lv_obj_clear_flag(s.btn, LV_OBJ_FLAG_HIDDEN);
+              lv_obj_move_to_index(s.btn, pos++);
+
+              // Apply colors
+              if (has_on) {
+                lv_obj_set_style_bg_color(s.btn, lv_color_hex(on_val),
+                  static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_CHECKED));
+              }
+              if (has_off) {
+                lv_obj_set_style_bg_color(s.btn, lv_color_hex(off_val),
+                  static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
+              }
+
+              // Track whether this slot has a sensor-when-on entity
+              std::string sensor_id = s.sensor->state;
+              has_sensor[idx - 1] = !sensor_id.empty();
+
+              // Track whether this slot has a different icon when on
+              std::string icon_on_name = s.icon_on->state;
+              has_icon_on[idx - 1] = !icon_on_name.empty() && icon_on_name != "Auto";
+              if (has_icon_on[idx - 1]) {
+                icon_on_cp[idx - 1] = find_icon(icon_on_name.c_str());
+              }
+
+              // Subscribe to HA entity state
+              std::string entity_id = s.entity->state;
+              if (!entity_id.empty()) {
+                // Label: custom or friendly_name fallback
+                lv_obj_t *text_lbl = s.text_lbl;
+                std::string custom_label = s.label->state;
+                if (!custom_label.empty()) {
+                  lv_label_set_text(text_lbl, custom_label.c_str());
+                } else {
+                  api::global_api_server->subscribe_home_assistant_state(
+                    entity_id, std::string("friendly_name"),
+                    std::function<void(const std::string &)>([text_lbl](const std::string &name) {
+                      lv_label_set_text(text_lbl, name.c_str());
+                    })
+                  );
+                }
+
+                // Icon (looked up by name so order of icon_entries[] doesn't matter)
+                lv_obj_t *icon_lbl = s.icon_lbl;
+                std::string icon_name = s.icon->state;
+                const char* icon_cp = "\U000F0493";  // cog fallback
+                if (icon_name.empty() || icon_name == "Auto") {
+                  std::string domain = entity_id.substr(0, entity_id.find('.'));
+                  // --- GENERATED:DOMAIN_ICONS START ---
+                  if      (domain == "light")         icon_cp = "\U000F0335";  // Lightbulb
+                  else if (domain == "switch")        icon_cp = "\U000F0654";  // Power Plug
+                  else if (domain == "fan")           icon_cp = "\U000F0210";  // Fan
+                  else if (domain == "lock")          icon_cp = "\U000F033E";  // Lock
+                  else if (domain == "cover")         icon_cp = "\U000F1A2B";  // Blinds Horizontal
+                  else if (domain == "climate")       icon_cp = "\U000F001B";  // Air Conditioner
+                  else if (domain == "media_player")  icon_cp = "\U000F04C3";  // Speaker
+                  else if (domain == "camera")        icon_cp = "\U000F0100";  // Camera
+                  else if (domain == "binary_sensor") icon_cp = "\U000F0D91";  // Motion Sensor
+                  // --- GENERATED:DOMAIN_ICONS END ---
+                } else {
+                  icon_cp = find_icon(icon_name.c_str());
+                }
+                lv_label_set_text(icon_lbl, icon_cp);
+                icon_off_cp[idx - 1] = icon_cp;
+
+                // Set unit label text if configured
+                if (has_sensor[idx - 1]) {
+                  std::string unit_str = s.sensor_unit->state;
+                  if (!unit_str.empty()) {
+                    lv_label_set_text(s.unit_lbl, unit_str.c_str());
+                  }
+                }
+
+                // Checked state subscription (with icon swap or sensor swap)
+                lv_obj_t *btn_ptr = s.btn;
+                lv_obj_t *sensor_ctr = s.sensor_container;
+                bool *slot_has_sensor = &has_sensor[idx - 1];
+                bool *slot_has_icon_on = &has_icon_on[idx - 1];
+                const char** slot_icon_off = &icon_off_cp[idx - 1];
+                const char** slot_icon_on = &icon_on_cp[idx - 1];
+                api::global_api_server->subscribe_home_assistant_state(
+                  entity_id, {},
+                  std::function<void(const std::string &)>([btn_ptr, icon_lbl, sensor_ctr, slot_has_sensor, slot_has_icon_on, slot_icon_off, slot_icon_on](const std::string &state) {
+                    bool is_on = state == "on" || state == "open" || state == "playing" ||
+                                 state == "home" || state == "unlocked";
+                    if (is_on) {
+                      lv_obj_add_state(btn_ptr, LV_STATE_CHECKED);
+                    } else {
+                      lv_obj_clear_state(btn_ptr, LV_STATE_CHECKED);
+                    }
+                    if (*slot_has_icon_on) {
+                      lv_label_set_text(icon_lbl, is_on ? *slot_icon_on : *slot_icon_off);
+                    } else if (*slot_has_sensor) {
+                      if (is_on) {
+                        lv_obj_add_flag(icon_lbl, LV_OBJ_FLAG_HIDDEN);
+                        lv_obj_clear_flag(sensor_ctr, LV_OBJ_FLAG_HIDDEN);
+                      } else {
+                        lv_obj_clear_flag(icon_lbl, LV_OBJ_FLAG_HIDDEN);
+                        lv_obj_add_flag(sensor_ctr, LV_OBJ_FLAG_HIDDEN);
+                      }
+                    }
+                  })
+                );
+
+                // Sensor value subscription
+                if (has_sensor[idx - 1]) {
+                  lv_obj_t *sensor_lbl = s.sensor_lbl;
+                  api::global_api_server->subscribe_home_assistant_state(
+                    sensor_id, {},
+                    std::function<void(const std::string &)>([sensor_lbl](const std::string &state) {
+                      char *end;
+                      float val = strtof(state.c_str(), &end);
+                      if (end != state.c_str()) {
+                        char buf[16];
+                        snprintf(buf, sizeof(buf), "%.0f", val);
+                        lv_label_set_text(sensor_lbl, buf);
+                      } else {
+                        lv_label_set_text(sensor_lbl, state.c_str());
+                      }
+                    })
+                  );
+                }
+              }
+            }
+
+            // --- Temperature display ---
+            bool indoor_on  = id(indoor_temp_enable).state;
+            bool outdoor_on = id(outdoor_temp_enable).state;
+
+            if (indoor_on && outdoor_on) {
+              lv_label_set_text(id(temperatures), "-° / -°");
+              lv_obj_clear_flag(id(temperatures), LV_OBJ_FLAG_HIDDEN);
+            } else if (indoor_on || outdoor_on) {
+              lv_label_set_text(id(temperatures), "-°");
+              lv_obj_clear_flag(id(temperatures), LV_OBJ_FLAG_HIDDEN);
+            }
+
+            // --- Indoor temperature subscription ---
+            if (indoor_on) {
+              std::string indoor_id = id(indoor_temp_entity).state;
+              if (!indoor_id.empty()) {
+                api::global_api_server->subscribe_home_assistant_state(
+                  indoor_id, {},
+                  std::function<void(const std::string &)>([](const std::string &state) {
+                    char *end;
+                    float val = strtof(state.c_str(), &end);
+                    if (end != state.c_str()) {
+                      id(indoor_temp) = val;
+                      float outdoor = id(outdoor_temp);
+                      if (std::isnan(outdoor)) {
+                        char buf[16];
+                        snprintf(buf, sizeof(buf), "%.0f°", val);
+                        lv_label_set_text(id(temperatures), buf);
+                      } else {
+                        char buf[16];
+                        snprintf(buf, sizeof(buf), "%.0f° / %.0f°", val, outdoor);
+                        lv_label_set_text(id(temperatures), buf);
+                      }
+                    }
+                  })
+                );
+              }
+            }
+
+            // --- Outdoor temperature subscription ---
+            if (outdoor_on) {
+              std::string outdoor_id = id(outdoor_temp_entity).state;
+              if (!outdoor_id.empty()) {
+                api::global_api_server->subscribe_home_assistant_state(
+                  outdoor_id, {},
+                  std::function<void(const std::string &)>([](const std::string &state) {
+                    char *end;
+                    float val = strtof(state.c_str(), &end);
+                    if (end != state.c_str()) {
+                      id(outdoor_temp) = val;
+                      float indoor = id(indoor_temp);
+                      if (std::isnan(indoor)) {
+                        char buf[16];
+                        snprintf(buf, sizeof(buf), "%.0f°", val);
+                        lv_label_set_text(id(temperatures), buf);
+                      } else {
+                        char buf[16];
+                        snprintf(buf, sizeof(buf), "%.0f° / %.0f°", indoor, val);
+                        lv_label_set_text(id(temperatures), buf);
+                      }
+                    }
+                  })
+                );
+              }
+            }
+
+            // --- Presence sensor subscription ---
+            std::string presence_id = id(presence_sensor_entity).state;
+            if (!presence_id.empty()) {
+              api::global_api_server->subscribe_home_assistant_state(
+                presence_id, {},
+                std::function<void(const std::string &)>([](const std::string &state) {
+                  bool detected = (state == "on");
+                  id(presence_detected) = detected;
+                  if (detected) {
+                    lv_disp_trig_activity(NULL);
+                    id(screensaver_wake).execute();
+                  }
+                })
+              );
+            }

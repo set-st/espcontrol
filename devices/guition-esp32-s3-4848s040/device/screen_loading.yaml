@@ -1,0 +1,77 @@
+# =============================================================================
+# SCREEN: LOADING
+# =============================================================================
+# Boot screen. Must be the first page included in packages.yaml so LVGL
+# shows it at startup. on_boot updates status text; after a grace period,
+# if WiFi is not connected, switches to wifi_setup_page.
+# =============================================================================
+
+globals:
+  - id: boot_grace_period
+    type: bool
+    initial_value: 'true'
+
+lvgl:
+  pages:
+    - id: loading_page
+      bg_color: 0x000000
+      scrollable: false
+      widgets:
+        - obj:
+            align: center
+            width: 380
+            height: SIZE_CONTENT
+            bg_opa: 0%
+            border_width: 0
+            pad_all: 0
+            scrollable: false
+            layout:
+              type: flex
+              flex_flow: COLUMN
+              flex_align_main: center
+              flex_align_cross: center
+              pad_row: 40
+            widgets:
+              - label:
+                  text: "Starting up"
+                  text_font: setup_title_font
+                  text_color: 0xFFFFFF
+                  width: 380
+                  text_align: center
+              - label:
+                  id: loading_status_label
+                  text: "Booting"
+                  text_font: setup_body_font
+                  text_color: 0x888888
+                  width: 380
+                  text_align: center
+
+esphome:
+  on_boot:
+    - priority: -200
+      then:
+        - lambda: |-
+            lv_obj_add_flag(id(temperatures), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(display_time), LV_OBJ_FLAG_HIDDEN);
+        - delay: 100ms
+        - light.turn_on:
+            id: display_backlight
+            brightness: 90%
+            transition_length: 500ms
+    - priority: -100
+      then:
+        - lambda: |-
+            lv_label_set_text(id(loading_status_label), "Connecting to WiFi");
+        - lambda: |-
+            std::string name = App.get_name();
+            std::string wifi_text = "Connect to the WiFi hotspot\n'" + name + "'\nto configure your network";
+            lv_label_set_text(id(wifi_setup_instructions), wifi_text.c_str());
+        - delay: 10s
+        - lambda: 'id(boot_grace_period) = false;'
+        - if:
+            condition:
+              not:
+                wifi.connected:
+            then:
+              - lvgl.page.show: wifi_setup_page
+              - script.execute: setup_screen_dim

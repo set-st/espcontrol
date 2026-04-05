@@ -24,6 +24,9 @@ jobs:
           - device: guition-esp32-p4-jc4880p443
             slug: guition-esp32-p4-jc4880p443
             chip: ESP32-P4
+          - device: guition-esp32-s3-4848s040
+            slug: guition-esp32-s3-4848s040
+            chip: ESP32-S3
     steps:
       - uses: actions/checkout@v6
         with:

@@ -9,7 +9,7 @@ description:
 
 # Espcontrol
 
-**Espcontrol** is free, open-source firmware that turns **Guition ESP32-P4** touchscreens into a control panel for [Home Assistant](https://www.home-assistant.io/). Supported panels include the **7-inch JC1060P470** (1024x600, landscape) and the **4.3-inch JC4880P443** (480x800, portrait). You get up to **30 configurable buttons** that can toggle or control any smart home device, plus a status bar with a clock and temperatures, a screensaver, automatic brightness, and **over-the-air updates**. After the first install, everything is configured through the device's **built-in web page** — no coding or file editing required.
+**Espcontrol** is free, open-source firmware that turns **Guition ESP32** touchscreens into a control panel for [Home Assistant](https://www.home-assistant.io/). Supported panels include the **7-inch JC1060P470** (1024x600, landscape), the **4.3-inch JC4880P443** (480x800, portrait), and the **4-inch 4848S040** (480x480, square). You get up to **30 configurable buttons** that can toggle or control any smart home device, plus a status bar with a clock and temperatures, a screensaver, automatic brightness, and **over-the-air updates**. After the first install, everything is configured through the device's **built-in web page** — no coding or file editing required.
 
 **Source code and issues:** [github.com/jtenniswood/espcontrol](https://github.com/jtenniswood/espcontrol).
 
@@ -32,6 +32,7 @@ description:
 
 - **7-inch panel (JC1060P470):** [AliExpress](https://s.click.aliexpress.com/e/_c335W0r5) (affiliate link, ~£40)
 - **4.3-inch panel (JC4880P443):** coming soon
+- **4-inch square panel (4848S040):** [AliExpress](https://s.click.aliexpress.com/e/_c3sIhvBv) (~£16)
 - **Desk stand for 7-inch** (3D printable): [MakerWorld](https://makerworld.com/en/models/2387421-guition-esp32p4-jc1060p470-7inch-screen-desk-mount#profileId-2614995)
 
 ## Next steps

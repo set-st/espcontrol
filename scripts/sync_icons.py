@@ -17,6 +17,7 @@ SOURCE = ROOT / "common" / "assets" / "icons.json"
 DEVICES = [
     {"slug": "guition-esp32-p4-jc1060p470"},
     {"slug": "guition-esp32-p4-jc4880p443"},
+    {"slug": "guition-esp32-s3-4848s040"},
 ]
 
 SHARED_TARGETS = {
