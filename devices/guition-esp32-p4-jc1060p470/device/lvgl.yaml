@@ -2,8 +2,7 @@
 # LVGL MAIN PAGE - Top-layer HUD and button grid
 # =============================================================================
 # Defines the primary UI: a top-layer overlay with temperature and clock
-# labels, and the main page with a hero image above a flex-wrap grid of 20
-# button widgets.
+# labels, and the main page with a flex-wrap grid of 20 button widgets.
 # Buttons start hidden; sensors.yaml unhides active ones at boot.
 # =============================================================================
 
@@ -56,11 +55,6 @@ lvgl:
       scrollable: true
 
       widgets:
-        - image:
-            id: home_screen_hero_lvgl
-            src: home_screen_hero_img
-            width: 100%
-
         - obj:
             width: 100%
             height: SIZE_CONTENT
