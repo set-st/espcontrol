@@ -1,4 +1,4 @@
-![Espcontrol on a 7-inch touchscreen: home screen with temperature, clock, and control tiles](devices/guition-esp32-p4-jc1060p470/device/home_screen_hero.jpg)
+![Espcontrol on a 7-inch touchscreen: home screen with temperature, clock, and control tiles](docs/public/home_screen_hero.jpg)
 
 # Espcontrol
 

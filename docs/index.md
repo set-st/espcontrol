@@ -5,6 +5,8 @@ description:
   7-inch touchscreen control panel for Home Assistant: up to 20 buttons, web-based configuration, automatic firmware updates.
 ---
 
+![Espcontrol on a 7-inch touchscreen: home screen with temperature, clock, and control tiles](/home_screen_hero.jpg)
+
 # Espcontrol
 
 **Espcontrol** is free, open-source firmware that turns the **Guition ESP32-P4 JC1060P470** — a 7-inch, 1024x600 touchscreen — into a control panel for [Home Assistant](https://www.home-assistant.io/). You get up to **20 configurable buttons** that can toggle or control any smart home device, plus a status bar with a clock and temperatures, a screensaver, automatic brightness, and **over-the-air updates**. After the first install, everything is configured through the device's **built-in web page** — no coding or file editing required.
