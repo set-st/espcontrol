@@ -17,9 +17,9 @@ lvgl:
           width: 100%
           height: SIZE_CONTENT
           bg_color: 0x000000
-          bg_opa: 80%
+          bg_opa: cover
           pad_top: 6
-          pad_bottom: 4
+          pad_bottom: 8
           pad_left: 8
           pad_right: 8
           border_width: 0
@@ -56,7 +56,7 @@ lvgl:
       width: 100%
       bg_color: Black
       bg_opa: cover
-      pad_top: 36
+      pad_top: 0
       pad_bottom: 5
       pad_left: 5
       pad_right: 5
