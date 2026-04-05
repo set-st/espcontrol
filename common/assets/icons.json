@@ -46,6 +46,51 @@
       "mdi": "battery"
     },
     {
+      "name": "Battery 10%",
+      "codepoint": "F007A",
+      "mdi": "battery-10"
+    },
+    {
+      "name": "Battery 20%",
+      "codepoint": "F007B",
+      "mdi": "battery-20"
+    },
+    {
+      "name": "Battery 30%",
+      "codepoint": "F007C",
+      "mdi": "battery-30"
+    },
+    {
+      "name": "Battery 40%",
+      "codepoint": "F007D",
+      "mdi": "battery-40"
+    },
+    {
+      "name": "Battery 50%",
+      "codepoint": "F007E",
+      "mdi": "battery-50"
+    },
+    {
+      "name": "Battery 60%",
+      "codepoint": "F007F",
+      "mdi": "battery-60"
+    },
+    {
+      "name": "Battery 70%",
+      "codepoint": "F0080",
+      "mdi": "battery-70"
+    },
+    {
+      "name": "Battery 80%",
+      "codepoint": "F0081",
+      "mdi": "battery-80"
+    },
+    {
+      "name": "Battery 90%",
+      "codepoint": "F0082",
+      "mdi": "battery-90"
+    },
+    {
       "name": "Battery Alert",
       "codepoint": "F0083",
       "mdi": "battery-alert"
@@ -56,9 +101,44 @@
       "mdi": "battery-charging"
     },
     {
+      "name": "Battery Charging 100",
+      "codepoint": "F0085",
+      "mdi": "battery-charging-100"
+    },
+    {
+      "name": "Battery Charging 70",
+      "codepoint": "F089E",
+      "mdi": "battery-charging-70"
+    },
+    {
+      "name": "Battery High",
+      "codepoint": "F12A3",
+      "mdi": "battery-high"
+    },
+    {
+      "name": "Battery Low",
+      "codepoint": "F12A1",
+      "mdi": "battery-low"
+    },
+    {
+      "name": "Battery Medium",
+      "codepoint": "F12A2",
+      "mdi": "battery-medium"
+    },
+    {
+      "name": "Battery Off",
+      "codepoint": "F125D",
+      "mdi": "battery-off"
+    },
+    {
       "name": "Battery Outline",
       "codepoint": "F008E",
       "mdi": "battery-outline"
+    },
+    {
+      "name": "Battery Unknown",
+      "codepoint": "F0091",
+      "mdi": "battery-unknown"
     },
     {
       "name": "Bed",
@@ -271,6 +351,36 @@
       "mdi": "gauge"
     },
     {
+      "name": "Gauge Empty",
+      "codepoint": "F0873",
+      "mdi": "gauge-empty"
+    },
+    {
+      "name": "Gauge Full",
+      "codepoint": "F0874",
+      "mdi": "gauge-full"
+    },
+    {
+      "name": "Gauge Low",
+      "codepoint": "F0875",
+      "mdi": "gauge-low"
+    },
+    {
+      "name": "Grid Export",
+      "codepoint": "F192C",
+      "mdi": "transmission-tower-export"
+    },
+    {
+      "name": "Grid Import",
+      "codepoint": "F192D",
+      "mdi": "transmission-tower-import"
+    },
+    {
+      "name": "Grid Off",
+      "codepoint": "F19DD",
+      "mdi": "transmission-tower-off"
+    },
+    {
       "name": "Headphones",
       "codepoint": "F02CB",
       "mdi": "headphones"
@@ -346,6 +456,11 @@
       "mdi": "led-strip-variant"
     },
     {
+      "name": "LED Strip Variant Off",
+      "codepoint": "F1A4B",
+      "mdi": "led-strip-variant-off"
+    },
+    {
       "name": "Light Switch",
       "codepoint": "F097E",
       "mdi": "light-switch"
@@ -359,6 +474,21 @@
       "name": "Lightbulb Group",
       "codepoint": "F1253",
       "mdi": "lightbulb-group"
+    },
+    {
+      "name": "Lightbulb Group Outline",
+      "codepoint": "F1254",
+      "mdi": "lightbulb-group-outline"
+    },
+    {
+      "name": "Lightbulb Night",
+      "codepoint": "F1A4C",
+      "mdi": "lightbulb-night"
+    },
+    {
+      "name": "Lightbulb Night Outline",
+      "codepoint": "F1A4D",
+      "mdi": "lightbulb-night-outline"
     },
     {
       "name": "Lightbulb Off",
@@ -441,6 +571,11 @@
       "mdi": "package-variant"
     },
     {
+      "name": "Package Closed",
+      "codepoint": "F03D7",
+      "mdi": "package-variant-closed"
+    },
+    {
       "name": "Pool",
       "codepoint": "F0606",
       "mdi": "pool"
@@ -514,6 +649,16 @@
       "name": "Snowflake",
       "codepoint": "F0717",
       "mdi": "snowflake"
+    },
+    {
+      "name": "Snowflake Alert",
+      "codepoint": "F0F29",
+      "mdi": "snowflake-alert"
+    },
+    {
+      "name": "Snowflake Thermometer",
+      "codepoint": "F1A71",
+      "mdi": "snowflake-thermometer"
     },
     {
       "name": "Sofa",
@@ -651,9 +796,34 @@
       "mdi": "weather-cloudy"
     },
     {
+      "name": "Weather Cloudy Alert",
+      "codepoint": "F0F2F",
+      "mdi": "weather-cloudy-alert"
+    },
+    {
+      "name": "Weather Dust",
+      "codepoint": "F1B5A",
+      "mdi": "weather-dust"
+    },
+    {
       "name": "Weather Fog",
       "codepoint": "F0591",
       "mdi": "weather-fog"
+    },
+    {
+      "name": "Weather Hail",
+      "codepoint": "F0592",
+      "mdi": "weather-hail"
+    },
+    {
+      "name": "Weather Hazy",
+      "codepoint": "F0F30",
+      "mdi": "weather-hazy"
+    },
+    {
+      "name": "Weather Hurricane",
+      "codepoint": "F0898",
+      "mdi": "weather-hurricane"
     },
     {
       "name": "Weather Lightning",
@@ -671,14 +841,34 @@
       "mdi": "weather-night"
     },
     {
+      "name": "Weather Night Cloudy",
+      "codepoint": "F0F31",
+      "mdi": "weather-night-partly-cloudy"
+    },
+    {
       "name": "Weather Partly Cloudy",
       "codepoint": "F0595",
       "mdi": "weather-partly-cloudy"
     },
     {
+      "name": "Weather Partly Lightning",
+      "codepoint": "F0F32",
+      "mdi": "weather-partly-lightning"
+    },
+    {
       "name": "Weather Partly Rainy",
       "codepoint": "F0F33",
       "mdi": "weather-partly-rainy"
+    },
+    {
+      "name": "Weather Partly Snowy",
+      "codepoint": "F0F34",
+      "mdi": "weather-partly-snowy"
+    },
+    {
+      "name": "Weather Partly Snowy Rainy",
+      "codepoint": "F0F35",
+      "mdi": "weather-partly-snowy-rainy"
     },
     {
       "name": "Weather Pouring",
@@ -696,9 +886,29 @@
       "mdi": "weather-snowy"
     },
     {
+      "name": "Weather Snowy Heavy",
+      "codepoint": "F0F36",
+      "mdi": "weather-snowy-heavy"
+    },
+    {
+      "name": "Weather Snowy Rainy",
+      "codepoint": "F067F",
+      "mdi": "weather-snowy-rainy"
+    },
+    {
       "name": "Weather Sunny",
       "codepoint": "F0599",
       "mdi": "weather-sunny"
+    },
+    {
+      "name": "Weather Sunny Alert",
+      "codepoint": "F0F37",
+      "mdi": "weather-sunny-alert"
+    },
+    {
+      "name": "Weather Sunny Off",
+      "codepoint": "F14E4",
+      "mdi": "weather-sunny-off"
     },
     {
       "name": "Weather Sunset",
@@ -739,6 +949,16 @@
       "name": "Wind Turbine",
       "codepoint": "F0DA5",
       "mdi": "wind-turbine"
+    },
+    {
+      "name": "Wind Turbine Alert",
+      "codepoint": "F19AB",
+      "mdi": "wind-turbine-alert"
+    },
+    {
+      "name": "Wind Turbine Check",
+      "codepoint": "F19AC",
+      "mdi": "wind-turbine-check"
     },
     {
       "name": "Window",

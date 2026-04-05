@@ -22,9 +22,25 @@ font:
       - "\U000F078F"  # mdi-alarm-light
       - "\U000F0614"  # mdi-application-outline
       - "\U000F0079"  # mdi-battery
+      - "\U000F007A"  # mdi-battery-10
+      - "\U000F007B"  # mdi-battery-20
+      - "\U000F007C"  # mdi-battery-30
+      - "\U000F007D"  # mdi-battery-40
+      - "\U000F007E"  # mdi-battery-50
+      - "\U000F007F"  # mdi-battery-60
+      - "\U000F0080"  # mdi-battery-70
+      - "\U000F0081"  # mdi-battery-80
+      - "\U000F0082"  # mdi-battery-90
       - "\U000F0083"  # mdi-battery-alert
       - "\U000F0084"  # mdi-battery-charging
+      - "\U000F0085"  # mdi-battery-charging-100
+      - "\U000F089E"  # mdi-battery-charging-70
+      - "\U000F12A3"  # mdi-battery-high
+      - "\U000F12A1"  # mdi-battery-low
+      - "\U000F12A2"  # mdi-battery-medium
+      - "\U000F125D"  # mdi-battery-off
       - "\U000F008E"  # mdi-battery-outline
+      - "\U000F0091"  # mdi-battery-unknown
       - "\U000F02E3"  # mdi-bed
       - "\U000F009A"  # mdi-bell
       - "\U000F00AC"  # mdi-blinds
@@ -67,6 +83,12 @@ font:
       - "\U000F0299"  # mdi-gate
       - "\U000F116A"  # mdi-gate-open
       - "\U000F029A"  # mdi-gauge
+      - "\U000F0873"  # mdi-gauge-empty
+      - "\U000F0874"  # mdi-gauge-full
+      - "\U000F0875"  # mdi-gauge-low
+      - "\U000F192C"  # mdi-transmission-tower-export
+      - "\U000F192D"  # mdi-transmission-tower-import
+      - "\U000F19DD"  # mdi-transmission-tower-off
       - "\U000F02CB"  # mdi-headphones
       - "\U000F0438"  # mdi-radiator
       - "\U000F02DC"  # mdi-home
@@ -82,9 +104,13 @@ font:
       - "\U000F032A"  # mdi-leaf
       - "\U000F07D6"  # mdi-led-strip
       - "\U000F1051"  # mdi-led-strip-variant
+      - "\U000F1A4B"  # mdi-led-strip-variant-off
       - "\U000F097E"  # mdi-light-switch
       - "\U000F0335"  # mdi-lightbulb
       - "\U000F1253"  # mdi-lightbulb-group
+      - "\U000F1254"  # mdi-lightbulb-group-outline
+      - "\U000F1A4C"  # mdi-lightbulb-night
+      - "\U000F1A4D"  # mdi-lightbulb-night-outline
       - "\U000F0E4F"  # mdi-lightbulb-off
       - "\U000F0336"  # mdi-lightbulb-outline
       - "\U000F140B"  # mdi-lightning-bolt
@@ -101,6 +127,7 @@ font:
       - "\U000F1020"  # mdi-coach-lamp
       - "\U000F04DE"  # mdi-stove
       - "\U000F03D6"  # mdi-package-variant
+      - "\U000F03D7"  # mdi-package-variant-closed
       - "\U000F0606"  # mdi-pool
       - "\U000F0425"  # mdi-power
       - "\U000F0654"  # mdi-power-plug
@@ -116,6 +143,8 @@ font:
       - "\U000F09A1"  # mdi-shower-head
       - "\U000F0392"  # mdi-smoke-detector
       - "\U000F0717"  # mdi-snowflake
+      - "\U000F0F29"  # mdi-snowflake-alert
+      - "\U000F1A71"  # mdi-snowflake-thermometer
       - "\U000F04B9"  # mdi-sofa
       - "\U000F0D9B"  # mdi-solar-panel
       - "\U000F0D9C"  # mdi-solar-panel-large
@@ -143,16 +172,29 @@ font:
       - "\U000F0F92"  # mdi-water-boiler
       - "\U000F058E"  # mdi-water-percent
       - "\U000F0590"  # mdi-weather-cloudy
+      - "\U000F0F2F"  # mdi-weather-cloudy-alert
+      - "\U000F1B5A"  # mdi-weather-dust
       - "\U000F0591"  # mdi-weather-fog
+      - "\U000F0592"  # mdi-weather-hail
+      - "\U000F0F30"  # mdi-weather-hazy
+      - "\U000F0898"  # mdi-weather-hurricane
       - "\U000F0593"  # mdi-weather-lightning
       - "\U000F067E"  # mdi-weather-lightning-rainy
       - "\U000F0594"  # mdi-weather-night
+      - "\U000F0F31"  # mdi-weather-night-partly-cloudy
       - "\U000F0595"  # mdi-weather-partly-cloudy
+      - "\U000F0F32"  # mdi-weather-partly-lightning
       - "\U000F0F33"  # mdi-weather-partly-rainy
+      - "\U000F0F34"  # mdi-weather-partly-snowy
+      - "\U000F0F35"  # mdi-weather-partly-snowy-rainy
       - "\U000F0596"  # mdi-weather-pouring
       - "\U000F0597"  # mdi-weather-rainy
       - "\U000F0598"  # mdi-weather-snowy
+      - "\U000F0F36"  # mdi-weather-snowy-heavy
+      - "\U000F067F"  # mdi-weather-snowy-rainy
       - "\U000F0599"  # mdi-weather-sunny
+      - "\U000F0F37"  # mdi-weather-sunny-alert
+      - "\U000F14E4"  # mdi-weather-sunny-off
       - "\U000F059A"  # mdi-weather-sunset
       - "\U000F059B"  # mdi-weather-sunset-down
       - "\U000F059C"  # mdi-weather-sunset-up
@@ -161,6 +203,8 @@ font:
       - "\U000F059E"  # mdi-weather-windy-variant
       - "\U000F1A88"  # mdi-wind-power
       - "\U000F0DA5"  # mdi-wind-turbine
+      - "\U000F19AB"  # mdi-wind-turbine-alert
+      - "\U000F19AC"  # mdi-wind-turbine-check
       - "\U000F111C"  # mdi-window-open-variant
       # --- GENERATED:ICONS END ---
 

@@ -20,9 +20,25 @@
     "Alarm Light": "alarm-light",
     Application: "application-outline",
     Battery: "battery",
+    "Battery 10%": "battery-10",
+    "Battery 20%": "battery-20",
+    "Battery 30%": "battery-30",
+    "Battery 40%": "battery-40",
+    "Battery 50%": "battery-50",
+    "Battery 60%": "battery-60",
+    "Battery 70%": "battery-70",
+    "Battery 80%": "battery-80",
+    "Battery 90%": "battery-90",
     "Battery Alert": "battery-alert",
     "Battery Charging": "battery-charging",
+    "Battery Charging 100": "battery-charging-100",
+    "Battery Charging 70": "battery-charging-70",
+    "Battery High": "battery-high",
+    "Battery Low": "battery-low",
+    "Battery Medium": "battery-medium",
+    "Battery Off": "battery-off",
     "Battery Outline": "battery-outline",
+    "Battery Unknown": "battery-unknown",
     Bed: "bed",
     Bell: "bell",
     Blinds: "blinds",
@@ -65,6 +81,12 @@
     Gate: "gate",
     "Gate Open": "gate-open",
     Gauge: "gauge",
+    "Gauge Empty": "gauge-empty",
+    "Gauge Full": "gauge-full",
+    "Gauge Low": "gauge-low",
+    "Grid Export": "transmission-tower-export",
+    "Grid Import": "transmission-tower-import",
+    "Grid Off": "transmission-tower-off",
     Headphones: "headphones",
     Heater: "radiator",
     Home: "home",
@@ -80,9 +102,13 @@
     Leaf: "leaf",
     "LED Strip": "led-strip",
     "LED Strip Variant": "led-strip-variant",
+    "LED Strip Variant Off": "led-strip-variant-off",
     "Light Switch": "light-switch",
     Lightbulb: "lightbulb",
     "Lightbulb Group": "lightbulb-group",
+    "Lightbulb Group Outline": "lightbulb-group-outline",
+    "Lightbulb Night": "lightbulb-night",
+    "Lightbulb Night Outline": "lightbulb-night-outline",
     "Lightbulb Off": "lightbulb-off",
     "Lightbulb Outline": "lightbulb-outline",
     "Lightning Bolt": "lightning-bolt",
@@ -99,6 +125,7 @@
     "Outdoor Lamp": "coach-lamp",
     Oven: "stove",
     Package: "package-variant",
+    "Package Closed": "package-variant-closed",
     Pool: "pool",
     Power: "power",
     "Power Plug": "power-plug",
@@ -114,6 +141,8 @@
     Shower: "shower-head",
     "Smoke Detector": "smoke-detector",
     Snowflake: "snowflake",
+    "Snowflake Alert": "snowflake-alert",
+    "Snowflake Thermometer": "snowflake-thermometer",
     Sofa: "sofa",
     "Solar Panel": "solar-panel",
     "Solar Panel Large": "solar-panel-large",
@@ -141,16 +170,29 @@
     "Water Heater": "water-boiler",
     "Water Percent": "water-percent",
     "Weather Cloudy": "weather-cloudy",
+    "Weather Cloudy Alert": "weather-cloudy-alert",
+    "Weather Dust": "weather-dust",
     "Weather Fog": "weather-fog",
+    "Weather Hail": "weather-hail",
+    "Weather Hazy": "weather-hazy",
+    "Weather Hurricane": "weather-hurricane",
     "Weather Lightning": "weather-lightning",
     "Weather Lightning Rainy": "weather-lightning-rainy",
     "Weather Night": "weather-night",
+    "Weather Night Cloudy": "weather-night-partly-cloudy",
     "Weather Partly Cloudy": "weather-partly-cloudy",
+    "Weather Partly Lightning": "weather-partly-lightning",
     "Weather Partly Rainy": "weather-partly-rainy",
+    "Weather Partly Snowy": "weather-partly-snowy",
+    "Weather Partly Snowy Rainy": "weather-partly-snowy-rainy",
     "Weather Pouring": "weather-pouring",
     "Weather Rainy": "weather-rainy",
     "Weather Snowy": "weather-snowy",
+    "Weather Snowy Heavy": "weather-snowy-heavy",
+    "Weather Snowy Rainy": "weather-snowy-rainy",
     "Weather Sunny": "weather-sunny",
+    "Weather Sunny Alert": "weather-sunny-alert",
+    "Weather Sunny Off": "weather-sunny-off",
     "Weather Sunset": "weather-sunset",
     "Weather Sunset Down": "weather-sunset-down",
     "Weather Sunset Up": "weather-sunset-up",
@@ -159,6 +201,8 @@
     "Weather Windy Variant": "weather-windy-variant",
     "Wind Power": "wind-power",
     "Wind Turbine": "wind-turbine",
+    "Wind Turbine Alert": "wind-turbine-alert",
+    "Wind Turbine Check": "wind-turbine-check",
     Window: "window-open-variant",
     // --- GENERATED:ICONS END ---
   };
@@ -176,57 +220,6 @@
     binary_sensor: "motion-sensor",
     // --- GENERATED:DOMAIN_ICONS END ---
   };
-
-  var ICON_ALIASES = {
-    "Battery 10%": "Battery",
-    "Battery 20%": "Battery",
-    "Battery 30%": "Battery",
-    "Battery 40%": "Battery",
-    "Battery 50%": "Battery",
-    "Battery 60%": "Battery",
-    "Battery 70%": "Battery",
-    "Battery 80%": "Battery",
-    "Battery 90%": "Battery",
-    "Battery Charging 100": "Battery Charging",
-    "Battery Charging 70": "Battery Charging",
-    "Battery High": "Battery",
-    "Battery Low": "Battery",
-    "Battery Medium": "Battery",
-    "Battery Off": "Battery",
-    "Battery Unknown": "Battery",
-    "Gauge Empty": "Gauge",
-    "Gauge Full": "Gauge",
-    "Gauge Low": "Gauge",
-    "Grid Export": "Transmission Tower",
-    "Grid Import": "Transmission Tower",
-    "Grid Off": "Transmission Tower",
-    "LED Strip Variant Off": "LED Strip Variant",
-    "Lightbulb Group Outline": "Lightbulb Group",
-    "Lightbulb Night": "Lightbulb",
-    "Lightbulb Night Outline": "Lightbulb Outline",
-    "Package Closed": "Package",
-    "Snowflake Alert": "Snowflake",
-    "Snowflake Thermometer": "Snowflake",
-    "Weather Cloudy Alert": "Weather Cloudy",
-    "Weather Dust": "Weather Windy",
-    "Weather Hail": "Weather Snowy",
-    "Weather Hazy": "Weather Fog",
-    "Weather Hurricane": "Weather Windy",
-    "Weather Night Cloudy": "Weather Night",
-    "Weather Partly Lightning": "Weather Lightning",
-    "Weather Partly Snowy": "Weather Snowy",
-    "Weather Partly Snowy Rainy": "Weather Rainy",
-    "Weather Snowy Heavy": "Weather Snowy",
-    "Weather Snowy Rainy": "Weather Rainy",
-    "Weather Sunny Alert": "Weather Sunny",
-    "Weather Sunny Off": "Weather Sunny",
-    "Wind Turbine Alert": "Wind Turbine",
-    "Wind Turbine Check": "Wind Turbine",
-  };
-
-  function migrateIcon(name) {
-    return ICON_ALIASES[name] || name;
-  }
 
   var ICON_OPTIONS = Object.keys(ICON_MAP).sort();
 
@@ -544,7 +537,7 @@
 
   function resolveIcon(slot) {
     var b = state.buttons[slot - 1];
-    var sel = migrateIcon(b.icon || "Auto");
+    var sel = b.icon || "Auto";
     if (sel === "Auto" && b.entity) {
       var domain = b.entity.split(".")[0];
       return DOMAIN_ICONS[domain] || "cog";
@@ -1328,7 +1321,7 @@
     iconPicker.className = "sp-icon-picker";
     iconPicker.id = "sp-inp-icon-picker";
     iconPicker.innerHTML =
-      '<span class="sp-icon-picker-preview mdi mdi-' + (ICON_MAP[migrateIcon(b.icon)] || "cog") + '"></span>' +
+      '<span class="sp-icon-picker-preview mdi mdi-' + (ICON_MAP[b.icon] || "cog") + '"></span>' +
       '<input class="sp-icon-picker-input" id="sp-inp-icon" type="text" ' +
       'placeholder="Search icons\u2026" value="' + escAttr(b.icon) + '" autocomplete="off">' +
       '<div class="sp-icon-dropdown"></div>';
@@ -1470,7 +1463,7 @@
     var highlighted = -1;
 
     function iconClass(name) {
-      return ICON_MAP[migrateIcon(name)] || "cog";
+      return ICON_MAP[name] || "cog";
     }
 
     function buildOptions(filter) {
@@ -1938,16 +1931,14 @@
           postText("Button " + n + " Label", b.label || "");
           postText("Button " + n + " Sensor", b.sensor || "");
           postText("Button " + n + " Sensor Unit", b.unit || "");
-          var mIcon = migrateIcon(b.icon || "Auto");
-          var mIconOn = migrateIcon(b.icon_on || "Auto");
-          postText("Button " + n + " Icon", mIcon);
-          postText("Button " + n + " Icon On", mIconOn);
+          postText("Button " + n + " Icon", b.icon || "Auto");
+          postText("Button " + n + " Icon On", b.icon_on || "Auto");
 
           state.buttons[i] = {
             entity: b.entity || "",
             label: b.label || "",
-            icon: mIcon,
-            icon_on: mIconOn,
+            icon: b.icon || "Auto",
+            icon_on: b.icon_on || "Auto",
             sensor: b.sensor || "",
             unit: b.unit || "",
           };
@@ -2157,12 +2148,12 @@
         fn: function (m, val) {
           var slot = parseInt(m[1], 10);
           if (slot >= 1 && slot <= NUM_SLOTS) {
-            state.buttons[slot - 1].icon = migrateIcon(val);
+            state.buttons[slot - 1].icon = val;
             renderPreview();
             if (state.selectedSlots.length === 1 && state.selectedSlots[0] === slot && isSettingsFocused()) {
-              syncInput(document.getElementById("sp-inp-icon"), migrateIcon(val));
+              syncInput(document.getElementById("sp-inp-icon"), val);
               var prev = document.querySelector(".sp-icon-picker-preview");
-              if (prev) prev.className = "sp-icon-picker-preview mdi mdi-" + (ICON_MAP[migrateIcon(val)] || "cog");
+              if (prev) prev.className = "sp-icon-picker-preview mdi mdi-" + (ICON_MAP[val] || "cog");
             } else {
               renderButtonSettings();
             }
@@ -2174,14 +2165,14 @@
         fn: function (m, val) {
           var slot = parseInt(m[1], 10);
           if (slot >= 1 && slot <= NUM_SLOTS) {
-            state.buttons[slot - 1].icon_on = migrateIcon(val);
+            state.buttons[slot - 1].icon_on = val;
             renderPreview();
             if (state.selectedSlots.length === 1 && state.selectedSlots[0] === slot && isSettingsFocused()) {
               syncInput(document.getElementById("sp-inp-icon-on"), val);
               var prev = document.getElementById("sp-inp-icon-on-picker");
               if (prev) {
                 var p = prev.querySelector(".sp-icon-picker-preview");
-                if (p) p.className = "sp-icon-picker-preview mdi mdi-" + (ICON_MAP[migrateIcon(val)] || "cog");
+                if (p) p.className = "sp-icon-picker-preview mdi mdi-" + (ICON_MAP[val] || "cog");
               }
             } else {
               renderButtonSettings();
