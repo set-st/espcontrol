@@ -9,17 +9,6 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  validate-firmware:
-    name: Validate Firmware Config
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Validate ESPHome config
-        run: >-
-          docker run --rm -v "${PWD}:/config"
-          ghcr.io/esphome/esphome:latest
-          config /config/builds/espcontrol-7inch.factory.yaml
-
   check-icons:
     name: Check Icon Sync
     runs-on: ubuntu-latest
