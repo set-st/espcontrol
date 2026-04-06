@@ -6,11 +6,11 @@
 # =============================================================================
 
 font:
-  # Button icons (48px)
+  # Button icons (52px)
   - file: 'https://github.com/Templarian/MaterialDesign-Webfont/raw/v7.4.47/fonts/materialdesignicons-webfont.ttf'
     id: icon_font
-    size: 48
-    bpp: 4
+    size: 52
+    bpp: 2
     glyphs:
       # --- GENERATED:ICONS START ---
       - "\U000F0493"  # mdi-cog (Auto fallback)
@@ -212,7 +212,7 @@ font:
   - file: 'https://github.com/Templarian/MaterialDesign-Webfont/raw/v7.4.47/fonts/materialdesignicons-webfont.ttf'
     id: icon_font_setup
     size: 64
-    bpp: 4
+    bpp: 2
     glyphs:
       - "\U000F05A9"  # mdi-wifi
       - "\U000F0493"  # mdi-cog

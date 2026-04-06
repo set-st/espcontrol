@@ -4,7 +4,7 @@
 # Defines the primary UI: a top-layer overlay with temperature and clock
 # labels, and the main page containing a flex-wrap grid of 30 button widgets.
 # Uses column_wrap for the 480x480 display with horizontal scrolling.
-# pad_top clears the top-layer clock bar (~34px). Buttons start hidden;
+# pad_top clears the top-layer clock bar (~36px). Buttons start hidden;
 # sensors.yaml unhides active ones at boot.
 # =============================================================================
 

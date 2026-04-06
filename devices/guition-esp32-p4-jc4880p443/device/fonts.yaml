@@ -11,7 +11,7 @@ font:
   - file: 'https://github.com/Templarian/MaterialDesign-Webfont/raw/v7.4.47/fonts/materialdesignicons-webfont.ttf'
     id: icon_font_lg
     size: 56
-    bpp: 4
+    bpp: 2
     glyphs:
       # --- GENERATED:ICONS START ---
       - "\U000F0493"  # mdi-cog (Auto fallback)
@@ -213,10 +213,10 @@ font:
   - file: "gfonts://Roboto"
     id: label_font_lg
     size: 24
-    bpp: 4
+    bpp: 2
 
   # Top bar clock and temperature (22px, up from common 20px)
   - file: "gfonts://Roboto"
     id: clockbar_font_lg
     size: 22
-    bpp: 4
+    bpp: 2

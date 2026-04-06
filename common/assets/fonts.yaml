@@ -7,26 +7,26 @@ font:
   - file: "gfonts://Roboto"
     id: statistics_font
     size: 48
-    bpp: 4
+    bpp: 2
     glyphs: "0123456789.-°/%kWhVA "
 
   # Main page: button labels
   - file: "gfonts://Roboto"
     id: label_font
-    size: 22
-    bpp: 4
+    size: 24
+    bpp: 2
 
   # Top bar: clock and temperature
   - file: "gfonts://Roboto"
     id: clockbar_font
-    size: 20
-    bpp: 4
+    size: 22
+    bpp: 2
 
   # Setup screens: titles (40px light)
   - file: "gfonts://Roboto@Light"
     id: setup_title_font
     size: 40
-    bpp: 4
+    bpp: 2
     glyphs: >-
       !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~
       ¡¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ—–…·°•€£¥¢
@@ -35,7 +35,7 @@ font:
   - file: "gfonts://Roboto"
     id: setup_body_font
     size: 24
-    bpp: 4
+    bpp: 2
     glyphs: >-
       !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~
       ¡¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ—–…·°•€£¥¢
