@@ -13,7 +13,7 @@ font:
   # Main page: button labels
   - file: "gfonts://Roboto"
     id: label_font
-    size: 24
+    size: 22
     bpp: 2
 
   # Top bar: clock and temperature
