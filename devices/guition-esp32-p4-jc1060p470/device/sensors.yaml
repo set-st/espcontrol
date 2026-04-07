@@ -615,9 +615,12 @@ esphome:
                     std::string *en = (std::string *)lv_event_get_user_data(e);
                     if (en && !en->empty()) {
                       api::HomeassistantActionRequest resp;
-                      resp.action = "homeassistant.toggle";
+                      resp.service = "homeassistant.toggle";
                       resp.is_event = false;
-                      resp.data.push_back(api::HomeassistantServiceMap{std::string("entity_id"), std::string(*en)});
+                      api::HomeassistantServiceMap m;
+                      m.key = "entity_id";
+                      m.value = *en;
+                      resp.data.push_back(m);
                       api::global_api_server->send_homeassistant_action(resp);
                     }
                   }, LV_EVENT_CLICKED, eid);
