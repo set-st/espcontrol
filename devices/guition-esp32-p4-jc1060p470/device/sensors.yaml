@@ -614,14 +614,14 @@ esphome:
                   lv_obj_add_event_cb(sb_btn, [](lv_event_t *e) {
                     std::string *en = (std::string *)lv_event_get_user_data(e);
                     if (en && !en->empty()) {
-                      api::HomeassistantActionRequest resp;
-                      resp.service = "homeassistant.toggle";
-                      resp.is_event = false;
-                      api::HomeassistantServiceMap m;
-                      m.key = "entity_id";
-                      m.value = *en;
-                      resp.data.push_back(m);
-                      api::global_api_server->send_homeassistant_action(resp);
+                      api::HomeassistantActionRequest req;
+                      req.service = decltype(req.service)("homeassistant.toggle");
+                      req.is_event = false;
+                      api::HomeassistantServiceMap kv;
+                      kv.key = decltype(kv.key)("entity_id");
+                      kv.value = decltype(kv.value)(en->c_str());
+                      req.data.push_back(kv);
+                      api::global_api_server->send_homeassistant_action(req);
                     }
                   }, LV_EVENT_CLICKED, eid);
                 } else {
