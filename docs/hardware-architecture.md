@@ -74,5 +74,5 @@ Both panels are powered through the USB-C port. A standard USB-C phone charger (
 ## Where to buy
 
 - **7-inch panel (JC1060P470):** [AliExpress](https://s.click.aliexpress.com/e/_c335W0r5) (~£40)
-- **4.3-inch panel (JC4880P443):** coming soon
+- **4.3-inch panel (JC4880P443):** [AliExpress](https://s.click.aliexpress.com/e/_c3nNpYXn) (~£24)
 - **Desk stand for 7-inch** (3D printable): [MakerWorld](https://makerworld.com/en/models/2387421-guition-esp32p4-jc1060p470-7inch-screen-desk-mount#profileId-2614995)

@@ -352,7 +352,9 @@
     ".sp-back-btn .sp-btn-icon{font-size:var(--back-icon);line-height:1;color:#fff}" +
     ".sp-back-btn .sp-btn-label{font-size:var(--back-label);line-height:1.2;color:#fff}" +
 
-    ".sp-subpage-badge{position:absolute;bottom:var(--subpage-bottom);right:var(--subpage-right);font-size:var(--subpage-fs);opacity:.5}";
+    ".sp-btn-label-row{display:flex;align-items:baseline;width:100%}" +
+    ".sp-btn-label-row .sp-btn-label{flex:1;min-width:0}" +
+    ".sp-subpage-badge{font-size:var(--btn-label);line-height:1.2;opacity:.5;flex-shrink:0}";
 
   // ── State ──────────────────────────────────────────────────────────────
 
@@ -1324,13 +1326,14 @@
         var sensorBadge = hasWhenOn
           ? '<span class="sp-sensor-badge mdi mdi-' + badgeIcon + '"></span>'
           : '';
-        var subpageBadge = isSubpage
-          ? '<span class="sp-subpage-badge mdi mdi-chevron-right"></span>'
-          : '';
+        var labelHtml = isSubpage
+          ? '<span class="sp-btn-label-row"><span class="sp-btn-label">' + escHtml(label) + '</span>' +
+            '<span class="sp-subpage-badge mdi mdi-chevron-right"></span></span>'
+          : '<span class="sp-btn-label">' + escHtml(label) + '</span>';
         btn.innerHTML =
-          sensorBadge + subpageBadge +
+          sensorBadge +
           '<span class="sp-btn-icon mdi mdi-' + iconName + '"></span>' +
-          '<span class="sp-btn-label">' + escHtml(label) + "</span>";
+          labelHtml;
         main.appendChild(btn);
       } else {
         var empty = document.createElement("div");
