@@ -3024,17 +3024,36 @@
 
   // ── Log viewer ─────────────────────────────────────────────────────────
 
+  var ANSI_LEVEL = {
+    "1;31": "sp-log-error",   // bold red → error
+    "0;31": "sp-log-error",   // red → error
+    "0;33": "sp-log-warn",    // yellow → warning
+    "0;32": "sp-log-info",    // green → info
+    "0;35": "sp-log-config",  // magenta → config
+    "0;36": "sp-log-debug",   // cyan → debug
+    "0;37": "sp-log-verbose"  // white → verbose
+  };
+  var ANSI_RE = /\033\[[\d;]*m/g;
+
   function appendLog(msg, lvl) {
     if (!els.logOutput) return;
     var line = document.createElement("div");
     line.className = "sp-log-line";
-    if (lvl === 1) line.classList.add("sp-log-error");
+
+    var ansiClass = "";
+    var m = msg.match(/\033\[([\d;]+)m/);
+    if (m) ansiClass = ANSI_LEVEL[m[1]] || "";
+
+    if (ansiClass) {
+      line.classList.add(ansiClass);
+    } else if (lvl === 1) line.classList.add("sp-log-error");
     else if (lvl === 2) line.classList.add("sp-log-warn");
     else if (lvl === 3) line.classList.add("sp-log-info");
     else if (lvl === 4) line.classList.add("sp-log-config");
     else if (lvl === 5) line.classList.add("sp-log-debug");
     else if (lvl >= 6) line.classList.add("sp-log-verbose");
-    line.textContent = msg;
+
+    line.textContent = msg.replace(ANSI_RE, "");
 
     var atBottom = els.logOutput.scrollHeight - els.logOutput.scrollTop - els.logOutput.clientHeight < 40;
     els.logOutput.appendChild(line);
