@@ -45,8 +45,20 @@ psram:
 # ---------------------------------------------------------------------------
 # OTA updates (ESPHome native + HTTP-based)
 # ---------------------------------------------------------------------------
+# ESP32-S3 with octal PSRAM and MIPI RGB display fails to reinitialize
+# peripherals after a software reset. Deep sleep wake triggers a full
+# hardware reset, equivalent to a power cycle.
+# ---------------------------------------------------------------------------
 ota:
   - platform: esphome
+    on_begin:
+      then:
+        - light.turn_off: display_backlight
+    on_end:
+      then:
+        - lambda: |-
+            esp_sleep_enable_timer_wakeup(100000);
+            esp_deep_sleep_start();
   - platform: http_request
 
 # ---------------------------------------------------------------------------
