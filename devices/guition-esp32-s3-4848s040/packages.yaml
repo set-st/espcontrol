@@ -49,6 +49,7 @@ packages:
   # ---------------------------------------------------------------------------
   screen_loading:  !include device/screen_loading.yaml
   screen_wifi:     !include device/screen_wifi_setup.yaml
+  screen_ha:       !include device/screen_ha_setup.yaml
   screen_setup:    !include device/screen_button_setup.yaml
   # ---------------------------------------------------------------------------
   # Main page and dynamic sensor subscriptions (after setup screens)
