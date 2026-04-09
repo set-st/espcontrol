@@ -388,6 +388,7 @@
     updateFrequency: "Daily",
     updateFreqOptions: ["Hourly", "Daily", "Weekly", "Monthly"],
     subpages: {},
+    subpageRaw: {},
     editingSubpage: null,
     subpageSelectedSlots: [],
     subpageLastClicked: -1,
@@ -545,7 +546,16 @@
 
   function saveSubpageEntity(slot) {
     var sp = state.subpages[slot];
-    postText("Subpage " + slot + " Config", sp ? serializeSubpageConfig(sp) : "");
+    var full = sp ? serializeSubpageConfig(sp) : "";
+    var main = full, ext = "";
+    if (full.length > 255) {
+      var splitAt = full.lastIndexOf("|", 255);
+      if (splitAt <= 0) splitAt = 255;
+      main = full.substring(0, splitAt);
+      ext = full.substring(splitAt);
+    }
+    postText("Subpage " + slot + " Config", main);
+    postText("Subpage " + slot + " Config Ext", ext);
   }
 
   function postSelect(name, option) {
@@ -618,6 +628,22 @@
       out += "|" + fields.join(":");
     }
     return out;
+  }
+
+  function applySubpageRaw(slot) {
+    var raw = state.subpageRaw[slot];
+    var combined = (raw ? raw.main : "") + (raw ? raw.ext : "");
+    if (combined) {
+      var sp = parseSubpageConfig(combined);
+      sp.sizes = sp.sizes || {};
+      buildSubpageGrid(sp);
+      state.subpages[slot] = sp;
+    } else {
+      delete state.subpages[slot];
+    }
+    if (state.editingSubpage === slot) {
+      scheduleRender();
+    }
   }
 
   function getSubpage(homeSlot) {
@@ -2619,6 +2645,7 @@
         }
 
         state.subpages = {};
+        state.subpageRaw = {};
         if (data.subpages) {
           for (var k in data.subpages) {
             var newKey = spKeyMap[k];
@@ -2840,17 +2867,19 @@
         fn: function (m, val) {
           var slot = parseInt(m[1], 10);
           if (slot < 1 || slot > NUM_SLOTS) return;
-          if (val) {
-            var sp = parseSubpageConfig(val);
-            sp.sizes = sp.sizes || {};
-            buildSubpageGrid(sp);
-            state.subpages[slot] = sp;
-          } else {
-            delete state.subpages[slot];
-          }
-          if (state.editingSubpage === slot) {
-            scheduleRender();
-          }
+          if (!state.subpageRaw[slot]) state.subpageRaw[slot] = { main: "", ext: "" };
+          state.subpageRaw[slot].main = val || "";
+          applySubpageRaw(slot);
+        },
+      },
+      {
+        re: /^text-subpage_(\d+)_config_ext$/,
+        fn: function (m, val) {
+          var slot = parseInt(m[1], 10);
+          if (slot < 1 || slot > NUM_SLOTS) return;
+          if (!state.subpageRaw[slot]) state.subpageRaw[slot] = { main: "", ext: "" };
+          state.subpageRaw[slot].ext = val || "";
+          applySubpageRaw(slot);
         },
       },
     ];

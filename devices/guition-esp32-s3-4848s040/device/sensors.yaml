@@ -782,12 +782,17 @@ esphome:
               id(subpage_4_config), id(subpage_5_config), id(subpage_6_config),
               id(subpage_7_config), id(subpage_8_config), id(subpage_9_config),
             };
+            esphome::text::Text *sp_ext_configs[] = {
+              id(subpage_1_config_ext), id(subpage_2_config_ext), id(subpage_3_config_ext),
+              id(subpage_4_config_ext), id(subpage_5_config_ext), id(subpage_6_config_ext),
+              id(subpage_7_config_ext), id(subpage_8_config_ext), id(subpage_9_config_ext),
+            };
 
             for (int si = 0; si < NUM_SLOTS; si++) {
               std::string cfg = slots[si].config->state;
               std::string btn_type = cfg_field(cfg, 6);
               if (btn_type != "subpage") continue;
-              std::string sp_cfg = sp_configs[si]->state;
+              std::string sp_cfg = sp_configs[si]->state + sp_ext_configs[si]->state;
               if (sp_cfg.empty()) continue;
 
               std::vector<std::string> pipes;
