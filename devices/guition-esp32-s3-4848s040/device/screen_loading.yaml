@@ -33,6 +33,11 @@ lvgl:
               pad_row: 40
             widgets:
               - label:
+                  text_font: icon_font_setup
+                  text: $icon_wifi
+                  text_color: 0xFFFFFF
+                  text_align: center
+              - label:
                   text: "Starting up"
                   text_font: setup_title_font
                   text_color: 0xFFFFFF
