@@ -22,7 +22,7 @@ Tap any empty space in the grid (shown as a dashed outline with a **+** icon). A
 
 1. **Choose a type** — **Toggle** (the default) to control a device, or **Subpage** to create a folder of extra buttons.
 2. **Pick the device** you want to control by entering its Home Assistant entity name (for example, `light.living_room` or `switch.garden_lights`). You can find these under **Settings > Devices & Services** in Home Assistant. Subpage buttons don't need a device name.
-3. **Choose an icon** — type to search, or select **Auto** to let the panel pick one based on the device type (see [Auto icons](#auto-icons) below).
+3. **Choose an icon** — type to search, or select **Auto** to let the panel pick one based on the device type.
 4. **Set a label** (optional). If left blank the button uses the device's friendly name from Home Assistant.
 
 ### Button types
@@ -32,25 +32,6 @@ Tap any empty space in the grid (shown as a dashed outline with a **+** icon). A
 **Subpage** — works like a folder. Tapping it opens a new page with its own set of buttons, great for grouping related controls without filling up the home screen. The subpage has one fewer slot than the home screen because the first slot is a **Back** button. Subpage buttons show a small **arrow badge** on the home screen.
 
 To configure a subpage, click **Configure Subpage** in the button settings, or right-click the button and choose **Edit Subpage**. Add and arrange buttons there the same way you would on the home screen, then click the back arrow to return.
-
-### Auto icons {#auto-icons}
-
-When you set a button's icon to **Auto**, the panel picks an appropriate icon based on the device type:
-
-| Device type | Icon shown |
-| --- | --- |
-| Light | Lightbulb |
-| Switch | Power plug |
-| Fan | Fan |
-| Lock | Lock |
-| Cover (blinds, shutters) | Horizontal blinds |
-| Climate (heating, AC) | Air conditioner |
-| Media player | Speaker |
-| Camera | Camera |
-| Binary sensor (motion, door) | Motion sensor |
-| Anything else | Gear |
-
-If you'd rather pick a specific icon, the dropdown offers hundreds of choices. Type to search by name, or browse the full list on the [Icon Reference](/reference/icons) page. If the icon you need isn't available, [open an issue](https://github.com/jtenniswood/espcontrol/issues).
 
 ### When Entity On
 
@@ -90,20 +71,6 @@ Right-click a button to see:
 | **Delete** | Removes the button permanently |
 
 Right-click an **empty space** to **Paste** a previously cut button. Cut and paste also works between the home screen and subpages.
-
-## Settings tab
-
-The Settings tab lets you adjust how your panel looks and behaves. Each section can be expanded or collapsed by tapping its heading:
-
-- **[Appearance](/features/appearance)** — customise button on/off colours.
-- **[Brightness](/features/backlight-schedule)** — set daytime/nighttime brightness and timezone for automatic sunrise/sunset switching.
-- **[Display & Screensaver](/features/display-screensaver)** — show temperatures in the top bar and configure screensaver behaviour.
-- **[Backup](/features/backup)** — export or import your panel configuration.
-- **[Firmware](/features/firmware-updates)** — check version, enable auto-updates, and set update frequency.
-
-## Logs tab
-
-A live feed of what the panel is doing. Mainly useful for troubleshooting — messages are colour-coded: red for errors, yellow for warnings, green for normal activity. Press **Clear** to empty the log.
 
 ## Apply Configuration
 
