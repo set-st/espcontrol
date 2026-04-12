@@ -68,7 +68,7 @@ button:
           lv_timer_create([](lv_timer_t *timer) {
             lv_obj_clear_state((lv_obj_t *)timer->user_data, LV_STATE_CHECKED);
             lv_timer_del(timer);
-          }, 150, id(button_${num}));
+          }, 400, id(button_${num}));
           id(push_button_event).trigger("push_${num}");
           size_t lp = cfg.find(';');
           std::string label = "";

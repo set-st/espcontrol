@@ -36,6 +36,8 @@ lvgl:
       pad_all: $padding
       shadow_width: 0
       text_color: $button_text_color
+      pressed:
+        bg_color: $button_on_color
       checked:
         bg_color: $button_on_color
         text_color: $button_text_color
