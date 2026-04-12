@@ -77,13 +77,13 @@
     "Spotlight", "Sprinkler", "String Lights", "Sun", "Table", "Television",
     "Thermometer", "Thermometer Alert", "Thermometer High", "Thermometer Low", "Thermostat", "Timer",
     "Toilet", "Transmission Tower", "Trash Can", "Wall Outlet", "Washer", "Water",
-    "Water Heater", "Water Percent", "Weather Cloudy", "Weather Cloudy Alert", "Weather Dust", "Weather Fog",
-    "Weather Hail", "Weather Hazy", "Weather Hurricane", "Weather Lightning", "Weather Lightning Rainy", "Weather Night",
-    "Weather Night Cloudy", "Weather Partly Cloudy", "Weather Partly Lightning", "Weather Partly Rainy", "Weather Partly Snowy", "Weather Partly Snowy Rainy",
-    "Weather Pouring", "Weather Rainy", "Weather Snowy", "Weather Snowy Heavy", "Weather Snowy Rainy", "Weather Sunny",
-    "Weather Sunny Alert", "Weather Sunny Off", "Weather Sunset", "Weather Sunset Down", "Weather Sunset Up", "Weather Tornado",
-    "Weather Windy", "Weather Windy Variant", "Wind Power", "Wind Turbine", "Wind Turbine Alert", "Wind Turbine Check",
-    "Window",
+    "Water Heater", "Radar", "Water Percent", "Weather Cloudy", "Weather Cloudy Alert", "Weather Dust",
+    "Weather Fog", "Weather Hail", "Weather Hazy", "Weather Hurricane", "Weather Lightning", "Weather Lightning Rainy",
+    "Weather Night", "Weather Night Cloudy", "Weather Partly Cloudy", "Weather Partly Lightning", "Weather Partly Rainy", "Weather Partly Snowy",
+    "Weather Partly Snowy Rainy", "Weather Pouring", "Weather Rainy", "Weather Snowy", "Weather Snowy Heavy", "Weather Snowy Rainy",
+    "Weather Sunny", "Weather Sunny Alert", "Weather Sunny Off", "Weather Sunset", "Weather Sunset Down", "Weather Sunset Up",
+    "Weather Tornado", "Weather Windy", "Weather Windy Variant", "Wind Power", "Wind Turbine", "Wind Turbine Alert",
+    "Wind Turbine Check", "Window",
   ];
   // --- GENERATED:ICONS END ---
 
@@ -185,6 +185,8 @@
     ".sp-radar-tile{position:absolute;inset:0;overflow:hidden;border-radius:inherit;" +
     "display:flex;align-items:center;justify-content:center}" +
     ".sp-radar-placeholder{font-size:8cqw;color:rgba(255,255,255,.2)}" +
+    ".sp-radar-img{width:100%;height:100%;object-fit:cover}" +
+    ".sp-btn:has(.sp-radar-img) .sp-btn-label{text-shadow:0 1px 4px rgba(0,0,0,.8);position:relative;z-index:1}" +
     ".sp-empty-cell{border:2px dashed rgba(255,255,255,.15);background:transparent;" +
     "border-radius:var(--empty-r);display:flex;align-items:center;justify-content:center;" +
     "cursor:pointer;transition:border-color .2s}" +
@@ -1633,7 +1635,7 @@
         var b = c.buttons[bIdx];
         var iconName = resolveIcon(b);
         var label = b.label || b.entity || "Configure";
-        var color = (b.type === "sensor" || b.type === "weather") ? state.sensorColor : state.offColor;
+        var color = (b.type === "sensor" || b.type === "weather" || b.type === "radar") ? state.sensorColor : state.offColor;
         var previewTypeDef = !c.isSub ? (BUTTON_TYPES[b.type || ""] || null) : null;
         var typePreview = previewTypeDef && previewTypeDef.renderPreview
           ? previewTypeDef.renderPreview(b, { escHtml: escHtml })
@@ -1669,6 +1671,57 @@
         empty.setAttribute("data-pos", pos);
         empty.innerHTML = '<span class="sp-add-icon mdi mdi-plus"></span>';
         main.appendChild(empty);
+      }
+    }
+    loadRadarTiles();
+  }
+
+  // ── Radar tile image loading ──────────────────────────────────────────
+
+  var _radarCache = { host: "", path: "", ts: 0 };
+
+  function loadRadarTiles() {
+    var tiles = els.previewMain.querySelectorAll(".sp-radar-tile[data-lat]");
+    if (!tiles.length) return;
+    var now = Date.now();
+    if (_radarCache.path && now - _radarCache.ts < 5 * 60 * 1000) {
+      applyRadarImages(tiles, _radarCache.host, _radarCache.path);
+      return;
+    }
+    fetch("https://api.rainviewer.com/public/weather-maps.json")
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var frames = data.radar && data.radar.past;
+        if (!frames || !frames.length) return;
+        var latest = frames[frames.length - 1];
+        _radarCache.host = data.host;
+        _radarCache.path = latest.path;
+        _radarCache.ts = Date.now();
+        var current = els.previewMain.querySelectorAll(".sp-radar-tile[data-lat]");
+        applyRadarImages(current, data.host, latest.path);
+      })
+      .catch(function () {});
+  }
+
+  function applyRadarImages(tiles, host, path) {
+    for (var i = 0; i < tiles.length; i++) {
+      var tile = tiles[i];
+      var lat = tile.getAttribute("data-lat");
+      var lon = tile.getAttribute("data-lon");
+      var zoom = tile.getAttribute("data-zoom") || "6";
+      if (!lat || !lon) continue;
+      var url = host + path + "/512/" + zoom + "/" + lat + "/" + lon + "/2/1_1.png";
+      var existing = tile.querySelector(".sp-radar-img");
+      if (existing) {
+        existing.src = url;
+      } else {
+        var placeholder = tile.querySelector(".sp-radar-placeholder");
+        if (placeholder) placeholder.style.display = "none";
+        var img = document.createElement("img");
+        img.className = "sp-radar-img";
+        img.src = url;
+        img.alt = "Radar";
+        tile.appendChild(img);
       }
     }
   }

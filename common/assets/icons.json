@@ -805,6 +805,11 @@
       "mdi": "water-boiler"
     },
     {
+      "name": "Radar",
+      "codepoint": "F0437",
+      "mdi": "radar"
+    },
+    {
       "name": "Water Percent",
       "codepoint": "F058E",
       "mdi": "water-percent"
