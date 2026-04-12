@@ -26,6 +26,7 @@ packages:
   colors:          !include ../../common/config/colors.yaml
   button_order:    !include ../../common/config/button_order.yaml
   display_config:  !include ../../common/config/display.yaml
+  weather_config:  !include ../../common/config/weather.yaml
   # Per-button entity/label/icon (15 slots — 5x3 grid)
   btn_1:           !include { file: ../../common/config/button_template.yaml, vars: { num: "1" } }
   btn_2:           !include { file: ../../common/config/button_template.yaml, vars: { num: "2" } }
@@ -51,6 +52,7 @@ packages:
   bl_schedule:     !include ../../common/addon/backlight_schedule.yaml
   network:         !include ../../common/addon/network.yaml
   fw_update:       !include ../../common/addon/firmware_update.yaml
+  weather:         !include ../../common/addon/weather.yaml
   # ---------------------------------------------------------------------------
   # Screens (loading must be first page for LVGL startup)
   # ---------------------------------------------------------------------------

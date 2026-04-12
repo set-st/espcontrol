@@ -1,0 +1,141 @@
+# =============================================================================
+# WEATHER - Open-Meteo current conditions
+# =============================================================================
+# Fetches current weather from the Open-Meteo API every 15 minutes using the
+# latitude/longitude stored in weather config entities. Parses the WMO weather
+# code and maps it to an MDI icon name and condition label. Device-specific
+# sensors.yaml registers weather card widgets during Phase 1 boot via the
+# weather_register_card() helper; this addon's interval updates them.
+# =============================================================================
+
+json:
+
+globals:
+  - id: weather_wmo_code
+    type: int
+    initial_value: '-1'
+  - id: weather_label
+    type: std::string
+    initial_value: '""'
+  - id: weather_icon_name
+    type: std::string
+    initial_value: '"Weather Sunny"'
+  - id: weather_url
+    type: std::string
+    initial_value: '""'
+  - id: weather_icon_lbl_ptrs
+    type: std::vector<lv_obj_t*>
+  - id: weather_text_lbl_ptrs
+    type: std::vector<lv_obj_t*>
+
+script:
+  - id: weather_fetch
+    mode: single
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return !id(weather_latitude).state.empty() && !id(weather_longitude).state.empty();
+          then:
+            - lambda: |-
+                id(weather_url) = "https://api.open-meteo.com/v1/forecast?latitude=" +
+                  id(weather_latitude).state + "&longitude=" + id(weather_longitude).state +
+                  "&current=weather_code,temperature_2m&timezone=auto";
+            - http_request.get:
+                url: !lambda 'return id(weather_url);'
+                capture_response: true
+                max_response_buffer_size: 1024
+                on_response:
+                  then:
+                    - lambda: |-
+                        if (response->status_code != 200) {
+                          ESP_LOGW("weather", "HTTP %d from Open-Meteo", response->status_code);
+                          return;
+                        }
+                        json::parse_json(body, [](JsonObject root) -> bool {
+                          if (!root.containsKey("current")) {
+                            ESP_LOGW("weather", "No 'current' key in response");
+                            return false;
+                          }
+                          JsonObject current = root["current"];
+                          int code = current["weather_code"] | -1;
+                          if (code < 0) return false;
+                          id(weather_wmo_code) = code;
+
+                          const char* label = "Unknown";
+                          const char* icon = "Weather Sunny";
+                          switch (code) {
+                            case 0:            label = "Clear";           icon = "Weather Sunny"; break;
+                            case 1:            label = "Mostly Clear";    icon = "Weather Sunny"; break;
+                            case 2:            label = "Partly Cloudy";   icon = "Weather Partly Cloudy"; break;
+                            case 3:            label = "Overcast";        icon = "Weather Cloudy"; break;
+                            case 45: case 48:  label = "Fog";             icon = "Weather Fog"; break;
+                            case 51: case 53: case 55:
+                                               label = "Drizzle";         icon = "Weather Partly Rainy"; break;
+                            case 56: case 57:  label = "Freezing Drizzle"; icon = "Weather Snowy Rainy"; break;
+                            case 61: case 63:  label = "Rain";            icon = "Weather Rainy"; break;
+                            case 65:           label = "Heavy Rain";      icon = "Weather Pouring"; break;
+                            case 66: case 67:  label = "Freezing Rain";   icon = "Weather Snowy Rainy"; break;
+                            case 71: case 73:  label = "Snow";            icon = "Weather Snowy"; break;
+                            case 75: case 77:  label = "Heavy Snow";      icon = "Weather Snowy Heavy"; break;
+                            case 80: case 81:  label = "Showers";         icon = "Weather Rainy"; break;
+                            case 82:           label = "Heavy Showers";   icon = "Weather Pouring"; break;
+                            case 85: case 86:  label = "Snow Showers";    icon = "Weather Snowy Rainy"; break;
+                            case 95:           label = "Thunderstorm";    icon = "Weather Lightning"; break;
+                            case 96: case 99:  label = "Thunderstorm";    icon = "Weather Lightning Rainy"; break;
+                          }
+                          id(weather_label) = label;
+                          id(weather_icon_name) = icon;
+                          ESP_LOGI("weather", "WMO %d -> %s (%s)", code, label, icon);
+                          return true;
+                        });
+                    - script.execute: weather_update_cards
+          else:
+            - lambda: 'ESP_LOGD("weather", "No location configured, skipping fetch");'
+
+  - id: weather_update_cards
+    mode: single
+    then:
+      - lambda: |-
+          if (id(weather_wmo_code) < 0) return;
+
+          struct IconEntry { const char* name; const char* glyph; };
+          static const IconEntry weather_icons[] = {
+            {"Weather Cloudy",             "\U000F0590"},
+            {"Weather Fog",               "\U000F0591"},
+            {"Weather Lightning",          "\U000F0593"},
+            {"Weather Lightning Rainy",    "\U000F067E"},
+            {"Weather Partly Cloudy",      "\U000F0595"},
+            {"Weather Partly Rainy",       "\U000F0F33"},
+            {"Weather Pouring",            "\U000F0596"},
+            {"Weather Rainy",              "\U000F0597"},
+            {"Weather Snowy",              "\U000F0598"},
+            {"Weather Snowy Heavy",        "\U000F0F36"},
+            {"Weather Snowy Rainy",        "\U000F067F"},
+            {"Weather Sunny",              "\U000F0599"},
+          };
+          const char* glyph = "\U000F0599";
+          for (auto &e : weather_icons) {
+            if (id(weather_icon_name) == e.name) { glyph = e.glyph; break; }
+          }
+
+          auto &icons = id(weather_icon_lbl_ptrs);
+          auto &texts = id(weather_text_lbl_ptrs);
+          for (size_t i = 0; i < icons.size(); i++) {
+            lv_label_set_text(icons[i], glyph);
+            if (i < texts.size()) {
+              lv_label_set_text(texts[i], id(weather_label).c_str());
+            }
+          }
+
+esphome:
+  on_boot:
+    priority: -200
+    then:
+      - delay: 5s
+      - script.execute: weather_fetch
+
+interval:
+  - interval: 15min
+    then:
+      - script.execute: weather_fetch

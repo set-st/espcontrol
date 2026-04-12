@@ -1,0 +1,56 @@
+# =============================================================================
+# CONFIG: WEATHER LOCATION
+# =============================================================================
+# Latitude, longitude, and display name for Open-Meteo weather API queries.
+# The web UI geocodes a city name into coordinates; coordinates can also be
+# entered manually. All weather cards share this single location.
+# =============================================================================
+
+text:
+  - platform: template
+    name: "Weather Latitude"
+    internal: true
+    id: weather_latitude
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 12
+    mode: text
+    entity_category: config
+    icon: "mdi:latitude"
+    update_interval: never
+    web_server:
+      sorting_group_id: sg_display
+
+  - platform: template
+    name: "Weather Longitude"
+    internal: true
+    id: weather_longitude
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 13
+    mode: text
+    entity_category: config
+    icon: "mdi:longitude"
+    update_interval: never
+    web_server:
+      sorting_group_id: sg_display
+
+  - platform: template
+    name: "Weather Location"
+    internal: true
+    id: weather_location
+    optimistic: true
+    restore_value: true
+    initial_value: ""
+    min_length: 0
+    max_length: 100
+    mode: text
+    entity_category: config
+    icon: "mdi:map-marker"
+    update_interval: never
+    web_server:
+      sorting_group_id: sg_display

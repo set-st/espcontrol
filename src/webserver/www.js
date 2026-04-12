@@ -180,6 +180,11 @@
     ".sp-btn-double{grid-row:span 2}" +
     ".sp-btn-double .sp-btn-label{-webkit-line-clamp:var(--btn-lines-dbl)}" +
     ".sp-btn-double .sp-btn-label-row .sp-btn-label{-webkit-line-clamp:var(--btn-lines-dbl)}" +
+    ".sp-btn-quad{grid-row:span 2;grid-column:span 2}" +
+    ".sp-btn-quad .sp-btn-label{-webkit-line-clamp:var(--btn-lines-dbl)}" +
+    ".sp-radar-tile{position:absolute;inset:0;overflow:hidden;border-radius:inherit;" +
+    "display:flex;align-items:center;justify-content:center}" +
+    ".sp-radar-placeholder{font-size:8cqw;color:rgba(255,255,255,.2)}" +
     ".sp-empty-cell{border:2px dashed rgba(255,255,255,.15);background:transparent;" +
     "border-radius:var(--empty-r);display:flex;align-items:center;justify-content:center;" +
     "cursor:pointer;transition:border-color .2s}" +
@@ -383,12 +388,19 @@
     "overflow:hidden;word-break:break-word;min-height:0}" +
     ".sp-back-btn.sp-btn-double{grid-row:span 2}" +
     ".sp-back-btn.sp-btn-double .sp-btn-label{-webkit-line-clamp:var(--back-lines-dbl)}" +
+    ".sp-back-btn.sp-btn-quad{grid-row:span 2;grid-column:span 2}" +
+    ".sp-back-btn.sp-btn-quad .sp-btn-label{-webkit-line-clamp:var(--back-lines-dbl)}" +
 
     ".sp-btn-label-row{display:flex;align-items:baseline;width:100%;overflow:hidden}" +
     ".sp-btn-label-row .sp-btn-label{flex:1;min-width:0}" +
     ".sp-subpage-badge{font-size:var(--btn-label);line-height:1.2;opacity:.5;flex-shrink:0;" +
     "cursor:pointer;padding:2px 0 2px 4px;border-radius:4px;transition:opacity .15s}" +
-    ".sp-subpage-badge:hover{opacity:1}";
+    ".sp-subpage-badge:hover{opacity:1}" +
+
+    ".sp-wx-results{display:flex;flex-direction:column;gap:4px;margin:6px 0}" +
+    ".sp-wx-result{display:block;width:100%;text-align:left;padding:8px 10px;border:1px solid #333;" +
+    "border-radius:6px;background:#1a1a1a;color:#ccc;cursor:pointer;font-size:13px;transition:background .15s}" +
+    ".sp-wx-result:hover{background:#2a2a2a}";
 
   // ── State ──────────────────────────────────────────────────────────────
 
@@ -426,6 +438,9 @@
     subpageSelectedSlots: [],
     subpageLastClicked: -1,
     clipboard: null,
+    weatherLat: "",
+    weatherLon: "",
+    weatherLocation: "",
   };
 
   for (var i = 0; i < NUM_SLOTS; i++) {
@@ -499,20 +514,53 @@
     for (var i = 0; i < parts.length && i < NUM_SLOTS; i++) {
       var s = parts[i].trim();
       if (!s) continue;
-      var dbl = s.charAt(s.length - 1) === "d";
+      var last = s.charAt(s.length - 1);
+      var dbl = last === "d";
+      var quad = last === "q";
       var n = parseInt(s, 10);
       if (n >= 1 && n <= NUM_SLOTS && !isNaN(n)) {
         grid[i] = n;
-        if (dbl) state.sizes[n] = 2;
+        if (quad) state.sizes[n] = 4;
+        else if (dbl) state.sizes[n] = 2;
       }
     }
     applySpans(grid, state.sizes, NUM_SLOTS);
     return grid;
   }
 
+  function displaceCell(grid, idx, sizes, owner, maxSlots) {
+    if (idx >= maxSlots) return false;
+    if (grid[idx] === 0 || grid[idx] === -1) { grid[idx] = -1; return true; }
+    if (grid[idx] > 0 || grid[idx] === -2) {
+      var displaced = grid[idx];
+      for (var j = 0; j < maxSlots; j++) {
+        if (grid[j] === 0) { grid[j] = displaced; grid[idx] = -1; return true; }
+      }
+    }
+    return false;
+  }
+
   function applySpans(grid, sizes, maxSlots) {
     for (var i = 0; i < maxSlots; i++) {
-      if ((grid[i] > 0 || grid[i] === -2) && sizes[grid[i]] === 2) {
+      var s = grid[i];
+      if (!((s > 0 || s === -2) && (sizes[s] === 2 || sizes[s] === 4))) continue;
+
+      if (sizes[s] === 4) {
+        var col = i % GRID_COLS;
+        var right = i + 1;
+        var below = i + GRID_COLS;
+        var diag = below + 1;
+        if (col + 1 >= GRID_COLS || below >= maxSlots) { delete sizes[s]; continue; }
+        var ok = displaceCell(grid, right, sizes, s, maxSlots) &&
+                 displaceCell(grid, below, sizes, s, maxSlots) &&
+                 displaceCell(grid, diag, sizes, s, maxSlots);
+        if (!ok) {
+          if (grid[right] === -1) grid[right] = 0;
+          if (grid[below] === -1) grid[below] = 0;
+          if (grid[diag] === -1) grid[diag] = 0;
+          delete sizes[s];
+        }
+      } else {
         var below = i + GRID_COLS;
         if (below >= maxSlots) continue;
         if (grid[below] > 0 || grid[below] === -2) {
@@ -521,10 +569,7 @@
           for (var j = 0; j < maxSlots; j++) {
             if (grid[j] === 0) { grid[j] = displaced; placed = true; break; }
           }
-          if (!placed) {
-            delete sizes[grid[i]];
-            continue;
-          }
+          if (!placed) { delete sizes[grid[i]]; continue; }
         }
         grid[below] = -1;
       }
@@ -539,13 +584,49 @@
     if (last < 0) return "";
     return grid.slice(0, last + 1).map(function (slot) {
       if (slot <= 0) return "";
-      return slot + (state.sizes[slot] === 2 ? "d" : "");
+      var suffix = state.sizes[slot] === 4 ? "q" : (state.sizes[slot] === 2 ? "d" : "");
+      return slot + suffix;
     }).join(",");
   }
 
   function clearSpans(grid, maxSlots) {
     for (var i = 0; i < maxSlots; i++) {
       if (grid[i] === -1) grid[i] = 0;
+    }
+  }
+
+  function clearSlotSpan(grid, pos, sizes, slot, maxSlots) {
+    var sz = sizes[slot] || 1;
+    if (sz === 4) {
+      var right = pos + 1, below = pos + GRID_COLS, diag = below + 1;
+      if (right < maxSlots && grid[right] === -1) grid[right] = 0;
+      if (below < maxSlots && grid[below] === -1) grid[below] = 0;
+      if (diag < maxSlots && grid[diag] === -1) grid[diag] = 0;
+    } else if (sz === 2) {
+      var below = pos + GRID_COLS;
+      if (below < maxSlots && grid[below] === -1) grid[below] = 0;
+    }
+    delete sizes[slot];
+  }
+
+  function displaceIfOccupied(grid, idx, maxSlots, isSub) {
+    if (idx >= maxSlots) return;
+    if (grid[idx] > 0 || grid[idx] === -2) {
+      if (isSub) return;
+      var displaced = grid[idx];
+      grid[idx] = 0;
+      var freeCell = firstFreeCell(idx + 1);
+      if (freeCell >= 0) grid[freeCell] = displaced;
+    }
+  }
+
+  function saveGridState(c) {
+    if (c.isSub) {
+      var sp = getSubpage(state.editingSubpage);
+      sp.order = serializeSubpageGrid(sp);
+      saveSubpageConfig(state.editingSubpage);
+    } else {
+      postText("Button Order", serializeGrid(state.grid));
     }
   }
 
@@ -1070,6 +1151,91 @@
 
     config.appendChild(makeCollapsibleCard("Temperature", tempBody, true));
 
+    var wxBody = document.createElement("div");
+
+    wxBody.appendChild(fieldLabel("City Search"));
+    var wxSearchRow = document.createElement("div");
+    wxSearchRow.className = "sp-backup-btns";
+    var wxSearchInp = textInput("sp-set-wx-search", "", "e.g. London");
+    wxSearchInp.style.flex = "1";
+    wxSearchRow.appendChild(wxSearchInp);
+    var wxSearchBtn = document.createElement("button");
+    wxSearchBtn.className = "sp-backup-btn";
+    wxSearchBtn.textContent = "Search";
+    wxSearchRow.appendChild(wxSearchBtn);
+    wxBody.appendChild(wxSearchRow);
+
+    var wxResults = document.createElement("div");
+    wxResults.className = "sp-wx-results";
+    wxBody.appendChild(wxResults);
+
+    wxSearchBtn.addEventListener("click", function () {
+      var q = wxSearchInp.value.trim();
+      if (!q) return;
+      wxSearchBtn.disabled = true;
+      wxSearchBtn.textContent = "Searching\u2026";
+      wxResults.innerHTML = "";
+      fetch("https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(q) + "&count=5")
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          wxSearchBtn.disabled = false;
+          wxSearchBtn.textContent = "Search";
+          if (!data.results || !data.results.length) {
+            wxResults.textContent = "No results found";
+            return;
+          }
+          data.results.forEach(function (r) {
+            var opt = document.createElement("button");
+            opt.className = "sp-wx-result";
+            opt.textContent = r.name + (r.admin1 ? ", " + r.admin1 : "") + (r.country ? " \u2014 " + r.country : "");
+            opt.addEventListener("click", function () {
+              var lat = String(r.latitude);
+              var lon = String(r.longitude);
+              var loc = r.name + (r.country ? ", " + r.country : "");
+              state.weatherLat = lat;
+              state.weatherLon = lon;
+              state.weatherLocation = loc;
+              syncInput(els.setWxLat, lat);
+              syncInput(els.setWxLon, lon);
+              if (els.wxLocationLabel) els.wxLocationLabel.textContent = loc;
+              postText("Weather Latitude", lat);
+              postText("Weather Longitude", lon);
+              postText("Weather Location", loc);
+              wxResults.innerHTML = "";
+            });
+            wxResults.appendChild(opt);
+          });
+        })
+        .catch(function () {
+          wxSearchBtn.disabled = false;
+          wxSearchBtn.textContent = "Search";
+          wxResults.textContent = "Search failed \u2014 check connection";
+        });
+    });
+    wxSearchInp.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") wxSearchBtn.click();
+    });
+
+    var wxLocLabel = document.createElement("div");
+    wxLocLabel.className = "sp-hint";
+    wxLocLabel.textContent = state.weatherLocation || "No location set";
+    wxBody.appendChild(wxLocLabel);
+    els.wxLocationLabel = wxLocLabel;
+
+    wxBody.appendChild(fieldLabel("Latitude"));
+    var wxLatInp = textInput("sp-set-wx-lat", state.weatherLat, "e.g. 51.5074");
+    wxBody.appendChild(wxLatInp);
+    bindTextPost(wxLatInp, "Weather Latitude", {});
+    els.setWxLat = wxLatInp;
+
+    wxBody.appendChild(fieldLabel("Longitude"));
+    var wxLonInp = textInput("sp-set-wx-lon", state.weatherLon, "e.g. -0.1278");
+    wxBody.appendChild(wxLonInp);
+    bindTextPost(wxLonInp, "Weather Longitude", {});
+    els.setWxLon = wxLonInp;
+
+    config.appendChild(makeCollapsibleCard("Weather", wxBody, true));
+
     var ssBody = document.createElement("div");
     var ssMode = state.presenceEntity ? "sensor" : "timer";
 
@@ -1453,7 +1619,7 @@
 
       if (slot === -2) {
         var backBtn = document.createElement("div");
-        backBtn.className = "sp-back-btn" + (c.sizes[-2] === 2 ? " sp-btn-double" : "");
+        backBtn.className = "sp-back-btn" + (c.sizes[-2] === 4 ? " sp-btn-quad" : c.sizes[-2] === 2 ? " sp-btn-double" : "");
         backBtn.innerHTML =
           '<span class="sp-btn-icon mdi mdi-chevron-left"></span>' +
           '<span class="sp-btn-label">Back</span>';
@@ -1467,7 +1633,7 @@
         var b = c.buttons[bIdx];
         var iconName = resolveIcon(b);
         var label = b.label || b.entity || "Configure";
-        var color = (b.type === "sensor") ? state.sensorColor : state.offColor;
+        var color = (b.type === "sensor" || b.type === "weather") ? state.sensorColor : state.offColor;
         var previewTypeDef = !c.isSub ? (BUTTON_TYPES[b.type || ""] || null) : null;
         var typePreview = previewTypeDef && previewTypeDef.renderPreview
           ? previewTypeDef.renderPreview(b, { escHtml: escHtml })
@@ -1475,7 +1641,7 @@
 
         var btn = document.createElement("div");
         btn.className = "sp-btn" +
-          (c.sizes[slot] === 2 ? " sp-btn-double" : "") +
+          (c.sizes[slot] === 4 ? " sp-btn-quad" : c.sizes[slot] === 2 ? " sp-btn-double" : "") +
           (c.selected.indexOf(slot) !== -1 ? " sp-selected" : "");
         btn.style.backgroundColor = "#" + (color.length === 6 ? color : "313131");
         btn.draggable = true;
@@ -1973,10 +2139,16 @@
     var targetSlot = grid[toPos];
     grid[toPos] = movingSlot;
     grid[fromPos] = targetSlot;
-    applySpans(grid, c.sizes, c.maxSlots);
-    if (c.sizes[movingSlot] === 2 && toPos + GRID_COLS >= c.maxSlots) {
+    var sz = c.sizes[movingSlot] || 1;
+    if (sz === 4) {
+      var col = toPos % GRID_COLS;
+      if (col + 1 >= GRID_COLS || toPos + GRID_COLS >= c.maxSlots) {
+        delete c.sizes[movingSlot];
+      }
+    } else if (sz === 2 && toPos + GRID_COLS >= c.maxSlots) {
       delete c.sizes[movingSlot];
     }
+    applySpans(grid, c.sizes, c.maxSlots);
     if (c.isSub) {
       getSubpage(state.editingSubpage).grid = grid;
     } else {
@@ -2237,16 +2409,14 @@
       type: src.type || "",
     };
 
-    if (state.sizes[srcSlot] === 2) state.sizes[newSlot] = 2;
+    var srcSize = state.sizes[srcSlot];
+    if (srcSize) state.sizes[newSlot] = srcSize;
 
     var srcPos = state.grid.indexOf(srcSlot);
     var newPos = firstFreeCell(srcPos + 1);
     if (newPos < 0) return;
     state.grid[newPos] = newSlot;
-    if (state.sizes[newSlot] === 2) {
-      var belowNew = newPos + GRID_COLS;
-      if (belowNew < NUM_SLOTS && state.grid[belowNew] === 0) state.grid[belowNew] = -1;
-    }
+    applySpans(state.grid, state.sizes, NUM_SLOTS);
 
     if (src.type === "subpage" && state.subpages[srcSlot]) {
       var spJson = serializeSubpageConfig(state.subpages[srcSlot]);
@@ -2265,14 +2435,11 @@
     var c = ctx();
     for (var i = 0; i < c.maxSlots; i++) {
       if (c.grid[i] === slot) {
+        clearSlotSpan(c.grid, i, c.sizes, slot, c.maxSlots);
         c.grid[i] = 0;
-        if (c.sizes[slot] === 2 && i + GRID_COLS < c.maxSlots && c.grid[i + GRID_COLS] === -1) {
-          c.grid[i + GRID_COLS] = 0;
-        }
         break;
       }
     }
-    delete c.sizes[slot];
 
     var selIdx = c.selected.indexOf(slot);
     if (selIdx !== -1) c.selected.splice(selIdx, 1);
@@ -2301,13 +2468,10 @@
     var c = ctx();
     for (var i = 0; i < c.maxSlots; i++) {
       if (slots.indexOf(c.grid[i]) !== -1) {
-        if (c.sizes[c.grid[i]] === 2 && i + GRID_COLS < c.maxSlots && c.grid[i + GRID_COLS] === -1) {
-          c.grid[i + GRID_COLS] = 0;
-        }
+        clearSlotSpan(c.grid, i, c.sizes, c.grid[i], c.maxSlots);
         c.grid[i] = 0;
       }
     }
-    slots.forEach(function (slot) { delete c.sizes[slot]; });
     c.setSelected([]);
     c.setLastClicked(-1);
     if (c.isSub) {
@@ -2390,35 +2554,50 @@
         }
       }
 
-      var isDbl = c.sizes[slot] === 2;
-      addCtxItem("arrow-expand-vertical", isDbl ? "Single Height" : "Double Height", function () {
+      var curSize = c.sizes[slot] || 1;
+      addCtxItem("arrow-expand-vertical", curSize === 1 ? "Double Height" : "Single Size", function () {
         var slotPos = c.grid.indexOf(slot);
-        var belowPos = slotPos + GRID_COLS;
-        if (isDbl) {
-          delete c.sizes[slot];
-          if (belowPos < c.maxSlots && c.grid[belowPos] === -1) c.grid[belowPos] = 0;
-        } else {
+        clearSlotSpan(c.grid, slotPos, c.sizes, slot, c.maxSlots);
+        if (curSize === 1) {
+          var belowPos = slotPos + GRID_COLS;
           if (belowPos >= c.maxSlots) return;
-          if (c.grid[belowPos] > 0) {
-            if (c.isSub) return;
-            var displaced = c.grid[belowPos];
-            c.grid[belowPos] = 0;
-            var freeCell = firstFreeCell(belowPos + 1);
-            if (freeCell >= 0) c.grid[freeCell] = displaced;
-          }
+          displaceIfOccupied(c.grid, belowPos, c.maxSlots, c.isSub);
           c.sizes[slot] = 2;
           c.grid[belowPos] = -1;
         }
-        if (c.isSub) {
-          var sp = getSubpage(state.editingSubpage);
-          sp.order = serializeSubpageGrid(sp);
-          saveSubpageConfig(state.editingSubpage);
-        } else {
-          postText("Button Order", serializeGrid(state.grid));
-        }
+        saveGridState(c);
         renderPreview();
         renderButtonSettings();
       });
+
+      if (!c.isSub) {
+        var canQuad = (function () {
+          var slotPos = c.grid.indexOf(slot);
+          var col = slotPos % GRID_COLS;
+          return col + 1 < GRID_COLS && slotPos + GRID_COLS < c.maxSlots;
+        })();
+        if (canQuad) {
+          addCtxItem("arrow-expand-all", curSize === 4 ? "Single Size" : "Quad (2\u00d72)", function () {
+            var slotPos = c.grid.indexOf(slot);
+            clearSlotSpan(c.grid, slotPos, c.sizes, slot, c.maxSlots);
+            if (curSize !== 4) {
+              var right = slotPos + 1;
+              var below = slotPos + GRID_COLS;
+              var diag = below + 1;
+              displaceIfOccupied(c.grid, right, c.maxSlots, false);
+              displaceIfOccupied(c.grid, below, c.maxSlots, false);
+              displaceIfOccupied(c.grid, diag, c.maxSlots, false);
+              c.sizes[slot] = 4;
+              c.grid[right] = -1;
+              c.grid[below] = -1;
+              c.grid[diag] = -1;
+            }
+            saveGridState(c);
+            renderPreview();
+            renderButtonSettings();
+          });
+        }
+      }
 
       if (!c.isSub) {
         addCtxItem("content-copy", "Duplicate", function () { duplicateButton(slot); });
@@ -2438,22 +2617,14 @@
     ctxMenu = document.createElement("div");
     ctxMenu.className = "sp-ctx-menu";
     var sp = getSubpage(state.editingSubpage);
-    var isDbl = sp.sizes[-2] === 2;
-    addCtxItem("arrow-expand-vertical", isDbl ? "Single Height" : "Double Height", function () {
+    var backSize = sp.sizes[-2] || 1;
+    addCtxItem("arrow-expand-vertical", backSize > 1 ? "Single Height" : "Double Height", function () {
       var backPos = sp.grid.indexOf(-2);
-      var belowPos = backPos + GRID_COLS;
-      if (isDbl) {
-        delete sp.sizes[-2];
-        if (belowPos < NUM_SLOTS && sp.grid[belowPos] === -1) sp.grid[belowPos] = 0;
-      } else {
+      clearSlotSpan(sp.grid, backPos, sp.sizes, -2, NUM_SLOTS);
+      if (backSize === 1) {
+        var belowPos = backPos + GRID_COLS;
         if (belowPos >= NUM_SLOTS) return;
-        if (sp.grid[belowPos] > 0) {
-          var displaced = sp.grid[belowPos];
-          sp.grid[belowPos] = 0;
-          for (var j = 0; j < NUM_SLOTS; j++) {
-            if (sp.grid[j] === 0) { sp.grid[j] = displaced; break; }
-          }
-        }
+        displaceIfOccupied(sp.grid, belowPos, NUM_SLOTS, true);
         sp.sizes[-2] = 2;
         sp.grid[belowPos] = -1;
       }
@@ -2542,12 +2713,9 @@
         entity: e.entity, label: e.label, icon: e.icon,
         icon_on: e.icon_on, sensor: e.sensor, unit: e.unit, type: e.type || "",
       };
-      if (e.size === 2) state.sizes[newSlot] = 2;
+      if (e.size === 2 || e.size === 4) state.sizes[newSlot] = e.size;
       state.grid[cell] = newSlot;
-      if (e.size === 2) {
-        var below = cell + GRID_COLS;
-        if (below < NUM_SLOTS && state.grid[below] === 0) state.grid[below] = -1;
-      }
+      applySpans(state.grid, state.sizes, NUM_SLOTS);
       if (e.subpageConfig) {
         var spCopy = parseSubpageConfig(e.subpageConfig);
         spCopy.sizes = {};
@@ -2640,6 +2808,9 @@
         outdoor_temp_entity: state.outdoorEntity,
         presence_sensor_entity: state.presenceEntity,
         screensaver_timeout: state.screensaverTimeout,
+        weather_latitude: state.weatherLat,
+        weather_longitude: state.weatherLon,
+        weather_location: state.weatherLocation,
       },
     };
 
@@ -2703,18 +2874,20 @@
           for (var j = 0; j < origParts.length; j++) {
             var tok = origParts[j].trim();
             if (!tok) continue;
-            var dbl = tok.charAt(tok.length - 1) === "d";
+            var lastCh = tok.charAt(tok.length - 1);
+            var dbl = lastCh === "d";
+            var quad = lastCh === "q";
             var num = parseInt(tok, 10);
             if (isNaN(num) || num < 1 || num > importedCount || seen[num]) continue;
             seen[num] = true;
-            usedSlots.push({ oldSlot: num, isDouble: dbl });
+            usedSlots.push({ oldSlot: num, spanSize: quad ? 4 : (dbl ? 2 : 1) });
           }
           for (var j = 0; j < importedCount; j++) {
             var sn = j + 1;
             if (seen[sn]) continue;
             var bb = data.buttons[j];
             if (bb.entity || bb.label || bb.type) {
-              usedSlots.push({ oldSlot: sn, isDouble: false });
+              usedSlots.push({ oldSlot: sn, spanSize: 1 });
             }
           }
 
@@ -2726,7 +2899,7 @@
             var ns = j + 1;
             slotMap[usedSlots[j].oldSlot] = ns;
             buttons.push(data.buttons[usedSlots[j].oldSlot - 1]);
-            if (usedSlots[j].isDouble) newSizes[ns] = 2;
+            if (usedSlots[j].spanSize > 1) newSizes[ns] = usedSlots[j].spanSize;
           }
           for (var j = limit; j < NUM_SLOTS; j++) buttons.push(empty);
 
@@ -2835,6 +3008,18 @@
           if (els.setSSTimeout) els.setSSTimeout.value = String(state.screensaverTimeout);
           if (els.setSsMode) els.setSsMode(state.presenceEntity ? "sensor" : "timer");
           updateTempPreview();
+
+          if (s.weather_latitude != null) {
+            postText("Weather Latitude", s.weather_latitude || "");
+            postText("Weather Longitude", s.weather_longitude || "");
+            postText("Weather Location", s.weather_location || "");
+            state.weatherLat = s.weather_latitude || "";
+            state.weatherLon = s.weather_longitude || "";
+            state.weatherLocation = s.weather_location || "";
+            syncInput(els.setWxLat, state.weatherLat);
+            syncInput(els.setWxLon, state.weatherLon);
+            if (els.wxLocationLabel) els.wxLocationLabel.textContent = state.weatherLocation || "No location set";
+          }
         }
 
         state.selectedSlots = [];
@@ -2948,6 +3133,18 @@
         state.presenceEntity = val;
         syncInput(els.setPresence, val);
         if (els.setSsMode) els.setSsMode(val ? "sensor" : "timer");
+      },
+      "text-weather_latitude": function (val) {
+        state.weatherLat = val;
+        syncInput(els.setWxLat, val);
+      },
+      "text-weather_longitude": function (val) {
+        state.weatherLon = val;
+        syncInput(els.setWxLon, val);
+      },
+      "text-weather_location": function (val) {
+        state.weatherLocation = val;
+        if (els.wxLocationLabel) els.wxLocationLabel.textContent = val || "No location set";
       },
       "number-screen__daytime_brightness": function (val) {
         state.brightnessDayVal = parseFloat(val) || 100;

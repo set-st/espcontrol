@@ -395,6 +395,20 @@ esphome:
                 continue;
               }
 
+              if (btn_type == "weather") {
+                if (has_sensor_color) {
+                  lv_obj_set_style_bg_color(s.btn, lv_color_hex(sensor_val),
+                    static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
+                }
+                lv_obj_clear_flag(s.btn, LV_OBJ_FLAG_CLICKABLE);
+                lv_label_set_text(s.icon_lbl, "\U000F0599");
+                std::string custom_label = cfg_field(cfg, 1);
+                lv_label_set_text(s.text_lbl, custom_label.empty() ? "Weather" : custom_label.c_str());
+                id(weather_icon_lbl_ptrs).push_back(s.icon_lbl);
+                id(weather_text_lbl_ptrs).push_back(s.text_lbl);
+                continue;
+              }
+
               std::string sensor_id = cfg_field(cfg, 4);
               has_sensor[idx - 1] = !sensor_id.empty();
 
