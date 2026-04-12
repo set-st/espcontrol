@@ -124,24 +124,6 @@
     }, def);
   }
   // __BUTTON_TYPES_START__
-  registerButtonType("", { label: "Toggle" });
-  registerButtonType("push", {
-    label: "Push Button",
-    allowInSubpage: false,
-    labelPlaceholder: "e.g. Doorbell",
-    renderSettings: function (panel, b, slot, h) {
-      panel.appendChild(h.makeIconPicker(
-        h.idPrefix + "icon-picker", h.idPrefix + "icon",
-        b.icon || "Auto", function (opt) {
-          b.icon = opt;
-          h.saveField("icon", opt);
-        }
-      ));
-    },
-  });
-  registerButtonType("subpage", {
-    label: "Subpage",
-  });
   // __BUTTON_TYPES_END__
 
   var CSS =
@@ -193,7 +175,7 @@
     "overflow:hidden;word-break:break-word;min-height:0}" +
     ".sp-sensor-badge{position:absolute;top:var(--sensor-top);right:var(--sensor-right);font-size:var(--sensor-fs);opacity:.5}" +
     ".sp-sensor-preview{display:flex;align-items:baseline;gap:1px;color:#fff}" +
-    ".sp-sensor-value{font-size:var(--btn-icon);line-height:1;font-weight:700}" +
+    ".sp-sensor-value{font-size:var(--btn-icon);line-height:1;font-weight:300}" +
     ".sp-sensor-unit{font-size:var(--btn-label);line-height:1;opacity:.7}" +
     ".sp-btn-double{grid-row:span 2}" +
     ".sp-btn-double .sp-btn-label{-webkit-line-clamp:var(--btn-lines-dbl)}" +

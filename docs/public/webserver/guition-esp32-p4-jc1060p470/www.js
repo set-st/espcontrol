@@ -124,6 +124,25 @@
     }, def);
   }
   // __BUTTON_TYPES_START__
+  // --- type: push ---
+  registerButtonType("push", {
+    label: "Push Button",
+    allowInSubpage: false,
+    labelPlaceholder: "e.g. Doorbell",
+    onSelect: function (b) {
+      b.entity = ""; b.sensor = ""; b.unit = ""; b.icon_on = "Auto";
+    },
+    renderSettings: function (panel, b, slot, helpers) {
+      panel.appendChild(helpers.makeIconPicker(
+        helpers.idPrefix + "icon-picker", helpers.idPrefix + "icon",
+        b.icon || "Auto", function (opt) {
+          b.icon = opt;
+          helpers.saveField("icon", opt);
+          renderPreview();
+        }
+      ));
+    },
+  });
   // --- type: sensor ---
   registerButtonType("sensor", {
     label: "Sensor",
@@ -260,7 +279,7 @@
     "overflow:hidden;word-break:break-word;min-height:0}" +
     ".sp-sensor-badge{position:absolute;top:var(--sensor-top);right:var(--sensor-right);font-size:var(--sensor-fs);opacity:.5}" +
     ".sp-sensor-preview{display:flex;align-items:baseline;gap:1px;color:#fff}" +
-    ".sp-sensor-value{font-size:var(--btn-icon);line-height:1;font-weight:700}" +
+    ".sp-sensor-value{font-size:var(--btn-icon);line-height:1;font-weight:300}" +
     ".sp-sensor-unit{font-size:var(--btn-label);line-height:1;opacity:.7}" +
     ".sp-btn-double{grid-row:span 2}" +
     ".sp-btn-double .sp-btn-label{-webkit-line-clamp:var(--btn-lines-dbl)}" +
