@@ -56,13 +56,3 @@ text:
     update_interval: never
     web_server:
       sorting_group_id: sg_button
-
-button:
-  - platform: template
-    name: "Push ${num}"
-    id: button_${num}_push
-    icon: "mdi:gesture-tap"
-    web_server:
-      sorting_group_id: sg_button
-    on_press:
-      - logger.log: "Push button ${num} pressed"

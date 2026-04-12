@@ -64,7 +64,7 @@ button:
           ? ((e == std::string::npos) ? cfg.substr(p) : cfg.substr(p, e - p))
           : "";
         if (t == "push") {
-          id(button_${num}_push).press();
+          id(push_button_event).trigger("push_${num}");
           lv_obj_add_state(id(button_${num}), LV_STATE_CHECKED);
           lv_timer_create([](lv_timer_t *timer) {
             lv_obj_clear_state((lv_obj_t *)timer->user_data, LV_STATE_CHECKED);
