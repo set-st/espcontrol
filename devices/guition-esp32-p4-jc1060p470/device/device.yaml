@@ -87,6 +87,7 @@ ota:
 api:
   reboot_timeout: 0s
   homeassistant_states: true
+  homeassistant_services: true
 
 # ---------------------------------------------------------------------------
 # Logging (light component silenced to WARN to reduce noise)
