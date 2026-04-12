@@ -64,7 +64,24 @@ button:
           ? ((e == std::string::npos) ? cfg.substr(p) : cfg.substr(p, e - p))
           : "";
         if (t == "push") {
-          id(push_button_event).trigger("push_${num}");
+          size_t lp = cfg.find(';');
+          std::string label = "";
+          if (lp != std::string::npos) {
+            size_t le = cfg.find(';', lp + 1);
+            label = (le == std::string::npos) ? cfg.substr(lp + 1) : cfg.substr(lp + 1, le - lp - 1);
+          }
+          if (label.empty()) label = "Push ${num}";
+          api::HomeassistantActionRequest req;
+          req.service = decltype(req.service)("esphome.push_button_pressed");
+          req.is_event = true;
+          req.data.init(2);
+          auto &kv1 = req.data.emplace_back();
+          kv1.key = decltype(kv1.key)("label");
+          kv1.value = decltype(kv1.value)(label.c_str());
+          auto &kv2 = req.data.emplace_back();
+          kv2.key = decltype(kv2.key)("slot");
+          kv2.value = decltype(kv2.value)("${num}");
+          api::global_api_server->send_homeassistant_action(req);
           lv_obj_add_state(id(button_${num}), LV_STATE_CHECKED);
           lv_timer_create([](lv_timer_t *timer) {
             lv_obj_clear_state((lv_obj_t *)timer->user_data, LV_STATE_CHECKED);
