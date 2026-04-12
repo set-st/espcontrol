@@ -374,6 +374,7 @@ esphome:
               if (btn_type == "sensor") {
                 std::string sensor_id = cfg_field(cfg, 4);
                 if (sensor_id.empty()) continue;
+                lv_obj_clear_flag(s.btn, LV_OBJ_FLAG_CLICKABLE);
                 lv_obj_add_flag(s.icon_lbl, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_clear_flag(s.sensor_container, LV_OBJ_FLAG_HIDDEN);
                 std::string unit_str = cfg_field(cfg, 5);
