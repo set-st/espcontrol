@@ -64,6 +64,12 @@ button:
           ? ((e == std::string::npos) ? cfg.substr(p) : cfg.substr(p, e - p))
           : "";
         if (t == "push") {
+          lv_obj_add_state(id(button_${num}), LV_STATE_CHECKED);
+          lv_timer_create([](lv_timer_t *timer) {
+            lv_obj_clear_state((lv_obj_t *)timer->user_data, LV_STATE_CHECKED);
+            lv_timer_del(timer);
+          }, 150, id(button_${num}));
+          id(push_button_event).trigger("push_${num}");
           size_t lp = cfg.find(';');
           std::string label = "";
           if (lp != std::string::npos) {
@@ -82,11 +88,6 @@ button:
           kv2.key = decltype(kv2.key)("slot");
           kv2.value = decltype(kv2.value)("${num}");
           api::global_api_server->send_homeassistant_action(req);
-          lv_obj_add_state(id(button_${num}), LV_STATE_CHECKED);
-          lv_timer_create([](lv_timer_t *timer) {
-            lv_obj_clear_state((lv_obj_t *)timer->user_data, LV_STATE_CHECKED);
-            lv_timer_del(timer);
-          }, 400, id(button_${num}));
         } else if (t == "subpage") {
           lv_obj_t *sub_scr = (lv_obj_t *)lv_obj_get_user_data(id(button_${num}));
           if (sub_scr) lv_scr_load_anim(sub_scr, LV_SCR_LOAD_ANIM_NONE, 0, 0, false);

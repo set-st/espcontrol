@@ -1,0 +1,37 @@
+# =============================================================================
+# CONFIG: PUSH BUTTON EVENT
+# =============================================================================
+# Single event entity shared across all button slots. When a button configured
+# as type "push" is tapped, the click handler triggers the event with the
+# slot-specific event type (e.g. "push_3") and also fires a homeassistant
+# event with the button label for readable automations.
+# Included once per device from packages.yaml (not per slot).
+# =============================================================================
+
+event:
+  - platform: template
+    name: "Push Button"
+    id: push_button_event
+    device_class: button
+    icon: "mdi:gesture-tap"
+    event_types:
+      - "push_1"
+      - "push_2"
+      - "push_3"
+      - "push_4"
+      - "push_5"
+      - "push_6"
+      - "push_7"
+      - "push_8"
+      - "push_9"
+      - "push_10"
+      - "push_11"
+      - "push_12"
+      - "push_13"
+      - "push_14"
+      - "push_15"
+      - "push_16"
+      - "push_17"
+      - "push_18"
+      - "push_19"
+      - "push_20"
