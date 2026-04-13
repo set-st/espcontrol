@@ -93,9 +93,11 @@ esphome:
 
             static int positions[NUM_SLOTS] = {};
             static bool is_double[NUM_SLOTS] = {};
+            static bool is_wide[NUM_SLOTS] = {};
             std::string order_str = id(button_order).state;
             memset(positions, 0, sizeof(positions));
             memset(is_double, 0, sizeof(is_double));
+            memset(is_wide, 0, sizeof(is_wide));
             if (!order_str.empty()) {
               size_t gpos = 0, start = 0;
               while (start <= order_str.length() && gpos < (size_t)NUM_SLOTS) {
@@ -104,9 +106,10 @@ esphome:
                 if (comma > start) {
                   std::string token = order_str.substr(start, comma - start);
                   bool dbl = !token.empty() && token.back() == 'd';
-                  if (dbl) token.pop_back();
+                  bool wide = !token.empty() && token.back() == 'w';
+                  if (dbl || wide) token.pop_back();
                   int v = atoi(token.c_str());
-                  if (v >= 1 && v <= NUM_SLOTS) { positions[gpos] = v; is_double[v - 1] = dbl; }
+                  if (v >= 1 && v <= NUM_SLOTS) { positions[gpos] = v; is_double[v - 1] = dbl; is_wide[v - 1] = wide; }
                 }
                 gpos++;
                 start = comma + 1;
@@ -115,6 +118,9 @@ esphome:
             for (int p = 0; p < NUM_SLOTS; p++) {
               if (positions[p] > 0 && is_double[positions[p] - 1] && p + COLS < NUM_SLOTS) {
                 positions[p + COLS] = 0;
+              }
+              if (positions[p] > 0 && is_wide[positions[p] - 1] && (p + 1) % COLS != 0 && p + 1 < NUM_SLOTS) {
+                positions[p + 1] = 0;
               }
             }
 
@@ -366,8 +372,9 @@ esphome:
               int col = p % COLS;
               int row = p / COLS;
               int row_span = is_double[idx - 1] ? 2 : 1;
+              int col_span = is_wide[idx - 1] ? 2 : 1;
               lv_obj_set_grid_cell(s.btn,
-                LV_GRID_ALIGN_STRETCH, col, 1,
+                LV_GRID_ALIGN_STRETCH, col, col_span,
                 LV_GRID_ALIGN_STRETCH, row, row_span);
 
               if (has_on) {
@@ -547,7 +554,7 @@ esphome:
                 if (comma == std::string::npos) comma = order_str.length();
                 if (comma > start) {
                   std::string token = order_str.substr(start, comma - start);
-                  if (!token.empty() && token.back() == 'd') token.pop_back();
+                  if (!token.empty() && (token.back() == 'd' || token.back() == 'w')) token.pop_back();
                   int v = atoi(token.c_str());
                   if (v >= 1 && v <= NUM_SLOTS) positions[gpos] = v;
                 }
@@ -959,8 +966,10 @@ esphome:
 
               int sp_pos[NUM_SLOTS] = {};
               bool sp_dbl[NUM_SLOTS] = {};
+              bool sp_wide[NUM_SLOTS] = {};
               int back_pos = 0;
               bool back_dbl = false;
+              bool back_wide = false;
               bool has_back_token = false;
               if (!sp_order_str.empty()) {
                 size_t gp2 = 0, st2 = 0;
@@ -969,15 +978,17 @@ esphome:
                   if (cm == std::string::npos) cm = sp_order_str.length();
                   if (cm > st2) {
                     std::string tk = sp_order_str.substr(st2, cm - st2);
-                    if (tk == "B" || tk == "Bd") {
+                    if (tk == "B" || tk == "Bd" || tk == "Bw") {
                       back_pos = gp2;
                       back_dbl = (tk == "Bd");
+                      back_wide = (tk == "Bw");
                       has_back_token = true;
                     } else {
                       bool d = !tk.empty() && tk.back() == 'd';
-                      if (d) tk.pop_back();
+                      bool w = !tk.empty() && tk.back() == 'w';
+                      if (d || w) tk.pop_back();
                       int v = atoi(tk.c_str());
-                      if (v >= 1 && v <= (int)sp_btns.size()) { sp_pos[gp2] = v; sp_dbl[v - 1] = d; }
+                      if (v >= 1 && v <= (int)sp_btns.size()) { sp_pos[gp2] = v; sp_dbl[v - 1] = d; sp_wide[v - 1] = w; }
                     }
                   }
                   gp2++;
@@ -1006,7 +1017,7 @@ esphome:
               lv_obj_set_style_shadow_width(back_btn, 0, LV_PART_MAIN);
               if (has_off) lv_obj_set_style_bg_color(back_btn, lv_color_hex(off_val),
                 static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
-              lv_obj_set_grid_cell(back_btn, LV_GRID_ALIGN_STRETCH, back_pos % COLS, 1,
+              lv_obj_set_grid_cell(back_btn, LV_GRID_ALIGN_STRETCH, back_pos % COLS, back_wide ? 2 : 1,
                 LV_GRID_ALIGN_STRETCH, back_pos / COLS, back_dbl ? 2 : 1);
               lv_obj_t *bi = lv_label_create(back_btn);
               lv_obj_set_style_text_font(bi, sp_icon_fnt, LV_PART_MAIN);
@@ -1040,7 +1051,8 @@ esphome:
                   static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
                 if (has_on) lv_obj_set_style_bg_color(sb_btn, lv_color_hex(on_val),
                   static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_CHECKED));
-                lv_obj_set_grid_cell(sb_btn, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, rs);
+                int cs = sp_wide[bn - 1] ? 2 : 1;
+                lv_obj_set_grid_cell(sb_btn, LV_GRID_ALIGN_STRETCH, col, cs, LV_GRID_ALIGN_STRETCH, row, rs);
 
                 lv_obj_t *sil = lv_label_create(sb_btn);
                 lv_obj_set_style_text_font(sil, sp_icon_fnt, LV_PART_MAIN);

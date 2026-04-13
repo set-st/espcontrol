@@ -2,7 +2,8 @@
 # CONFIG: BUTTON ORDER
 # =============================================================================
 # Comma-separated list of slot numbers defining the grid layout. Suffix "d"
-# marks a double-height button. Managed by the web UI drag-and-drop editor.
+# marks a double-height button, suffix "w" marks a double-wide button.
+# Managed by the web UI drag-and-drop editor.
 # =============================================================================
 
 text:
