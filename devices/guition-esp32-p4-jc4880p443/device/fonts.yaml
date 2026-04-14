@@ -14,17 +14,17 @@ font:
     bpp: 4
     glyphs: !include ../../../common/assets/icon_glyphs.yaml
 
-  # Button labels (34px)
+  # Button labels (31px)
   - file: "gfonts://Roboto"
     id: label_font_lg
-    size: 34
+    size: 31
     bpp: 4
     glyphs: !include ../../../common/assets/text_glyphs.yaml
 
-  # Sensor value large number (56px)
+  # Sensor value large number (62px)
   - file: "gfonts://Roboto@Light"
     id: statistics_font_lg
-    size: 56
+    size: 62
     bpp: 4
     glyphs: "0123456789.-°/%kWhVA "
 
