@@ -4,8 +4,8 @@ registerButtonType("cover", {
   labelPlaceholder: "e.g. Office Blind",
   onSelect: function (b) {
     b.sensor = ""; b.unit = "";
-    b.icon = "Blinds Open";
-    b.icon_on = "Blinds";
+    b.icon = "Blinds";
+    b.icon_on = "Blinds Open";
   },
   renderSettings: function (panel, b, slot, helpers) {
     var ef = document.createElement("div");
@@ -58,7 +58,7 @@ registerButtonType("cover", {
     });
 
     var hasIconOn = b.icon_on && b.icon_on !== "Auto";
-    var iconOnToggle = helpers.toggleRow("Change Icon When Closed", helpers.idPrefix + "iconon-toggle", hasIconOn);
+    var iconOnToggle = helpers.toggleRow("Change Icon When Open", helpers.idPrefix + "iconon-toggle", hasIconOn);
     panel.appendChild(iconOnToggle.row);
 
     var iconOnCond = condField();
@@ -66,7 +66,7 @@ registerButtonType("cover", {
 
     var iconOnSection = document.createElement("div");
     iconOnSection.className = "sp-field";
-    iconOnSection.appendChild(helpers.fieldLabel("Icon When Closed", helpers.idPrefix + "icon-on"));
+    iconOnSection.appendChild(helpers.fieldLabel("Icon When Open", helpers.idPrefix + "icon-on"));
     var iconOnVal = hasIconOn ? b.icon_on : "Auto";
     var iconOnPicker = document.createElement("div");
     iconOnPicker.className = "sp-icon-picker";
@@ -104,7 +104,7 @@ registerButtonType("cover", {
   },
   renderPreview: function (b, helpers) {
     var label = b.label || b.entity || "Cover";
-    var iconName = b.icon && b.icon !== "Auto" ? iconSlug(b.icon) : "blinds-open";
+    var iconName = b.icon && b.icon !== "Auto" ? iconSlug(b.icon) : "blinds";
     var horizClass = b.sensor === "h" ? " sp-slider-horiz" : "";
     return {
       iconHtml:

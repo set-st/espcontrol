@@ -428,7 +428,7 @@
     ".sp-back-btn.sp-btn-big{grid-row:span 2;grid-column:span 2}" +
     ".sp-back-btn.sp-btn-big .sp-btn-label{-webkit-line-clamp:var(--back-lines-dbl)}" +
 
-    ".sp-btn-label-row{display:flex;align-items:baseline;width:100%;overflow:hidden}" +
+    ".sp-btn-label-row{display:flex;align-items:flex-end;width:100%;overflow:hidden}" +
     ".sp-btn-label-row .sp-btn-label{flex:1;min-width:0}" +
     ".sp-subpage-badge{font-size:var(--btn-label);line-height:1.2;opacity:.5;flex-shrink:0;" +
     "cursor:pointer;padding:2px 0 2px 4px;border-radius:4px;transition:opacity .15s}" +
