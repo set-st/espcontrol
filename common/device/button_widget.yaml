@@ -36,7 +36,7 @@ button:
         hidden: true
         widgets:
           - label:
-              text_font: statistics_font
+              text_font: $sensor_value_font
               text_color: $button_text_color
               id: button_${num}_sensor_label
               text: "--"

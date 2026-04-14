@@ -15,6 +15,7 @@ substitutions:
   icon_font: icon_font
   label_font: label_font_lt
   unit_font: label_font_lt
+  sensor_value_font: statistics_font
   padding: 16px
   radius: 10px
 
