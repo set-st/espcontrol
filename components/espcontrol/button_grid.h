@@ -306,6 +306,19 @@ inline lv_obj_t *setup_slider_widget(lv_obj_t *btn, uint32_t on_color, bool hori
   lv_obj_set_style_radius(slider, btn_radius,
     static_cast<lv_style_selector_t>(LV_PART_INDICATOR));
 
+  lv_obj_set_style_bg_opa(slider, LV_OPA_TRANSP,
+    static_cast<lv_style_selector_t>(LV_PART_KNOB));
+  lv_obj_set_style_border_width(slider, 0,
+    static_cast<lv_style_selector_t>(LV_PART_KNOB));
+  lv_obj_set_style_shadow_width(slider, 0,
+    static_cast<lv_style_selector_t>(LV_PART_KNOB));
+  lv_obj_set_style_pad_all(slider, 0,
+    static_cast<lv_style_selector_t>(LV_PART_KNOB));
+  lv_obj_set_style_width(slider, 0,
+    static_cast<lv_style_selector_t>(LV_PART_KNOB));
+  lv_obj_set_style_height(slider, 0,
+    static_cast<lv_style_selector_t>(LV_PART_KNOB));
+
   lv_obj_move_to_index(slider, 0);
 
   return slider;
