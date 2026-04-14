@@ -250,8 +250,8 @@ esphome:
               lv_obj_set_style_pad_bottom(sub_scr, 5, LV_PART_MAIN);
               lv_obj_set_style_pad_left(sub_scr, 5, LV_PART_MAIN);
               lv_obj_set_style_pad_right(sub_scr, 5, LV_PART_MAIN);
-              lv_obj_set_style_pad_row(sub_scr, 10, LV_PART_MAIN);
-              lv_obj_set_style_pad_column(sub_scr, 10, LV_PART_MAIN);
+              lv_obj_set_style_pad_row(sub_scr, 14, LV_PART_MAIN);
+              lv_obj_set_style_pad_column(sub_scr, 14, LV_PART_MAIN);
               lv_obj_clear_flag(sub_scr, LV_OBJ_FLAG_SCROLLABLE);
 
               lv_obj_t *back_btn = lv_btn_create(sub_scr);
