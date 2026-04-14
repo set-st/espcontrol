@@ -280,26 +280,21 @@ struct SliderCtx {
 inline void slider_update_fill(lv_obj_t *fill, lv_obj_t *btn, int pct, bool horizontal) {
   lv_coord_t bw = lv_obj_get_width(btn);
   lv_coord_t bh = lv_obj_get_height(btn);
-  lv_coord_t base_r = lv_obj_get_style_radius(btn, LV_PART_MAIN);
   if (horizontal) {
     lv_coord_t w = (lv_coord_t)((int32_t)bw * pct / 100);
     lv_obj_set_size(fill, w, bh);
     lv_obj_align(fill, LV_ALIGN_LEFT_MID, 0, 0);
-    lv_coord_t r = (w < base_r * 2) ? w / 2 : base_r;
-    lv_obj_set_style_radius(fill, r, LV_PART_MAIN);
   } else {
     lv_coord_t h = (lv_coord_t)((int32_t)bh * pct / 100);
     lv_obj_set_size(fill, bw, h);
     lv_obj_align(fill, LV_ALIGN_BOTTOM_MID, 0, 0);
-    lv_coord_t r = (h < base_r * 2) ? h / 2 : base_r;
-    lv_obj_set_style_radius(fill, r, LV_PART_MAIN);
   }
 }
 
 inline lv_obj_t *setup_slider_widget(lv_obj_t *btn, uint32_t on_color, bool horizontal) {
-  lv_coord_t btn_radius = lv_obj_get_style_radius(btn, LV_PART_MAIN);
-
   lv_obj_set_style_pad_all(btn, 0,
+    static_cast<lv_style_selector_t>(LV_PART_MAIN));
+  lv_obj_set_style_clip_corner(btn, true,
     static_cast<lv_style_selector_t>(LV_PART_MAIN));
   lv_obj_clear_flag(btn, LV_OBJ_FLAG_CLICKABLE);
 
@@ -307,7 +302,7 @@ inline lv_obj_t *setup_slider_widget(lv_obj_t *btn, uint32_t on_color, bool hori
   lv_obj_set_size(fill, 0, 0);
   lv_obj_set_style_bg_color(fill, lv_color_hex(on_color), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(fill, LV_OPA_COVER, LV_PART_MAIN);
-  lv_obj_set_style_radius(fill, btn_radius, LV_PART_MAIN);
+  lv_obj_set_style_radius(fill, 0, LV_PART_MAIN);
   lv_obj_set_style_border_width(fill, 0, LV_PART_MAIN);
   lv_obj_set_style_pad_all(fill, 0, LV_PART_MAIN);
   lv_obj_clear_flag(fill, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
