@@ -278,7 +278,13 @@ inline lv_obj_t *setup_light_slider(lv_obj_t *btn, uint32_t on_color) {
   lv_slider_set_value(slider, 50, LV_ANIM_OFF);
   lv_obj_set_size(slider, lv_pct(100), lv_pct(100));
   lv_obj_align(slider, LV_ALIGN_CENTER, 0, 0);
-  lv_obj_set_style_margin_all(slider, -btn_pad,
+  lv_obj_set_style_margin_top(slider, -btn_pad,
+    static_cast<lv_style_selector_t>(LV_PART_MAIN));
+  lv_obj_set_style_margin_bottom(slider, -btn_pad,
+    static_cast<lv_style_selector_t>(LV_PART_MAIN));
+  lv_obj_set_style_margin_left(slider, -btn_pad,
+    static_cast<lv_style_selector_t>(LV_PART_MAIN));
+  lv_obj_set_style_margin_right(slider, -btn_pad,
     static_cast<lv_style_selector_t>(LV_PART_MAIN));
 
   lv_obj_set_style_bg_opa(slider, LV_OPA_TRANSP,
