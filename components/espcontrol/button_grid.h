@@ -290,6 +290,7 @@ struct SliderCtx {
   std::string entity_id;
   lv_obj_t *fill;
   bool horizontal;
+  bool inverted;
   lv_coord_t radius;
 };
 
@@ -371,6 +372,7 @@ inline void setup_slider_visual(BtnSlot &s, const std::string &cfg, uint32_t on_
   ctx->entity_id = cfg_field(cfg, 0);
   ctx->fill = fill;
   ctx->horizontal = horizontal;
+  ctx->inverted = cfg_field(cfg, 7) == "1";
   ctx->radius = lv_obj_get_style_radius(s.btn, LV_PART_MAIN);
   lv_obj_set_user_data(slider, (void *)ctx);
 
@@ -387,7 +389,7 @@ inline void setup_slider_visual(BtnSlot &s, const std::string &cfg, uint32_t on_
     SliderCtx *c = (SliderCtx *)lv_obj_get_user_data(sl);
     if (c && !c->entity_id.empty()) {
       int val = lv_slider_get_value(sl);
-      send_slider_action(c->entity_id, val);
+      send_slider_action(c->entity_id, c->inverted ? 100 - val : val);
     }
   }, LV_EVENT_RELEASED, nullptr);
 }
@@ -400,16 +402,18 @@ inline void subscribe_slider_state(lv_obj_t *btn_ptr, lv_obj_t *icon_lbl,
   SliderCtx *sctx = (SliderCtx *)lv_obj_get_user_data(slider);
   lv_obj_t *fill = sctx ? sctx->fill : nullptr;
   bool horiz = sctx ? sctx->horizontal : false;
+  bool inv = sctx ? sctx->inverted : false;
   lv_coord_t rad = sctx ? sctx->radius : 0;
   bool is_cover = is_cover_entity(entity_id);
   esphome::api::global_api_server->subscribe_home_assistant_state(
     entity_id, {},
     std::function<void(const std::string &)>(
-      [slider, btn_ptr, fill, horiz, rad, icon_lbl, has_icon_on, icon_off, icon_on](const std::string &state) {
+      [slider, btn_ptr, fill, horiz, inv, rad, icon_lbl, has_icon_on, icon_off, icon_on](const std::string &state) {
         bool on = is_entity_on(state);
         if (!on) {
-          lv_slider_set_value(slider, 0, LV_ANIM_OFF);
-          if (fill) slider_update_fill(fill, btn_ptr, 0, horiz, rad);
+          int z = inv ? 100 : 0;
+          lv_slider_set_value(slider, z, LV_ANIM_OFF);
+          if (fill) slider_update_fill(fill, btn_ptr, z, horiz, rad);
         }
         if (has_icon_on) {
           lv_label_set_text(icon_lbl, on ? icon_on : icon_off);
@@ -420,13 +424,14 @@ inline void subscribe_slider_state(lv_obj_t *btn_ptr, lv_obj_t *icon_lbl,
     esphome::api::global_api_server->subscribe_home_assistant_state(
       entity_id, std::string("current_position"),
       std::function<void(const std::string &)>(
-        [slider, btn_ptr, fill, horiz, rad](const std::string &val) {
+        [slider, btn_ptr, fill, horiz, inv, rad](const std::string &val) {
           char *end;
           float pos = strtof(val.c_str(), &end);
           if (end != val.c_str()) {
             int pct = (int)(pos + 0.5f);
             if (pct < 0) pct = 0;
             if (pct > 100) pct = 100;
+            if (inv) pct = 100 - pct;
             lv_slider_set_value(slider, pct, LV_ANIM_OFF);
             if (fill) slider_update_fill(fill, btn_ptr, pct, horiz, rad);
           }
@@ -436,13 +441,14 @@ inline void subscribe_slider_state(lv_obj_t *btn_ptr, lv_obj_t *icon_lbl,
     esphome::api::global_api_server->subscribe_home_assistant_state(
       entity_id, std::string("brightness"),
       std::function<void(const std::string &)>(
-        [slider, btn_ptr, fill, horiz, rad](const std::string &val) {
+        [slider, btn_ptr, fill, horiz, inv, rad](const std::string &val) {
           char *end;
           float bri = strtof(val.c_str(), &end);
           if (end != val.c_str()) {
             int pct = (int)((bri * 100.0f + 127.0f) / 255.0f);
             if (pct < 1) pct = 1;
             if (pct > 100) pct = 100;
+            if (inv) pct = 100 - pct;
             lv_slider_set_value(slider, pct, LV_ANIM_OFF);
             if (fill) slider_update_fill(fill, btn_ptr, pct, horiz, rad);
           }

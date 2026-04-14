@@ -683,7 +683,7 @@
   function saveButtonConfig(slot) {
     var b = state.buttons[slot - 1];
     var cfg = [b.entity || "", b.label || "", b.icon || "Auto", b.icon_on || "Auto",
-               b.sensor || "", b.unit || "", b.type || ""].join(";");
+               b.sensor || "", b.unit || "", b.type || "", b.invert || ""].join(";");
     postText("Button " + slot + " Config", cfg);
   }
 
@@ -3405,6 +3405,7 @@
           b.sensor = parts[4] || "";
           b.unit = parts[5] || "";
           b.type = parts[6] || "";
+          b.invert = parts[7] || "";
           scheduleRender();
         },
       },

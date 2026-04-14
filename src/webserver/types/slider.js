@@ -56,6 +56,13 @@ registerButtonType("slider", {
       renderPreview();
     });
 
+    var invertToggle = helpers.toggleRow("Invert Slider", helpers.idPrefix + "invert-toggle", b.invert === "1");
+    panel.appendChild(invertToggle.row);
+    invertToggle.input.addEventListener("change", function () {
+      b.invert = this.checked ? "1" : "";
+      helpers.saveField("invert", b.invert);
+    });
+
     var hasIconOn = b.icon_on && b.icon_on !== "Auto";
     var iconOnToggle = helpers.toggleRow("Change Icon When On", helpers.idPrefix + "iconon-toggle", hasIconOn);
     panel.appendChild(iconOnToggle.row);
