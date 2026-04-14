@@ -2489,7 +2489,9 @@
     postText("Button Order", serializeGrid(state.grid));
     saveButtonConfig(newSlot);
     saveSubpageEntity(newSlot);
-    selectButton(newSlot);
+    state.selectedSlots = [newSlot];
+    state.lastClickedSlot = newSlot;
+    renderPreview();
   }
 
   function duplicateSubpageButton(srcSlot) {
@@ -2535,7 +2537,6 @@
     state.subpageSelectedSlots = [newSlot];
     state.subpageLastClicked = newSlot;
     renderPreview();
-    renderButtonSettings();
   }
 
   function deleteSlot(slot) {
