@@ -113,7 +113,7 @@ registerButtonType("slider", {
         '</span></span>',
       labelHtml:
         '<span class="sp-btn-label-row"><span class="sp-btn-label">' + helpers.escHtml(label) + '</span>' +
-        '<span class="sp-subpage-badge mdi mdi-tune-vertical"></span></span>',
+        '<span class="sp-subpage-badge mdi mdi-tune-vertical-variant"></span></span>',
     };
   },
 });

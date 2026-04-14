@@ -1,4 +1,4 @@
 registerButtonType("", {
-  label: "Toggle",
+  label: "Switch",
   allowInSubpage: true,
 });

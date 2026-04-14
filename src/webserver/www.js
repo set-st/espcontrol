@@ -130,7 +130,7 @@
     ":root{" +
     "--bg:#121212;--surface:#1e1e1e;--surface2:#2a2a2a;--border:#333;" +
     "--text:#e0e0e0;--text2:#999;--accent:#5c9cf5;--accent-hover:#7bb3ff;" +
-    "--success:#4caf50;--danger:#ef5350;--radius:10px;--gap:16px}" +
+    "--success:#4caf50;--danger:#ef5350;--radius:10px;--action-r:9999px;--gap:16px}" +
 
     "#sp-app{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;" +
     "color:var(--text);max-width:960px;margin:0 auto;-webkit-font-smoothing:antialiased}" +
@@ -277,7 +277,7 @@
     ".sp-icon-option-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
     ".sp-icon-option--empty{color:#666}" +
     ".sp-btn-row{display:flex;gap:8px;margin-top:16px}" +
-    ".sp-action-btn{padding:10px 20px;border:none;border-radius:9999px;font-size:.9rem;" +
+    ".sp-action-btn{padding:10px 20px;border:none;border-radius:var(--action-r);font-size:.9rem;" +
     "font-weight:500;cursor:pointer;font-family:inherit;transition:background .2s,opacity .2s}" +
     ".sp-action-btn:active{opacity:.8}" +
     ".sp-delete-btn{background:var(--surface2);color:var(--text);display:inline-flex;align-items:center;gap:6px}" +
@@ -304,7 +304,7 @@
     ".sp-toggle input:checked+.sp-toggle-track{background:var(--accent);border-color:var(--accent)}" +
     ".sp-toggle input:checked+.sp-toggle-track:before{transform:translateX(20px)}" +
 
-    ".sp-segment{display:flex;border-radius:9999px;overflow:hidden;border:1px solid var(--border);margin-bottom:14px}" +
+    ".sp-segment{display:flex;border-radius:var(--action-r);overflow:hidden;border:1px solid var(--border);margin-bottom:14px}" +
     ".sp-segment button{flex:1;padding:8px 0;background:var(--surface2);color:var(--text2);" +
     "border:none;font-size:.85rem;cursor:pointer;transition:background .2s,color .2s;font-family:inherit}" +
     ".sp-segment button.active{background:var(--accent);color:#fff}" +
@@ -341,7 +341,7 @@
     ".sp-number-unit{font-size:.85rem;color:var(--text2)}" +
 
     ".sp-apply-bar{padding:var(--gap);text-align:center}" +
-    ".sp-apply-btn{background:var(--accent);color:#fff;border:none;border-radius:9999px;" +
+    ".sp-apply-btn{background:var(--accent);color:#fff;border:none;border-radius:var(--action-r);" +
     "padding:10px 20px;font-size:.9rem;font-weight:500;cursor:pointer;" +
     "font-family:inherit;transition:background .2s,opacity .2s}" +
     ".sp-apply-btn:hover{background:var(--accent-hover)}" +
@@ -351,7 +351,7 @@
 
     ".sp-log-toolbar{display:flex;justify-content:flex-end;padding:12px var(--gap) 0}" +
     ".sp-log-clear{background:var(--surface2);color:var(--text);border:1px solid var(--border);" +
-    "border-radius:9999px;padding:8px 14px;font-size:.8rem;cursor:pointer;font-family:inherit}" +
+    "border-radius:var(--action-r);padding:8px 14px;font-size:.8rem;cursor:pointer;font-family:inherit}" +
     ".sp-log-clear:hover{background:var(--border)}" +
     ".sp-log-output{margin:8px var(--gap) var(--gap);padding:12px;background:#0d0d0d;" +
     "border:1px solid var(--border);border-radius:6px;" +
@@ -394,7 +394,7 @@
 
     ".sp-backup-btns{display:flex;gap:8px}" +
     ".sp-backup-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;" +
-    "padding:10px 16px;border:1px solid var(--border);border-radius:9999px;font-size:.85rem;font-weight:500;" +
+    "padding:10px 16px;border:1px solid var(--border);border-radius:var(--action-r);font-size:.85rem;font-weight:500;" +
     "cursor:pointer;font-family:inherit;transition:background .2s;background:var(--surface2);" +
     "color:var(--text)}" +
     ".sp-backup-btn:hover{background:var(--border)}" +
@@ -410,7 +410,7 @@
     ".sp-fw-version{font-size:.9rem;color:var(--text)}" +
     ".sp-fw-label{font-size:.8rem;color:var(--text2)}" +
     ".sp-fw-btn{background:var(--surface2);color:var(--text);border:1px solid var(--border);" +
-    "border-radius:9999px;padding:8px 14px;font-size:.8rem;font-weight:500;cursor:pointer;" +
+    "border-radius:var(--action-r);padding:8px 14px;font-size:.8rem;font-weight:500;cursor:pointer;" +
     "font-family:inherit;transition:background .2s;white-space:nowrap}" +
     ".sp-fw-btn:hover{background:var(--border)}" +
     ".sp-fw-btn:disabled{opacity:.4;cursor:not-allowed}" +
