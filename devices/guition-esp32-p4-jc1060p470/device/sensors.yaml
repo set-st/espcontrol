@@ -405,6 +405,9 @@ esphome:
                   }
                   bool sp_sl_horiz = sb.sensor == "h";
                   lv_obj_t *sl = setup_slider_widget(sb_btn, has_on ? on_val : 0xFF8C00, sp_sl_horiz);
+                  lv_coord_t sp_sl_pad = sp_radius + 4;
+                  lv_obj_align(sil, LV_ALIGN_TOP_LEFT, sp_sl_pad, sp_sl_pad);
+                  lv_obj_align(stl, LV_ALIGN_BOTTOM_LEFT, sp_sl_pad, -sp_sl_pad);
                   lv_obj_t *sp_fill = lv_obj_get_child(sb_btn, 0);
                   SliderCtx *lctx = new SliderCtx();
                   lctx->entity_id = sb.entity;
