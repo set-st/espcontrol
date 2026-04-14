@@ -282,6 +282,7 @@
     ".sp-edit-subpage-btn:hover{background:var(--accent-hover)}" +
     ".sp-btn-row--save{margin-top:24px;justify-content:flex-end}" +
     ".sp-btn-row--save.sp-has-delete{justify-content:space-between}" +
+    ".sp-btn-group-right{display:flex;gap:8px}" +
 
     ".sp-toggle-row{display:flex;align-items:center;justify-content:space-between;" +
     "min-height:36px;margin-bottom:14px}" +
@@ -1935,18 +1936,21 @@
 
     var delBtn = document.createElement("button");
     delBtn.className = "sp-action-btn sp-delete-btn";
-    delBtn.innerHTML = '<span class="mdi mdi-trash-can-outline"></span>Delete';
+    delBtn.innerHTML = '<span class="mdi mdi-trash-can-outline"></span>';
     delBtn.addEventListener("click", function () { deleteSlot(slot); });
     saveRow.appendChild(delBtn);
     saveRow.classList.add("sp-has-delete");
 
+    var rightGroup = document.createElement("div");
+    rightGroup.className = "sp-btn-group-right";
     var editSubBtn = panel.querySelector(".sp-edit-subpage-btn");
-    if (editSubBtn) saveRow.appendChild(editSubBtn);
+    if (editSubBtn) rightGroup.appendChild(editSubBtn);
     var saveBtn = document.createElement("button");
     saveBtn.className = "sp-action-btn sp-save-btn";
     saveBtn.textContent = "Save";
     saveBtn.addEventListener("click", function () { closeSettings(); });
-    saveRow.appendChild(saveBtn);
+    rightGroup.appendChild(saveBtn);
+    saveRow.appendChild(rightGroup);
     panel.appendChild(saveRow);
 
     container.appendChild(panel);
