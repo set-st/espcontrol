@@ -241,16 +241,31 @@ inline void send_toggle_action(const std::string &entity_id) {
 
 // ── Slider card helpers ────────────────────────────────────────────────
 
-inline void send_slider_action(const std::string &entity_id, int brightness_pct) {
+inline bool is_cover_entity(const std::string &entity_id) {
+  return entity_id.size() > 6 && entity_id.compare(0, 6, "cover.") == 0;
+}
+
+inline void send_slider_action(const std::string &entity_id, int value) {
   esphome::api::HomeassistantActionRequest req;
   req.is_event = false;
-  if (brightness_pct < 0) {
+  if (value < 0) {
     req.service = decltype(req.service)("homeassistant.toggle");
     req.data.init(1);
     auto &kv = req.data.emplace_back();
     kv.key = decltype(kv.key)("entity_id");
     kv.value = decltype(kv.value)(entity_id.c_str());
-  } else if (brightness_pct == 0) {
+  } else if (is_cover_entity(entity_id)) {
+    req.service = decltype(req.service)("cover.set_cover_position");
+    req.data.init(2);
+    auto &kv1 = req.data.emplace_back();
+    kv1.key = decltype(kv1.key)("entity_id");
+    kv1.value = decltype(kv1.value)(entity_id.c_str());
+    auto &kv2 = req.data.emplace_back();
+    kv2.key = decltype(kv2.key)("position");
+    char buf[8];
+    snprintf(buf, sizeof(buf), "%d", value);
+    kv2.value = decltype(kv2.value)(buf);
+  } else if (value == 0) {
     req.service = decltype(req.service)("light.turn_off");
     req.data.init(1);
     auto &kv = req.data.emplace_back();
@@ -265,7 +280,7 @@ inline void send_slider_action(const std::string &entity_id, int brightness_pct)
     auto &kv2 = req.data.emplace_back();
     kv2.key = decltype(kv2.key)("brightness_pct");
     char buf[8];
-    snprintf(buf, sizeof(buf), "%d", brightness_pct);
+    snprintf(buf, sizeof(buf), "%d", value);
     kv2.value = decltype(kv2.value)(buf);
   }
   esphome::api::global_api_server->send_homeassistant_action(req);
@@ -386,6 +401,7 @@ inline void subscribe_slider_state(lv_obj_t *btn_ptr, lv_obj_t *icon_lbl,
   lv_obj_t *fill = sctx ? sctx->fill : nullptr;
   bool horiz = sctx ? sctx->horizontal : false;
   lv_coord_t rad = sctx ? sctx->radius : 0;
+  bool is_cover = is_cover_entity(entity_id);
   esphome::api::global_api_server->subscribe_home_assistant_state(
     entity_id, {},
     std::function<void(const std::string &)>(
@@ -400,21 +416,39 @@ inline void subscribe_slider_state(lv_obj_t *btn_ptr, lv_obj_t *icon_lbl,
         }
       })
   );
-  esphome::api::global_api_server->subscribe_home_assistant_state(
-    entity_id, std::string("brightness"),
-    std::function<void(const std::string &)>(
-      [slider, btn_ptr, fill, horiz, rad](const std::string &val) {
-        char *end;
-        float bri = strtof(val.c_str(), &end);
-        if (end != val.c_str()) {
-          int pct = (int)((bri * 100.0f + 127.0f) / 255.0f);
-          if (pct < 1) pct = 1;
-          if (pct > 100) pct = 100;
-          lv_slider_set_value(slider, pct, LV_ANIM_OFF);
-          if (fill) slider_update_fill(fill, btn_ptr, pct, horiz, rad);
-        }
-      })
-  );
+  if (is_cover) {
+    esphome::api::global_api_server->subscribe_home_assistant_state(
+      entity_id, std::string("current_position"),
+      std::function<void(const std::string &)>(
+        [slider, btn_ptr, fill, horiz, rad](const std::string &val) {
+          char *end;
+          float pos = strtof(val.c_str(), &end);
+          if (end != val.c_str()) {
+            int pct = (int)(pos + 0.5f);
+            if (pct < 0) pct = 0;
+            if (pct > 100) pct = 100;
+            lv_slider_set_value(slider, pct, LV_ANIM_OFF);
+            if (fill) slider_update_fill(fill, btn_ptr, pct, horiz, rad);
+          }
+        })
+    );
+  } else {
+    esphome::api::global_api_server->subscribe_home_assistant_state(
+      entity_id, std::string("brightness"),
+      std::function<void(const std::string &)>(
+        [slider, btn_ptr, fill, horiz, rad](const std::string &val) {
+          char *end;
+          float bri = strtof(val.c_str(), &end);
+          if (end != val.c_str()) {
+            int pct = (int)((bri * 100.0f + 127.0f) / 255.0f);
+            if (pct < 1) pct = 1;
+            if (pct > 100) pct = 100;
+            lv_slider_set_value(slider, pct, LV_ANIM_OFF);
+            if (fill) slider_update_fill(fill, btn_ptr, pct, horiz, rad);
+          }
+        })
+    );
+  }
 }
 
 struct SubpageBtn {

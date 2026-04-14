@@ -4,13 +4,13 @@ registerButtonType("slider", {
   labelPlaceholder: "e.g. Living Room",
   onSelect: function (b) {
     b.sensor = ""; b.unit = ""; b.icon_on = "Auto";
-    b.icon = "Lightbulb";
+    b.icon = "Auto";
   },
   renderSettings: function (panel, b, slot, helpers) {
     var ef = document.createElement("div");
     ef.className = "sp-field";
     ef.appendChild(helpers.fieldLabel("Entity ID", helpers.idPrefix + "entity"));
-    var entityInp = helpers.textInput(helpers.idPrefix + "entity", b.entity, "e.g. light.living_room");
+    var entityInp = helpers.textInput(helpers.idPrefix + "entity", b.entity, "e.g. light.living_room or cover.blinds");
     ef.appendChild(entityInp);
     panel.appendChild(ef);
     helpers.bindField(entityInp, "entity", true);
@@ -103,7 +103,8 @@ registerButtonType("slider", {
   },
   renderPreview: function (b, helpers) {
     var label = b.label || b.entity || "Slider";
-    var iconName = b.icon && b.icon !== "Auto" ? iconSlug(b.icon) : "lightbulb";
+    var autoIcon = (b.entity && b.entity.indexOf("cover.") === 0) ? "blinds-horizontal" : "lightbulb";
+    var iconName = b.icon && b.icon !== "Auto" ? iconSlug(b.icon) : autoIcon;
     var horizClass = b.sensor === "h" ? " sp-slider-horiz" : "";
     return {
       iconHtml:
