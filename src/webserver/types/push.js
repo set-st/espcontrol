@@ -1,3 +1,4 @@
+// Momentary push button: fires an esphome.push_button_pressed event (no toggle state)
 registerButtonType("push", {
   label: "Button",
   allowInSubpage: true,

@@ -1,3 +1,4 @@
+// Read-only sensor card: displays a HA sensor value and unit (non-clickable)
 registerButtonType("sensor", {
   label: "Sensor",
   allowInSubpage: true,

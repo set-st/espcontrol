@@ -1,3 +1,17 @@
+// =============================================================================
+// ESPCONTROL WEB UI - Custom device configuration interface
+// =============================================================================
+// Replaces the default ESPHome webserver UI with a three-tab layout:
+//   Screen  - Live grid preview with drag-and-drop button arrangement
+//   Settings - Display, brightness, firmware, and entity configuration
+//   Logs    - Real-time device log viewer via SSE
+//
+// Per-device config (grid size, styling) is injected between __DEVICE_CONFIG__
+// markers by scripts/build.py. Button type plugins (switch, sensor, slider,
+// cover, push, subpage) are injected between __BUTTON_TYPES__ markers.
+// Icon data is generated between GENERATED:ICONS / GENERATED:DOMAIN_ICONS.
+// =============================================================================
+
 // Load the original ESPHome webserver v3 React app (used for API only)
 (function () {
   var s = document.createElement("script");
@@ -87,6 +101,7 @@
   ];
   // --- GENERATED:ICONS END ---
 
+  // Convert an icon display name to its MDI CSS class slug (e.g. "Lightbulb" → "lightbulb")
   function iconSlug(name) {
     return ICON_EXCEPTIONS[name] || name.toLowerCase().replace(/[^a-z0-9]/g, function (ch) {
       return ch === " " ? "-" : "";

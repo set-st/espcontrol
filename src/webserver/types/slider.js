@@ -1,4 +1,6 @@
-// b.sensor stores orientation ("h" or "") for slider/cover, not a HA sensor entity
+// Slider and cover button types: draggable brightness/position control.
+// Factory creates both "slider" (light.turn_on w/ brightness) and "cover"
+// (cover.set_cover_position) variants. b.sensor stores orientation ("h" or "").
 function sliderTypeFactory(opts) {
   return {
     label: opts.label,

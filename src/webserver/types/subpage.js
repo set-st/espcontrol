@@ -1,3 +1,4 @@
+// Navigation folder: tap opens a nested grid screen with its own button layout
 registerButtonType("subpage", {
   label: "Subpage",
   allowInSubpage: false,

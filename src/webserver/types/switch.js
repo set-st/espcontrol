@@ -1,3 +1,4 @@
+// Default button type: HA entity toggle (on/off switch)
 registerButtonType("", {
   label: "Switch",
   allowInSubpage: true,
