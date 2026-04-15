@@ -442,7 +442,7 @@
     "border-radius:8px;text-align:center;display:none}" +
     ".sp-sun-info.sp-visible{display:block}" +
 
-    ".sp-field-hint{font-size:.75rem;color:var(--text2);margin-top:6px}" +
+    ".sp-field-hint{font-size:.75rem;color:var(--text2);margin-top:6px;margin-bottom:16px}" +
 
     ".sp-fw-row{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:36px;margin-bottom:12px}" +
     ".sp-fw-version{font-size:.875rem;color:var(--text)}" +
@@ -2014,18 +2014,30 @@
       // Sensor section
       var sensorSection = condField();
       if (whenOnMode === "sensor") sensorSection.classList.add("sp-visible");
-      sensorSection.appendChild(fieldLabel("Sensor Entity", idPrefix + "sensor"));
-      var sensorInp = textInput(idPrefix + "sensor", b.sensor, "e.g. sensor.printer_percent_complete");
-      sensorSection.appendChild(sensorInp);
-      sensorSection.appendChild(fieldLabel("Unit", idPrefix + "unit"));
-      var unitInp = textInput(idPrefix + "unit", b.unit, "e.g. %");
-      unitInp.className = "sp-input";
-      sensorSection.appendChild(unitInp);
+
       var sensorHint = document.createElement("div");
       sensorHint.className = "sp-field-hint";
       sensorHint.textContent = "Show sensor value instead of icon when on";
       sensorSection.appendChild(sensorHint);
-      sensorSection.appendChild(fieldLabel("Display precision", idPrefix + "precision"));
+
+      var sf = document.createElement("div");
+      sf.className = "sp-field";
+      sf.appendChild(fieldLabel("Sensor Entity", idPrefix + "sensor"));
+      var sensorInp = textInput(idPrefix + "sensor", b.sensor, "e.g. sensor.printer_percent_complete");
+      sf.appendChild(sensorInp);
+      sensorSection.appendChild(sf);
+
+      var uf = document.createElement("div");
+      uf.className = "sp-field";
+      uf.appendChild(fieldLabel("Unit", idPrefix + "unit"));
+      var unitInp = textInput(idPrefix + "unit", b.unit, "e.g. %");
+      unitInp.className = "sp-input sp-input--narrow";
+      uf.appendChild(unitInp);
+      sensorSection.appendChild(uf);
+
+      var pf = document.createElement("div");
+      pf.className = "sp-field";
+      pf.appendChild(fieldLabel("Display precision", idPrefix + "precision"));
       var precSel = document.createElement("select");
       precSel.className = "sp-input sp-input--narrow";
       precSel.id = idPrefix + "precision";
@@ -2041,7 +2053,8 @@
         b.precision = this.value === "0" ? "" : this.value;
         saveField("precision", b.precision);
       });
-      sensorSection.appendChild(precSel);
+      pf.appendChild(precSel);
+      sensorSection.appendChild(pf);
       whenOnCond.appendChild(sensorSection);
 
       panel.appendChild(whenOnCond);
