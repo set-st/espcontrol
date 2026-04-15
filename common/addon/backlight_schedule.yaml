@@ -101,25 +101,16 @@ script:
     then:
       - lambda: |-
           if (id(display_asleep)) return;
-          float pct;
-          if (id(sunrise_sunset_valid)) {
-            auto now = id(ha_time).now();
-            if (now.is_valid()) {
-              int now_min = now.hour * 60 + now.minute;
-              int rise_min = id(sunrise_hour) * 60 + id(sunrise_minute);
-              int set_min = id(sunset_hour) * 60 + id(sunset_minute);
-              bool is_day = (now_min >= rise_min && now_min < set_min);
-              id(last_is_daytime) = is_day;
-              pct = is_day ? id(brightness_day).state : id(brightness_night).state;
-            } else {
-              pct = id(brightness_day).state;
-            }
-          } else {
-            pct = id(brightness_day).state;
-          }
-          float brightness = pct / 100.0f;
+          auto now = id(ha_time).now();
+          bool is_day = id(last_is_daytime);
+          float pct = calc_brightness_pct(
+            id(sunrise_sunset_valid), id(sunrise_hour), id(sunrise_minute),
+            id(sunset_hour), id(sunset_minute),
+            now.is_valid() ? now.hour : 12, now.is_valid() ? now.minute : 0,
+            &is_day, id(brightness_day).state, id(brightness_night).state);
+          id(last_is_daytime) = is_day;
           auto call = id(display_backlight).turn_on();
-          call.set_brightness(brightness);
+          call.set_brightness(pct / 100.0f);
           call.set_transition_length(500);
           call.perform();
 
@@ -132,46 +123,17 @@ script:
       - lambda: |-
           auto now = id(ha_time).now();
           if (!now.is_valid()) return;
-
-          std::string tz_full = id(timezone_select).current_option();
-          std::string tz_id = tz_full.substr(0, tz_full.find(" ("));
-          float tz_offset = parse_tz_offset(tz_full);
-
-          float lat, lon;
-          if (!lookup_tz_coords(tz_id, lat, lon)) {
-            ESP_LOGW("backlight", "No coordinates for timezone %s", tz_id.c_str());
-            id(sunrise_sunset_valid) = false;
-            return;
+          auto r = recalc_sunrise_sunset(now.year, now.month, now.day_of_month,
+                                         id(timezone_select).current_option());
+          id(sunrise_hour) = r.rise_h;
+          id(sunrise_minute) = r.rise_m;
+          id(sunset_hour) = r.set_h;
+          id(sunset_minute) = r.set_m;
+          id(sunrise_sunset_valid) = r.valid;
+          if (r.valid) {
+            id(sunrise_time_sensor).publish_state(r.sunrise_str);
+            id(sunset_time_sensor).publish_state(r.sunset_str);
           }
-
-          int rh, rm, sh, sm;
-          calc_sunrise_sunset(now.year, now.month, now.day_of_month,
-                              lat, lon, tz_offset, rh, rm, sh, sm);
-
-          id(sunrise_hour) = rh;
-          id(sunrise_minute) = rm;
-          id(sunset_hour) = sh;
-          id(sunset_minute) = sm;
-          id(sunrise_sunset_valid) = true;
-
-          char buf[16];
-          snprintf(buf, sizeof(buf), "%d:%02d AM", (rh == 0) ? 12 : (rh > 12 ? rh - 12 : rh), rm);
-          if (rh >= 12) snprintf(buf, sizeof(buf), "%d:%02d PM", (rh == 12) ? 12 : rh - 12, rm);
-          id(sunrise_time_sensor).publish_state(buf);
-
-          snprintf(buf, sizeof(buf), "%d:%02d PM", (sh == 12) ? 12 : (sh > 12 ? sh - 12 : sh), sm);
-          if (sh < 12) snprintf(buf, sizeof(buf), "%d:%02d AM", (sh == 0) ? 12 : sh, sm);
-          id(sunset_time_sensor).publish_state(buf);
-
-          int lat_c = (int)((lat >= 0 ? lat : -lat) * 100.0f + 0.5f);
-          int lon_c = (int)((lon >= 0 ? lon : -lon) * 100.0f + 0.5f);
-          int tz_c = (int)((tz_offset >= 0 ? tz_offset : -tz_offset) * 10.0f + 0.5f);
-          ESP_LOGI("backlight", "Sunrise %02d:%02d, Sunset %02d:%02d (lat=%s%d.%02d lon=%s%d.%02d tz=%s%d.%d)",
-                   rh, rm, sh, sm,
-                   lat < 0 ? "-" : "", lat_c / 100, lat_c % 100,
-                   lon < 0 ? "-" : "", lon_c / 100, lon_c % 100,
-                   tz_offset < 0 ? "-" : "", tz_c / 10, tz_c % 10);
-
           id(backlight_apply_brightness).execute();
 
 # =============================================================================
@@ -184,18 +146,14 @@ interval:
       - if:
           condition:
             lambda: |-
-              if (!id(sunrise_sunset_valid)) return false;
               auto now = id(ha_time).now();
               if (!now.is_valid()) return false;
-              int now_min = now.hour * 60 + now.minute;
-              int rise_min = id(sunrise_hour) * 60 + id(sunrise_minute);
-              int set_min = id(sunset_hour) * 60 + id(sunset_minute);
-              bool is_day = (now_min >= rise_min && now_min < set_min);
-              if (is_day != id(last_is_daytime)) {
-                id(last_is_daytime) = is_day;
-                return true;
-              }
-              return false;
+              bool changed = check_daylight_transition(
+                id(sunrise_sunset_valid), id(sunrise_hour), id(sunrise_minute),
+                id(sunset_hour), id(sunset_minute), now.hour, now.minute,
+                id(last_is_daytime));
+              if (changed) id(last_is_daytime) = !id(last_is_daytime);
+              return changed;
           then:
             - script.execute: backlight_apply_brightness
       - if:

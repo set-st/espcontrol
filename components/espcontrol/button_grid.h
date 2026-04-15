@@ -16,6 +16,7 @@
 #include <vector>
 #include <functional>
 #include "icons.h"
+#include "backlight.h"
 
 constexpr uint32_t DEFAULT_SLIDER_COLOR = 0xFF8C00;
 
@@ -336,6 +337,47 @@ inline void send_slider_action(const std::string &entity_id, int value) {
   }
   esphome::api::global_api_server->send_homeassistant_action(req);
 }
+
+// ── Button click dispatch ─────────────────────────────────────────────
+
+// Handle a main-grid button press: dispatch push event, subpage nav,
+// slider toggle, or entity toggle based on the config string.
+inline void handle_button_click(const std::string &cfg, int slot_num,
+                                lv_obj_t *btn_obj) {
+  ParsedCfg p = parse_cfg(cfg);
+  if (p.type == "sensor") return;
+  if (p.type == "push") {
+    std::string label = p.label;
+    if (label.empty()) {
+      char buf[16];
+      snprintf(buf, sizeof(buf), "Push %d", slot_num);
+      label = buf;
+    }
+    esphome::api::HomeassistantActionRequest req;
+    req.service = decltype(req.service)("esphome.push_button_pressed");
+    req.is_event = true;
+    req.data.init(2);
+    auto &kv1 = req.data.emplace_back();
+    kv1.key = decltype(kv1.key)("label");
+    kv1.value = decltype(kv1.value)(label.c_str());
+    auto &kv2 = req.data.emplace_back();
+    kv2.key = decltype(kv2.key)("slot");
+    char slot_buf[8];
+    snprintf(slot_buf, sizeof(slot_buf), "%d", slot_num);
+    kv2.value = decltype(kv2.value)(slot_buf);
+    esphome::api::global_api_server->send_homeassistant_action(req);
+  } else if (p.type == "subpage") {
+    lv_obj_t *sub_scr = (lv_obj_t *)lv_obj_get_user_data(btn_obj);
+    if (sub_scr)
+      lv_scr_load_anim(sub_scr, LV_SCR_LOAD_ANIM_NONE, 0, 0, false);
+  } else if (p.type == "slider" || p.type == "cover") {
+    if (!p.entity.empty()) send_slider_action(p.entity, -1);
+  } else {
+    if (!p.entity.empty()) send_toggle_action(p.entity);
+  }
+}
+
+// ── Slider widgets ───────────────────────────────────────────────────
 
 // Context attached to each LVGL slider via user_data
 struct SliderCtx {
