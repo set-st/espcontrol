@@ -470,6 +470,8 @@
     indoorEntity: "",
     outdoorEntity: "",
     presenceEntity: "",
+    clockScreensaverOn: true,
+    clockBrightness: 35,
     screensaverTimeout: 300,
     homeScreenTimeout: 60,
     brightnessDayVal: 100,
@@ -1311,6 +1313,26 @@
     sensorBtn.addEventListener("click", function () { setSsMode("sensor"); });
     els.setSsMode = setSsMode;
     setSsMode(ssMode);
+
+    var clockToggle = toggleRow("Clock", "sp-set-clock-ss", state.clockScreensaverOn);
+    ssBody.appendChild(clockToggle.row);
+    clockToggle.input.addEventListener("change", function () {
+      state.clockScreensaverOn = this.checked;
+      postSwitch("Screen Saver: Clock", this.checked);
+      clockBrightnessField.style.display = this.checked ? "" : "none";
+    });
+    els.setClockToggle = clockToggle.input;
+
+    var clockBrightnessField = document.createElement("div");
+    clockBrightnessField.style.display = state.clockScreensaverOn ? "" : "none";
+    var clockSlider = createRangeSlider("Clock Brightness", state.clockBrightness, "Screen Saver: Clock Brightness");
+    clockSlider.range.min = "1";
+    clockSlider.range.step = "1";
+    clockBrightnessField.appendChild(clockSlider.wrap);
+    ssBody.appendChild(clockBrightnessField);
+    els.setClockBrightness = clockSlider.range;
+    els.setClockBrightnessVal = clockSlider.val;
+    els.setClockBrightnessField = clockBrightnessField;
 
     config.appendChild(makeCollapsibleCard("Screensaver", ssBody, true));
 
@@ -3034,6 +3056,8 @@
         indoor_temp_entity: state.indoorEntity,
         outdoor_temp_entity: state.outdoorEntity,
         presence_sensor_entity: state.presenceEntity,
+        clock_screensaver: state.clockScreensaverOn,
+        clock_brightness: state.clockBrightness,
         screensaver_timeout: state.screensaverTimeout,
         home_screen_timeout: state.homeScreenTimeout,
       },
@@ -3237,6 +3261,8 @@
           postText("Indoor Temp Entity", s.indoor_temp_entity || "");
           postText("Outdoor Temp Entity", s.outdoor_temp_entity || "");
           postText("Presence Sensor Entity", s.presence_sensor_entity || "");
+          postSwitch("Screen Saver: Clock", s.clock_screensaver != null ? !!s.clock_screensaver : true);
+          postNumber("Screen Saver: Clock Brightness", s.clock_brightness != null ? s.clock_brightness : 35);
           postNumber("Screensaver Timeout", s.screensaver_timeout || 300);
           postNumber("Home Screen Timeout", s.home_screen_timeout != null ? s.home_screen_timeout : 60);
 
@@ -3245,6 +3271,8 @@
           state.indoorEntity = s.indoor_temp_entity || "";
           state.outdoorEntity = s.outdoor_temp_entity || "";
           state.presenceEntity = s.presence_sensor_entity || "";
+          state.clockScreensaverOn = s.clock_screensaver != null ? !!s.clock_screensaver : true;
+          state.clockBrightness = s.clock_brightness != null ? s.clock_brightness : 35;
           state.screensaverTimeout = s.screensaver_timeout || 300;
           state.homeScreenTimeout = s.home_screen_timeout != null ? s.home_screen_timeout : 60;
 
@@ -3255,6 +3283,12 @@
           els.setOutdoorField.className = "sp-cond-field" + (state._outdoorOn ? " sp-visible" : "");
           syncInput(els.setOutdoorEntity, state.outdoorEntity);
           syncInput(els.setPresence, state.presenceEntity);
+          if (els.setClockToggle) els.setClockToggle.checked = state.clockScreensaverOn;
+          if (els.setClockBrightnessField) els.setClockBrightnessField.style.display = state.clockScreensaverOn ? "" : "none";
+          if (els.setClockBrightness) {
+            els.setClockBrightness.value = state.clockBrightness;
+            els.setClockBrightnessVal.textContent = Math.round(state.clockBrightness) + "%";
+          }
           if (els.setSSTimeout) els.setSSTimeout.value = String(state.screensaverTimeout);
           if (els.setHSTimeout) els.setHSTimeout.value = String(state.homeScreenTimeout);
           if (els.setSsMode) els.setSsMode(state.presenceEntity ? "sensor" : "timer");
@@ -3393,6 +3427,18 @@
       "number-home_screen_timeout": function (val) {
         state.homeScreenTimeout = parseFloat(val) || 0;
         if (els.setHSTimeout) els.setHSTimeout.value = String(state.homeScreenTimeout);
+      },
+      "switch-screen_saver__clock": function (val, d) {
+        state.clockScreensaverOn = d.value === true || val === "ON";
+        if (els.setClockToggle) els.setClockToggle.checked = state.clockScreensaverOn;
+        if (els.setClockBrightnessField) els.setClockBrightnessField.style.display = state.clockScreensaverOn ? "" : "none";
+      },
+      "number-screen_saver__clock_brightness": function (val) {
+        state.clockBrightness = parseFloat(val) || 35;
+        if (els.setClockBrightness) {
+          els.setClockBrightness.value = state.clockBrightness;
+          els.setClockBrightnessVal.textContent = Math.round(state.clockBrightness) + "%";
+        }
       },
       "text-presence_sensor_entity": function (val) {
         state.presenceEntity = val;

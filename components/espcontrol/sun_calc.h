@@ -111,7 +111,7 @@ static const TzCoord TZ_COORDS[] = {
   {"Asia/Colombo",                       6.93f,   79.84f, "<+0530>-5:30"},
   {"Asia/Kathmandu",                    27.72f,   85.32f, "<+0545>-5:45"},
   {"Asia/Dhaka",                        23.81f,   90.41f, "<+06>-6"},
-  {"Asia/Almaty",                       43.24f,   76.95f, "<+05>-5"},
+  {"Asia/Almaty",                       43.24f,   76.95f, "<+06>-6"},
   {"Asia/Rangoon",                      16.87f,   96.20f, "<+0630>-6:30"},
   {"Asia/Bangkok",                      13.76f,  100.50f, "<+07>-7"},
   {"Asia/Jakarta",                      -6.21f,  106.85f, "WIB-7"},
@@ -270,22 +270,3 @@ inline bool calc_sunrise_sunset(int year, int month, int day,
   return ok_rise && ok_set;
 }
 
-inline float parse_tz_offset(const std::string &tz_label) {
-  auto pos = tz_label.find("GMT");
-  if (pos == std::string::npos) return 0.0f;
-  std::string offset_str = tz_label.substr(pos + 3);
-  if (offset_str.empty() || offset_str == "+0" || offset_str == "0") return 0.0f;
-  float sign = 1.0f;
-  size_t idx = 0;
-  if (offset_str[idx] == '+') { sign = 1.0f; idx++; }
-  else if (offset_str[idx] == '-') { sign = -1.0f; idx++; }
-  auto paren = offset_str.find(')');
-  if (paren != std::string::npos) offset_str = offset_str.substr(0, paren);
-  auto colon = offset_str.find(':', idx);
-  if (colon != std::string::npos) {
-    float hours = std::stof(offset_str.substr(idx, colon - idx));
-    float mins = std::stof(offset_str.substr(colon + 1));
-    return sign * (hours + mins / 60.0f);
-  }
-  return sign * std::stof(offset_str.substr(idx));
-}

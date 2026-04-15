@@ -109,8 +109,15 @@ script:
           id(is_clock_showing) = true;
           auto time = id(ha_time).now();
           if (time.is_valid()) {
-            char buf[6];
-            snprintf(buf, sizeof(buf), "%02d:%02d", time.hour, time.minute);
+            char buf[12];
+            int hr = time.hour, mn = time.minute;
+            bool use_12h = id(clock_format_select).current_option() == "12h";
+            if (use_12h) {
+              int h12 = hr % 12; if (h12 == 0) h12 = 12;
+              snprintf(buf, sizeof(buf), "%d:%02d %s", h12, mn, hr >= 12 ? "PM" : "AM");
+            } else {
+              snprintf(buf, sizeof(buf), "%02d:%02d", hr, mn);
+            }
             lv_label_set_text(id(clock_label), buf);
             lv_obj_update_layout(id(clock_label));
             lv_coord_t w = lv_obj_get_width(id(clock_label));
@@ -143,8 +150,15 @@ interval:
           if (!id(is_clock_showing)) return;
           auto time = id(ha_time).now();
           if (!time.is_valid()) return;
-          char buf[6];
-          snprintf(buf, sizeof(buf), "%02d:%02d", time.hour, time.minute);
+          char buf[12];
+          int hr = time.hour, mn = time.minute;
+          bool use_12h = id(clock_format_select).current_option() == "12h";
+          if (use_12h) {
+            int h12 = hr % 12; if (h12 == 0) h12 = 12;
+            snprintf(buf, sizeof(buf), "%d:%02d %s", h12, mn, hr >= 12 ? "PM" : "AM");
+          } else {
+            snprintf(buf, sizeof(buf), "%02d:%02d", hr, mn);
+          }
           lv_label_set_text(id(clock_label), buf);
           lv_obj_update_layout(id(clock_label));
           lv_coord_t w = lv_obj_get_width(id(clock_label));
