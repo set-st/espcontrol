@@ -739,8 +739,12 @@
     return _postQueue;
   }
 
+  function slugify(name) {
+    return name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  }
+
   function postText(name, value) {
-    post("/text/" + encodeURIComponent(name) + "/set?value=" + encodeURIComponent(value));
+    post("/text/" + slugify(name) + "/set?value=" + encodeURIComponent(value));
   }
 
   function saveButtonConfig(slot) {
@@ -766,19 +770,19 @@
   }
 
   function postSelect(name, option) {
-    post("/select/" + encodeURIComponent(name) + "/set?option=" + encodeURIComponent(option));
+    post("/select/" + slugify(name) + "/set?option=" + encodeURIComponent(option));
   }
 
   function postButtonPress(name) {
-    post("/button/" + encodeURIComponent(name) + "/press");
+    post("/button/" + slugify(name) + "/press");
   }
 
   function postSwitch(name, on) {
-    post("/switch/" + encodeURIComponent(name) + "/" + (on ? "turn_on" : "turn_off"));
+    post("/switch/" + slugify(name) + "/" + (on ? "turn_on" : "turn_off"));
   }
 
   function postNumber(name, value) {
-    post("/number/" + encodeURIComponent(name) + "/set?value=" + encodeURIComponent(value));
+    post("/number/" + slugify(name) + "/set?value=" + encodeURIComponent(value));
   }
 
   function waitForReboot() {
