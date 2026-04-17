@@ -107,5 +107,9 @@ esphome:
               id(temperatures),
               id(presence_sensor_entity).state,
               &id(presence_detected),
-              []() { id(screensaver_wake).execute(); },
-              []() { id(screensaver_sleep_sensor).execute(); });
+              []() {
+                if (id(screensaver_mode).state != "timer") id(screensaver_wake).execute();
+              },
+              []() {
+                if (id(screensaver_mode).state != "timer") id(screensaver_sleep_sensor).execute();
+              });

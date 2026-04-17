@@ -10,7 +10,7 @@ Espcontrol is actively developed and improved based on user feedback. There is n
 
 ## Additional button types
 
-In addition to the existing card types — **Toggle**, **Subpage**, **[Button](/card-types/buttons)**, **[Numeric Sensor](/card-types/sensors)**, **[Text Sensor](/card-types/text-sensors)**, **[Weather](/card-types/weather)**, **[Slider](/card-types/sliders)**, and **[Cover](/card-types/covers)** — future releases will introduce more specialised controls:
+In addition to the existing card types — **Toggle**, **Subpage**, **[Button](/card-types/buttons)**, **[Sensor](/card-types/sensors)**, **[Weather](/card-types/weather)**, **[Slider](/card-types/sliders)**, and **[Cover](/card-types/covers)** — future releases will introduce more specialised controls:
 
 | Button type | Description |
 | --- | --- |

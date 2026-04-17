@@ -1,39 +1,50 @@
 ---
-title: Numeric Sensors
+title: Sensors
 description:
-  How to display live numeric Home Assistant sensor data on your Espcontrol panel.
+  How to display live numeric readings or text states from Home Assistant on your Espcontrol panel.
 ---
 
-# Numeric Sensors
+# Sensors
 
-A numeric sensor card displays a live reading from a Home Assistant sensor entity. It shows a large value with an optional unit and a label underneath — useful for temperatures, humidity, power usage, or any numeric sensor.
+A sensor card displays live Home Assistant data. It has two modes:
 
-Numeric sensor cards are read-only — tapping them does nothing.
+- **Numeric** — shows a large number with an optional unit and label. This is the default mode.
+- **Text** — shows a chosen icon and displays the live text state where a normal card label would appear.
 
-![Numeric sensor card showing 0 kph wind speed](/images/card-sensor.png)
+Sensor cards are read-only — tapping them does nothing.
 
-## Setting up a numeric sensor card
+![Sensor card showing 0 kph wind speed](/images/card-sensor.png)
 
-1. Select a card and change its type to **Numeric Sensor**.
-2. Enter a **Sensor Entity** — the Home Assistant entity ID of the sensor you want to display (for example, `sensor.living_room_temperature`).
-3. Set a **Unit** — the unit label shown next to the value (for example, `°C`, `%`, `W`, or `kWh`).
-4. Set a **Label** (optional) — shown below the value. If left blank, the entity ID is used.
-5. Set **Unit precision** (optional) — choose how many decimal places to show. Options are `10` (whole number, the default), `10.2` (one decimal place), or `10.21` (two decimal places).
+## Setting up a sensor card
+
+1. Select a card and change its type to **Sensor**.
+2. Choose **Numeric** or **Text** from the mode tabs. Numeric is selected by default.
+3. Enter a **Sensor Entity** — the Home Assistant entity ID of the sensor you want to display.
+
+For **Numeric** mode:
+
+1. Set a **Unit** — the unit label shown next to the value, for example `°C`, `%`, `W`, or `kWh`.
+2. Set a **Label** if you want custom text under the value. If left blank, the entity name from Home Assistant is used.
+3. Set **Unit precision** if you want one or two decimal places.
+
+For **Text** mode:
+
+1. Choose an **Icon**. This icon is always shown and does not change based on the sensor value.
+2. The live state from Home Assistant is shown where a toggle label would normally appear.
 
 ## How it works on the panel
 
-- The card displays the sensor's current value in large text, with the unit beside it and the label underneath.
-- The value updates in real time as Home Assistant reports new readings.
-- By default, numeric values are rounded to a whole number. Use the **Unit precision** setting to show one or two decimal places instead.
-- The card uses the **tertiary** colour (configurable in [Appearance](/features/appearance)) as its background, so sensor cards are visually distinct from toggles and buttons.
+- Numeric mode displays the current value in large text, with the unit beside it and the label underneath.
+- Numeric mode uses the **tertiary** colour from [Appearance](/features/appearance), so it remains visually distinct from toggles and buttons.
+- Text mode uses the same tertiary colour as Numeric mode, while keeping the normal toggle-style icon and label layout.
+- Text mode formats states in sentence case. For example, `not_home` displays as `Not home`.
 
-For text states such as `low`, `medium`, `high`, or `Running`, use a [Text Sensor](/card-types/text-sensors) instead.
+## Example sensors
 
-## Example numeric sensors
-
-| Entity | Unit | Label | What it shows |
+| Entity | Mode | Unit | What it shows |
 |---|---|---|---|
-| `sensor.living_room_temperature` | `°C` | Living Room | Indoor temperature |
-| `sensor.solar_power` | `W` | Solar | Current solar generation |
-| `sensor.humidity` | `%` | Humidity | Relative humidity |
-| `sensor.daily_energy` | `kWh` | Today | Energy used today |
+| `sensor.living_room_temperature` | Numeric | `°C` | Indoor temperature |
+| `sensor.solar_power` | Numeric | `W` | Current solar generation |
+| `sensor.humidity` | Numeric | `%` | Relative humidity |
+| `text_sensor.washing_machine_status` | Text |  | `Running`, `Rinsing`, or `Finished` |
+| `sensor.fan_level` | Text |  | `low`, `medium`, or `high` |

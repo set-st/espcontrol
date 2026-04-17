@@ -173,8 +173,7 @@ export default defineConfig({
         text: 'Card Types',
         items: [
           { text: 'Buttons', link: '/card-types/buttons' },
-          { text: 'Numeric Sensors', link: '/card-types/sensors' },
-          { text: 'Text Sensors', link: '/card-types/text-sensors' },
+          { text: 'Sensors', link: '/card-types/sensors' },
           { text: 'Weather', link: '/card-types/weather' },
           { text: 'Sliders', link: '/card-types/sliders' },
           { text: 'Covers', link: '/card-types/covers' },

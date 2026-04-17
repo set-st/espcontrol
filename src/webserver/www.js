@@ -515,6 +515,8 @@
     indoorEntity: "",
     outdoorEntity: "",
     presenceEntity: "",
+    screensaverMode: "",
+    _screensaverModeReceived: false,
     clockScreensaverOn: true,
     clockBrightness: 35,
     screensaverTimeout: 300,
@@ -542,6 +544,12 @@
   for (var i = 0; i < NUM_SLOTS; i++) {
     state.grid.push(0);
     state.buttons.push({ entity: "", label: "", icon: "Auto", icon_on: "Auto", sensor: "", unit: "", type: "", precision: "" });
+  }
+
+  function getActiveScreensaverMode() {
+    if (state.screensaverMode === "sensor") return "sensor";
+    if (state.screensaverMode === "timer") return "timer";
+    return state.presenceEntity ? "sensor" : "timer";
   }
 
   var els = {};
@@ -797,6 +805,19 @@
 
   // ── Subpage helpers ────────────────────────────────────────────────────
 
+  function normalizeButtonConfig(b) {
+    if (b && b.type === "text_sensor") {
+      b.type = "sensor";
+      b.precision = "text";
+      b.entity = "";
+      b.label = "";
+      b.unit = "";
+      b.icon_on = "Auto";
+      if (!b.icon) b.icon = "Auto";
+    }
+    return b;
+  }
+
   function parseSubpageConfig(str) {
     if (!str || !str.trim()) return { order: [], buttons: [] };
     var parts = str.split("|");
@@ -811,7 +832,7 @@
     var buttons = [];
     for (var i = 1; i < parts.length; i++) {
       var f = parts[i].split(":");
-      buttons.push({
+      buttons.push(normalizeButtonConfig({
         entity: f[0] || "",
         label: f[1] || "",
         icon: f[2] || "Auto",
@@ -820,7 +841,7 @@
         unit: f[5] || "",
         type: f[6] || "",
         precision: f[7] || "",
-      });
+      }));
     }
     return { order: order, buttons: buttons };
   }
@@ -1307,7 +1328,7 @@
     config.appendChild(makeCollapsibleCard("Temperature", tempBody, true));
 
     var ssBody = document.createElement("div");
-    var ssMode = state.presenceEntity ? "sensor" : "timer";
+    var ssMode = getActiveScreensaverMode();
 
     ssBody.appendChild(fieldLabel("Mode"));
     var segment = document.createElement("div");
@@ -1408,11 +1429,14 @@
     }
     timerBtn.addEventListener("click", function () {
       setSsMode("timer");
-      state.presenceEntity = "";
-      syncInput(els.setPresence, "");
-      postText("Presence Sensor Entity", "");
+      state.screensaverMode = "timer";
+      postText("Screensaver Mode", "timer");
     });
-    sensorBtn.addEventListener("click", function () { setSsMode("sensor"); });
+    sensorBtn.addEventListener("click", function () {
+      setSsMode("sensor");
+      state.screensaverMode = "sensor";
+      postText("Screensaver Mode", "sensor");
+    });
     els.setSsMode = setSsMode;
     setSsMode(ssMode);
 
@@ -3181,6 +3205,7 @@
         outdoor_temp_enable: state._outdoorOn,
         indoor_temp_entity: state.indoorEntity,
         outdoor_temp_entity: state.outdoorEntity,
+        screensaver_mode: getActiveScreensaverMode(),
         presence_sensor_entity: state.presenceEntity,
         clock_screensaver: state.clockScreensaverOn,
         clock_brightness: state.clockBrightness,
@@ -3346,12 +3371,12 @@
         for (var i = 0; i < NUM_SLOTS; i++) {
           var b = buttons[i];
           var n = i + 1;
-          state.buttons[i] = {
+          state.buttons[i] = normalizeButtonConfig({
             entity: b.entity || "", label: b.label || "",
             icon: b.icon || "Auto", icon_on: b.icon_on || "Auto",
             sensor: b.sensor || "", unit: b.unit || "",
             type: b.type || "", precision: b.precision || "",
-          };
+          });
           saveButtonConfig(n);
         }
 
@@ -3386,6 +3411,9 @@
           postSwitch("Outdoor Temp Enable", !!s.outdoor_temp_enable);
           postText("Indoor Temp Entity", s.indoor_temp_entity || "");
           postText("Outdoor Temp Entity", s.outdoor_temp_entity || "");
+          var importedScreensaverMode = s.screensaver_mode || (s.presence_sensor_entity ? "sensor" : "timer");
+          if (importedScreensaverMode !== "sensor") importedScreensaverMode = "timer";
+          postText("Screensaver Mode", importedScreensaverMode);
           postText("Presence Sensor Entity", s.presence_sensor_entity || "");
           postSwitch("Screen Saver: Clock", s.clock_screensaver != null ? !!s.clock_screensaver : true);
           postNumber("Screen Saver: Clock Brightness", s.clock_brightness != null ? s.clock_brightness : 35);
@@ -3396,6 +3424,8 @@
           state._outdoorOn = !!s.outdoor_temp_enable;
           state.indoorEntity = s.indoor_temp_entity || "";
           state.outdoorEntity = s.outdoor_temp_entity || "";
+          state.screensaverMode = importedScreensaverMode;
+          state._screensaverModeReceived = true;
           state.presenceEntity = s.presence_sensor_entity || "";
           state.clockScreensaverOn = s.clock_screensaver != null ? !!s.clock_screensaver : true;
           state.clockBrightness = s.clock_brightness != null ? s.clock_brightness : 35;
@@ -3417,7 +3447,7 @@
           }
           if (els.setSSTimeout) els.setSSTimeout.value = String(state.screensaverTimeout);
           if (els.setHSTimeout) els.setHSTimeout.value = String(state.homeScreenTimeout);
-          if (els.setSsMode) els.setSsMode(state.presenceEntity ? "sensor" : "timer");
+          if (els.setSsMode) els.setSsMode(getActiveScreensaverMode());
           updateTempPreview();
 
         }
@@ -3568,7 +3598,17 @@
       "text-presence_sensor_entity": function (val) {
         state.presenceEntity = val;
         syncInput(els.setPresence, val);
-        if (els.setSsMode) els.setSsMode(val ? "sensor" : "timer");
+        if (!state._screensaverModeReceived) {
+          state.screensaverMode = val ? "sensor" : "timer";
+          if (els.setSsMode) els.setSsMode(state.screensaverMode);
+        } else if (state.screensaverMode === "") {
+          if (els.setSsMode) els.setSsMode(getActiveScreensaverMode());
+        }
+      },
+      "text-screensaver_mode": function (val) {
+        state._screensaverModeReceived = true;
+        state.screensaverMode = val === "sensor" || val === "timer" ? val : "";
+        if (els.setSsMode) els.setSsMode(getActiveScreensaverMode());
       },
       "number-screen__daytime_brightness": function (val) {
         state.brightnessDayVal = parseFloat(val) || 100;
@@ -3662,6 +3702,7 @@
           b.unit = parts[5] || "";
           b.type = parts[6] || "";
           b.precision = parts[7] || "";
+          normalizeButtonConfig(b);
           scheduleRender();
         },
       },

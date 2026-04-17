@@ -32,6 +32,8 @@ Instead of a timer, the screensaver is controlled by a motion or presence sensor
 
 To use this, enter the name of your motion or presence sensor from Home Assistant (for example, `binary_sensor.hallway_presence`).
 
+Switching back to Timer keeps the sensor name saved, so you can return to Sensor mode later without typing it in again.
+
 ::: tip
 Touching the screen always wakes it up, no matter which mode you're using.
 :::

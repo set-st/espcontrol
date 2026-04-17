@@ -22,7 +22,7 @@ Tap any empty space in the grid (shown as a dashed outline with a **+** icon). A
 
 ![Toggle card showing a Heater icon](/images/card-toggle.png)
 
-1. **Choose a type** — **Toggle** (the default) to control a device, **Subpage** to create a folder of extra cards, **[Button](/card-types/buttons)** to trigger Home Assistant automations with a single tap, **[Numeric Sensor](/card-types/sensors)** to display a live numeric reading, **[Text Sensor](/card-types/text-sensors)** to display a live text state, **[Weather](/card-types/weather)** to show the current weather condition, **[Slider](/card-types/sliders)** to control light brightness, or **[Cover](/card-types/covers)** to control blinds and shutters.
+1. **Choose a type** — **Toggle** (the default) to control a device, **Subpage** to create a folder of extra cards, **[Button](/card-types/buttons)** to trigger Home Assistant automations with a single tap, **[Sensor](/card-types/sensors)** to display a live numeric reading or text state, **[Weather](/card-types/weather)** to show the current weather condition, **[Slider](/card-types/sliders)** to control light brightness, or **[Cover](/card-types/covers)** to control blinds and shutters.
 2. **Pick the device** you want to control by entering its Home Assistant entity name (for example, `light.living_room` or `switch.garden_lights`). You can find these under **Settings > Devices & Services** in Home Assistant. Subpage buttons don't need a device name.
 3. **Choose an icon** — type to search, or select **Auto** to let the panel pick one based on the device type.
 4. **Set a label** (optional). If left blank the button uses the device's friendly name from Home Assistant.
@@ -31,9 +31,7 @@ Tap any empty space in the grid (shown as a dashed outline with a **+** icon). A
 
 **[Button](/card-types/buttons)** — a momentary button that fires an event to Home Assistant for use as an automation trigger. 
 
-**[Numeric Sensor](/card-types/sensors)** — displays a live numeric reading from a Home Assistant sensor entity.
-
-**[Text Sensor](/card-types/text-sensors)** — displays a live text state using the normal toggle-card style.
+**[Sensor](/card-types/sensors)** — displays a live reading from a Home Assistant sensor entity. Use the mode tabs to choose **Numeric** or **Text**.
 
 **[Weather](/card-types/weather)** — displays the current condition from a Home Assistant weather entity.
 

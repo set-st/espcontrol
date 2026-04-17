@@ -75,8 +75,43 @@ inline int parse_precision(const std::string &s) {
   return (v < 0) ? 0 : (v > 3) ? 3 : v;
 }
 
+<<<<<<< HEAD
 inline bool is_text_sensor_card(const ParsedCfg &p) {
   return (p.type == "sensor" && p.precision == "text") || p.type == "text_sensor";
+=======
+inline bool is_text_sensor_card(const std::string &type, const std::string &precision) {
+  return (type == "sensor" && precision == "text") || type == "text_sensor";
+}
+
+inline bool is_text_sensor_card(const ParsedCfg &p) {
+  return is_text_sensor_card(p.type, p.precision);
+}
+
+inline std::string sentence_cap_text(const std::string &state) {
+  std::string out;
+  out.reserve(state.size());
+  bool cap_next = true;
+  bool last_space = false;
+  for (char ch : state) {
+    unsigned char c = static_cast<unsigned char>(ch);
+    if (ch == '_' || ch == '-' || std::isspace(c)) {
+      if (!out.empty() && !last_space) {
+        out.push_back(' ');
+        last_space = true;
+      }
+      continue;
+    }
+    if (std::isalpha(c)) {
+      out.push_back(static_cast<char>(cap_next ? std::toupper(c) : std::tolower(c)));
+      cap_next = false;
+    } else {
+      out.push_back(ch);
+    }
+    last_space = false;
+  }
+  if (!out.empty() && out.back() == ' ') out.pop_back();
+  return out;
+>>>>>>> main
 }
 
 inline const char* weather_icon_for_state(const std::string &state) {
@@ -288,7 +323,12 @@ inline void setup_toggle_visual(BtnSlot &s, const ParsedCfg &p) {
   }
 }
 
-inline void setup_text_sensor_card(BtnSlot &s, const ParsedCfg &p) {
+inline void setup_text_sensor_card(BtnSlot &s, const ParsedCfg &p,
+                                   bool has_sensor_color, uint32_t sensor_val) {
+  if (has_sensor_color) {
+    lv_obj_set_style_bg_color(s.btn, lv_color_hex(sensor_val),
+      static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
+  }
   setup_toggle_visual(s, p);
   lv_obj_clear_flag(s.icon_lbl, LV_OBJ_FLAG_HIDDEN);
   lv_obj_add_flag(s.sensor_container, LV_OBJ_FLAG_HIDDEN);
@@ -322,7 +362,8 @@ inline void subscribe_text_sensor_value(lv_obj_t *text_lbl, const std::string &s
   esphome::api::global_api_server->subscribe_home_assistant_state(
     sensor_id, {},
     std::function<void(const std::string &)>([text_lbl](const std::string &state) {
-      lv_label_set_text(text_lbl, state.c_str());
+      std::string text = sentence_cap_text(state);
+      lv_label_set_text(text_lbl, text.c_str());
     })
   );
 }
@@ -902,7 +943,11 @@ inline void grid_phase1(
 
     ParsedCfg p = parse_cfg(scfg);
     if (is_text_sensor_card(p)) {
+<<<<<<< HEAD
       setup_text_sensor_card(s, p);
+=======
+      setup_text_sensor_card(s, p, has_sensor_color, sensor_val);
+>>>>>>> main
       continue;
     }
     if (p.type == "sensor") {
@@ -1158,7 +1203,14 @@ inline void grid_phase2(
         lv_obj_set_width(stl, lv_pct(100));
       }
 
+<<<<<<< HEAD
       if (is_text_sensor_card(sb)) {
+=======
+      if (is_text_sensor_card(sb.type, sb.precision)) {
+        if (has_sensor_color)
+          lv_obj_set_style_bg_color(sb_btn, lv_color_hex(sensor_val),
+            static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
+>>>>>>> main
         lv_obj_clear_flag(sil, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(sb_btn, LV_OBJ_FLAG_CLICKABLE);
         lv_label_set_text(stl, "--");
