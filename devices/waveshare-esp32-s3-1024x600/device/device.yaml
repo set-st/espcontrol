@@ -1,0 +1,232 @@
+# =============================================================================
+# DEVICE - Guition ESP32-P4 JC1060P470 hardware definition
+# =============================================================================
+# Pin assignments, peripherals, and platform config for the 7" touch panel.
+# Includes the ESP32-P4 main SoC, ESP32-C6 hosted WiFi co-processor, MIPI
+# DSI display, GT911 capacitive touchscreen, and backlight PWM.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# ESP32-P4 platform (16MB flash, ESP-IDF framework)
+# ---------------------------------------------------------------------------
+esp32:
+  variant: esp32s3
+  flash_size: 16MB
+  cpu_frequency: 240MHZ
+  framework:
+    type: esp-idf
+    advanced:
+      enable_idf_experimental_features: true
+      disable_vfs_support_termios: false
+      disable_vfs_support_select: false
+      disable_vfs_support_dir: false
+      loop_task_stack_size: 8192
+    sdkconfig_options:
+      CONFIG_SDMMC_HOST_DEFAULT: "y"
+      CONFIG_COMPILER_OPTIMIZATION_SIZE: "y"
+      CONFIG_FREERTOS_THREAD_LOCAL_STORAGE_POINTERS: "1"
+      CONFIG_LOG_DEFAULT_LEVEL: "2"
+      COMPILER_OPTIMIZATION_SIZE: y
+      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: "y"
+      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: y
+      CONFIG_SPIRAM_RODATA: y
+      CONFIG_ESP_TASK_WDT_TIMEOUT_S: "60"
+      CONFIG_SPIRAM_TRY_ALLOCATE_WIFI_LWIP: y
+      CONFIG_ESP32_WIFI_STATIC_RX_BUFFER_NUM: "16"
+      CONFIG_ESP_CONSOLE_UART_DEFAULT: y
+      CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG: y
+      CONFIG_ESP_INT_WDT_TIMEOUT_MS: "3000"
+      CONFIG_LOG_DEFAULT_LEVEL_INFO: y
+
+# ---------------------------------------------------------------------------
+# External component (sun_calc.h for on-device sunrise/sunset)
+# ---------------------------------------------------------------------------
+external_components:
+  - source: github://pr#10071
+    components: [waveshare_io_ch32v003]
+    refresh: 0s
+  - source:
+      type: git
+      url: https://github.com/set-st/espcontrol
+      ref: main
+      path: components
+    components: [espcontrol]
+    refresh: 0s
+
+espcontrol:
+
+# ---------------------------------------------------------------------------
+# ESPHome core (device name from substitutions)
+# ---------------------------------------------------------------------------
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  platformio_options:
+    build_flags:
+      - "-Wno-deprecated-declarations"
+    build_src_flags:
+      - "-Wno-literal-suffix"
+
+# ---------------------------------------------------------------------------
+# ESP32-C6 co-processor (provides WiFi/BLE via SDIO)
+# ---------------------------------------------------------------------------
+# esp32_hosted:
+#   variant: esp32s3
+  # reset_pin: GPIO54
+  # cmd_pin: GPIO19
+  # clk_pin: GPIO18
+  # d0_pin: GPIO14
+  # d1_pin: GPIO15
+  # d2_pin: GPIO16
+  # d3_pin: GPIO17
+  # active_high: true
+
+waveshare_io_ch32v003:
+  - id: waveshare_io_hub
+
+# ---------------------------------------------------------------------------
+# PSRAM (video frame buffer memory)
+# ---------------------------------------------------------------------------
+psram:
+  mode: octal
+  speed: 80MHz
+
+# ---------------------------------------------------------------------------
+# OTA updates (ESPHome native + HTTP-based)
+# ---------------------------------------------------------------------------
+ota:
+  - platform: esphome
+  - platform: http_request
+
+# ---------------------------------------------------------------------------
+# Shared infrastructure (API, logging, web server, restart button)
+# ---------------------------------------------------------------------------
+packages:
+  core_infra: !include ../../../common/device/core_infra.yaml
+
+# ---------------------------------------------------------------------------
+# Power management (LDO channels for DSI PHY and SD card)
+# ---------------------------------------------------------------------------
+# esp_ldo:
+#   - channel: 3
+#     id: dsi_phy_enable
+#     voltage: 2.5V
+#     adjustable: True
+#   - channel: 4
+#     id: sd_card_power
+#     voltage: 2.7V
+#     adjustable: True
+
+# ---------------------------------------------------------------------------
+# Backlight (LEDC PWM output + monochromatic light entity)
+# ---------------------------------------------------------------------------
+output:
+  - platform: waveshare_io_ch32v003
+    inverted: true
+    id: pwm_backlight_output
+
+light:
+  - platform: monochromatic
+    output: pwm_backlight_output
+    name: Display Backlight
+    icon: mdi:lightbulb-on
+    id: display_backlight
+    restore_mode: ALWAYS_ON
+    default_transition_length: 0s
+    gamma_correct: 1.0
+
+# ---------------------------------------------------------------------------
+# I2C bus and touchscreen (GT911 capacitive, wakes screensaver on touch)
+# ---------------------------------------------------------------------------
+i2c:
+  - id: bus_a
+    sda: GPIO08
+    scl: GPIO09
+    # frequency: 400kHz
+    # sda_pullup_enabled: False
+    # scl_pullup_enabled: False
+
+# i2c_device:
+#   - id: i2cdev1
+#     address: 0x18
+#   - id: i2cdev2
+#     address: 0x32
+#   - id: i2cdev3
+#     address: 0x36
+#   - id: i2cdev4
+#     address: 0x40
+
+sensor:
+  # --- Internal Battery ---
+  - platform: waveshare_io_ch32v003
+    name: "Battery level"
+    id: wave_adc
+    reference_voltage: 9.9
+    update_interval: 60s
+
+  - platform: template
+    id: internal_bat_pct
+    name: "Internal Battery Percentage"
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    lambda: |-
+      float volt = id(wave_adc).state;
+      if (std::isnan(volt)) return {};
+      float max_v = 4.05; 
+      float min_v = 3.1;
+      float pct = (volt - min_v) / (max_v - min_v) * 100.0;
+      if (pct > 100.0) pct = 100.0;
+      if (pct < 0.0) pct = 0.0;
+      return pct;
+    update_interval: 60s
+
+touchscreen:
+  - platform: gt911
+    id: my_touchscreen
+    i2c_id: bus_a
+    reset_pin:
+      waveshare_io_ch32v003: waveshare_io_hub
+      number: 1
+      mode: OUTPUT
+    interrupt_pin: GPIO4
+    on_touch:
+      - script.execute: screensaver_wake
+
+# ---------------------------------------------------------------------------
+# Display (7" 1024x600 MIPI DSI panel)
+# ---------------------------------------------------------------------------
+display:
+  - platform: rpi_dpi_rgb
+    id: my_display
+    color_order: RGB
+    rotation: 0
+    update_interval: never
+    auto_clear_enabled: false
+    pclk_frequency: 30MHZ
+    dimensions: { width: 1024, height: 600 }
+    de_pin: 5
+    hsync_pin: { number: 46, ignore_strapping_warning: true }
+    vsync_pin: { number: 3, ignore_strapping_warning: true }
+    pclk_pin: 7
+    pclk_inverted: true
+    reset_pin: { waveshare_io_ch32v003: waveshare_io_hub, number: 3 }
+    hsync_back_porch: 152
+    hsync_front_porch: 48
+    hsync_pulse_width: 162
+    vsync_back_porch: 13
+    vsync_front_porch: 3
+    vsync_pulse_width: 45
+    data_pins:
+      red:   [1, 2, 42, 41, 40]
+      blue:  [14, 38, 18, 17, 10]
+      green: [39, 0, 45, 48, 47, 21]
+
+# ---------------------------------------------------------------------------
+# LVGL base (display binding, must be before any page definitions)
+# ---------------------------------------------------------------------------
+lvgl:
+  displays: my_display
+  touchscreens: my_touchscreen
+  color_depth: 16
+  #buffer_size: 15%
+  #byte_order: little_endian
