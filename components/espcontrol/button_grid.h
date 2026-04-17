@@ -52,8 +52,8 @@ struct ParsedCfg {
   std::string icon_on;     // 3  icon name for on state (blank = no swap)
   std::string sensor;      // 4  sensor entity for toggle overlay; "h" for horizontal slider
   std::string unit;        // 5  unit suffix for sensor display
-  std::string type;        // 6  button type: "" (toggle), sensor, text_sensor, slider, cover, push, subpage
-  std::string precision;   // 7  decimal places for sensor display ("" or "0" = integer)
+  std::string type;        // 6  button type: "" (toggle), sensor, slider, cover, push, subpage
+  std::string precision;   // 7  decimal places for sensors; "text" = text sensor mode
 };
 
 inline ParsedCfg parse_cfg(const std::string &cfg) {
@@ -73,6 +73,10 @@ inline int parse_precision(const std::string &s) {
   if (s.empty()) return 0;
   int v = atoi(s.c_str());
   return (v < 0) ? 0 : (v > 3) ? 3 : v;
+}
+
+inline bool is_text_sensor_card(const ParsedCfg &p) {
+  return (p.type == "sensor" && p.precision == "text") || p.type == "text_sensor";
 }
 
 inline const char* weather_icon_for_state(const std::string &state) {
@@ -667,7 +671,7 @@ struct SubpageBtn {
   std::string sensor;     // sensor entity for toggle; orientation "h"|"" for slider/cover
   std::string unit;
   std::string type;
-  std::string precision;  // decimal places for sensor display ("" or "0" = integer)
+  std::string precision;  // decimal places for sensor display; "text" = text sensor mode
 };
 
 // Create a slider button inside a subpage screen (reuses main grid slider logic)
@@ -897,13 +901,13 @@ inline void grid_phase1(
     apply_button_colors(s.btn, has_on, on_val, has_off, off_val);
 
     ParsedCfg p = parse_cfg(scfg);
+    if (is_text_sensor_card(p)) {
+      setup_text_sensor_card(s, p);
+      continue;
+    }
     if (p.type == "sensor") {
       if (p.sensor.empty()) continue;
       setup_sensor_card(s, p, has_sensor_color, sensor_val);
-      continue;
-    }
-    if (p.type == "text_sensor") {
-      setup_text_sensor_card(s, p);
       continue;
     }
     if (p.type == "weather") {
@@ -965,16 +969,16 @@ inline void grid_phase2(
     std::string scfg = s.config->state;
 
     ParsedCfg p = parse_cfg(scfg);
+    if (is_text_sensor_card(p)) {
+      if (!p.sensor.empty())
+        subscribe_text_sensor_value(s.text_lbl, p.sensor);
+      continue;
+    }
     if (p.type == "sensor") {
       if (p.sensor.empty()) continue;
       subscribe_sensor_value(s.sensor_lbl, p.sensor, parse_precision(p.precision));
       if (p.label.empty())
         subscribe_friendly_name(s.text_lbl, p.sensor);
-      continue;
-    }
-    if (p.type == "text_sensor") {
-      if (!p.sensor.empty())
-        subscribe_text_sensor_value(s.text_lbl, p.sensor);
       continue;
     }
     if (p.type == "weather") {
@@ -1154,7 +1158,14 @@ inline void grid_phase2(
         lv_obj_set_width(stl, lv_pct(100));
       }
 
-      if (sb.type == "sensor") {
+      if (is_text_sensor_card(sb)) {
+        lv_obj_clear_flag(sil, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(sb_btn, LV_OBJ_FLAG_CLICKABLE);
+        lv_label_set_text(stl, "--");
+        if (!sb.sensor.empty())
+          subscribe_text_sensor_value(stl, sb.sensor);
+
+      } else if (sb.type == "sensor") {
         if (sb.sensor.empty()) continue;
         if (has_sensor_color)
           lv_obj_set_style_bg_color(sb_btn, lv_color_hex(sensor_val),
@@ -1192,13 +1203,6 @@ inline void grid_phase2(
         } else {
           subscribe_friendly_name(stl, sb.sensor);
         }
-
-      } else if (sb.type == "text_sensor") {
-        lv_obj_clear_flag(sil, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_clear_flag(sb_btn, LV_OBJ_FLAG_CLICKABLE);
-        lv_label_set_text(stl, "--");
-        if (!sb.sensor.empty())
-          subscribe_text_sensor_value(stl, sb.sensor);
 
       } else if (sb.type == "weather") {
         if (has_sensor_color)
