@@ -42,10 +42,6 @@ esphome:
             cfg.num_slots = 15;
             cfg.cols = 5;
             cfg.wrap_tall_labels = true;
-            cfg.sp_pad_top = 42;
-            cfg.sp_pad_bottom = 5;
-            cfg.sp_pad_side = 5;
-            cfg.sp_pad_gap = 10;
             cfg.sp_sensor_font = id(statistics_font)->get_lv_font();
             grid_phase1(slots, cfg,
               id(button_order).state,
@@ -91,10 +87,6 @@ esphome:
             cfg.num_slots = 15;
             cfg.cols = 5;
             cfg.wrap_tall_labels = true;
-            cfg.sp_pad_top = 42;
-            cfg.sp_pad_bottom = 5;
-            cfg.sp_pad_side = 5;
-            cfg.sp_pad_gap = 10;
             cfg.sp_sensor_font = id(statistics_font)->get_lv_font();
             grid_phase2(slots, cfg, sp_cfgs, sp_ext,
               id(button_order).state,
@@ -115,4 +107,5 @@ esphome:
               id(temperatures),
               id(presence_sensor_entity).state,
               &id(presence_detected),
-              []() { id(screensaver_wake).execute(); });
+              []() { id(screensaver_wake).execute(); },
+              []() { id(screensaver_sleep_sensor).execute(); });
