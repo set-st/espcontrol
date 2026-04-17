@@ -12,7 +12,7 @@ description: "No-code smart home controller for ESP32 touchscreens. Easy web ins
 
 Espcontrol is free, open-source firmware that turns **Guition ESP32** touchscreens into beautiful control panels for [Home Assistant](https://www.home-assistant.io/). It comes with **full documentation** and an **[easy-to-use web installer](/getting-started/install)** — you can go from unboxing to a working wall panel in minutes.
 
-**Source code and issues:** [github.com/jtenniswood/espcontrol](https://github.com/jtenniswood/espcontrol).
+**Source code and issues:** [github.com/set-st/espcontrol](https://github.com/set-st/espcontrol).
 
 ## Features
 
@@ -31,14 +31,6 @@ Espcontrol is free, open-source firmware that turns **Guition ESP32** touchscree
 
 - **7-inch desk stand (JC1060P470):** [MakerWorld](https://makerworld.com/en/models/2387421-guition-esp32p4-jc1060p470-7inch-screen-desk-mount#profileId-2614995)
 - **4-inch desk stand (4848S040):** [MakerWorld](https://makerworld.com/en/models/2581572-guition-esp32s3-4848s040-case-stand#profileId-2847301)
-
-## Support This Project
-
-If you find this project useful, consider buying me a coffee to support ongoing development!
-
-<a href="https://www.buymeacoffee.com/jtenniswood">
-  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50" />
-</a>
 
 ## Next steps
 

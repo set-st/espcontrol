@@ -8,7 +8,7 @@ Espcontrol is free, open-source firmware that turns **Guition ESP32** touchscree
 
 Supported panels include the **7-inch JC1060P470** (1024×600, landscape, 15 buttons), the **4.3-inch JC4880P443** (480×800, portrait, 15 buttons), and the **4-inch 4848S040** (480×480, square, 9 buttons). Each panel uses a fixed grid layout sized to its screen, plus a status bar with a clock and temperatures, a screensaver, automatic brightness, and **over-the-air updates**. After the first install, everything is configured through the device's **built-in web page**.
 
-**Documentation and install guide:** [jtenniswood.github.io/espcontrol](https://jtenniswood.github.io/espcontrol/)
+**Documentation and install guide:** [set-st.github.io/espcontrol](https://set-st.github.io/espcontrol/)
 
 ## Features
 
@@ -35,23 +35,15 @@ See the [docs](https://jtenniswood.github.io/espcontrol/) for full specs and ins
 ## Getting started
 
 1. **Buy a panel** (see above)
-2. **Flash the firmware** from your browser — follow the [install guide](https://jtenniswood.github.io/espcontrol/getting-started/install)
+2. **Flash the firmware** from your browser — follow the [install guide](https://set-st.github.io/espcontrol/getting-started/install)
 3. **Connect to WiFi** using the on-screen setup
 4. **Add to Home Assistant** — it will be discovered automatically
-5. **Allow Home Assistant actions** — [enable the device](https://jtenniswood.github.io/espcontrol/getting-started/home-assistant-actions) to control your entities
+5. **Allow Home Assistant actions** — [enable the device](https://set-st.github.io/espcontrol/getting-started/home-assistant-actions) to control your entities
 6. **Configure your buttons** by opening the panel's built-in web page
-
-## Support This Project
-
-If you find this project useful, consider buying me a coffee to support ongoing development!
-
-<a href="https://www.buymeacoffee.com/jtenniswood">
-  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50" />
-</a>
 
 ## Links
 
-- [Documentation](https://jtenniswood.github.io/espcontrol/)
-- [Install guide](https://jtenniswood.github.io/espcontrol/getting-started/install)
-- [FAQ](https://jtenniswood.github.io/espcontrol/reference/faq)
-- [Report a bug or request a feature](https://github.com/jtenniswood/espcontrol/issues)
+- [Documentation](https://set-st.github.io/espcontrol/)
+- [Install guide](https://set-st.github.io/espcontrol/getting-started/install)
+- [FAQ](https://set-st.github.io/espcontrol/reference/faq)
+- [Report a bug or request a feature](https://github.com/set-st/espcontrol/issues)
