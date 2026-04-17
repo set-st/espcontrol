@@ -75,10 +75,6 @@ inline int parse_precision(const std::string &s) {
   return (v < 0) ? 0 : (v > 3) ? 3 : v;
 }
 
-<<<<<<< HEAD
-inline bool is_text_sensor_card(const ParsedCfg &p) {
-  return (p.type == "sensor" && p.precision == "text") || p.type == "text_sensor";
-=======
 inline bool is_text_sensor_card(const std::string &type, const std::string &precision) {
   return (type == "sensor" && precision == "text") || type == "text_sensor";
 }
@@ -111,7 +107,6 @@ inline std::string sentence_cap_text(const std::string &state) {
   }
   if (!out.empty() && out.back() == ' ') out.pop_back();
   return out;
->>>>>>> main
 }
 
 inline const char* weather_icon_for_state(const std::string &state) {
@@ -943,11 +938,7 @@ inline void grid_phase1(
 
     ParsedCfg p = parse_cfg(scfg);
     if (is_text_sensor_card(p)) {
-<<<<<<< HEAD
-      setup_text_sensor_card(s, p);
-=======
       setup_text_sensor_card(s, p, has_sensor_color, sensor_val);
->>>>>>> main
       continue;
     }
     if (p.type == "sensor") {
@@ -1203,14 +1194,10 @@ inline void grid_phase2(
         lv_obj_set_width(stl, lv_pct(100));
       }
 
-<<<<<<< HEAD
-      if (is_text_sensor_card(sb)) {
-=======
       if (is_text_sensor_card(sb.type, sb.precision)) {
         if (has_sensor_color)
           lv_obj_set_style_bg_color(sb_btn, lv_color_hex(sensor_val),
             static_cast<lv_style_selector_t>(LV_PART_MAIN) | static_cast<lv_style_selector_t>(LV_STATE_DEFAULT));
->>>>>>> main
         lv_obj_clear_flag(sil, LV_OBJ_FLAG_HIDDEN);
         lv_obj_clear_flag(sb_btn, LV_OBJ_FLAG_CLICKABLE);
         lv_label_set_text(stl, "--");
