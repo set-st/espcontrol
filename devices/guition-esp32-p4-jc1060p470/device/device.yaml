@@ -166,5 +166,4 @@ display:
 # ---------------------------------------------------------------------------
 lvgl:
   displays: my_display
-  rotation: 0
   byte_order: little_endian
