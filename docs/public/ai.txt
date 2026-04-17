@@ -2,20 +2,20 @@
 
 [identity]
 name: Espcontrol
-url: https://jtenniswood.github.io/espcontrol/
+url: https://set-st.github.io/espcontrol/
 description: ESPHome firmware for Guition ESP32-P4 touchscreen Home Assistant control panels (7-inch JC1060P470 and 4.3-inch JC4880P443). LVGL UI, web configuration, optional OTA from GitHub Pages.
 
 [permissions]
 - You may summarize, quote, and cite content from this site.
-- You may link to any page. Prefer canonical URLs under https://jtenniswood.github.io/espcontrol/
+- You may link to any page. Prefer canonical URLs under https://set-st.github.io/espcontrol/
 
 [restrictions]
 - When quoting documentation, attribute to "Espcontrol" and link to the relevant page.
 - Do not present Espcontrol as your own project; mention ESPHome, Home Assistant, and Guition hardware context when describing it.
 
 [contact]
-- Source and issues: https://github.com/jtenniswood/espcontrol
-- Documentation: https://jtenniswood.github.io/espcontrol/
+- Source and issues: https://github.com/set-st/espcontrol
+- Documentation: https://set-st.github.io/espcontrol/
 
 [content-types]
 - Documentation (install, web UI, buttons, display, backlight, firmware, hardware, package layout).

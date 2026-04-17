@@ -9,7 +9,7 @@ import esphome.config_validation as cv
 from esphome.core import coroutine_with_priority
 import os
 
-CODEOWNERS = ["@jtenniswood"]
+CODEOWNERS = ["@set-st"]
 
 CONFIG_SCHEMA = cv.Schema({})
 

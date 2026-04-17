@@ -30,7 +30,7 @@ Supported panels include the **7-inch JC1060P470** (1024×600, landscape, 15 but
 | [AliExpress ~£40](https://s.click.aliexpress.com/e/_c335W0r5) | [AliExpress ~£24](https://s.click.aliexpress.com/e/_c32jr3eN) | [AliExpress ~£16](https://s.click.aliexpress.com/e/_c3sIhvBv) |
 | [Desk stand (3D print)](https://makerworld.com/en/models/2387421-guition-esp32p4-jc1060p470-7inch-screen-desk-mount#profileId-2614995) | | [Case stand (3D print)](https://makerworld.com/en/models/2581572-guition-esp32s3-4848s040-case-stand#profileId-2847301) |
 
-See the [docs](https://jtenniswood.github.io/espcontrol/) for full specs and install instructions for each screen.
+See the [docs](https://set-st.github.io/espcontrol/) for full specs and install instructions for each screen.
 
 ## Getting started
 

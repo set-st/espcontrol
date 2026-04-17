@@ -21,7 +21,7 @@ esp32:
 external_components:
   - source:
       type: git
-      url: https://github.com/jtenniswood/espcontrol
+      url: https://github.com/set-st/espcontrol
       ref: main
       path: components
     components: [espcontrol]

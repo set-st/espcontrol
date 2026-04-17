@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitepress'
 
-const hostname = 'https://jtenniswood.github.io/espcontrol/'
+const hostname = 'https://set-st.github.io/espcontrol/'
 
 export default defineConfig({
   title: 'Espcontrol',
@@ -38,7 +38,7 @@ export default defineConfig({
       'data-name': 'BMC-Widget',
       'data-cfasync': 'false',
       src: 'https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js',
-      'data-id': 'jtenniswood',
+      'data-id': 'set-st',
       'data-description': 'Support me on Buy me a coffee!',
       'data-message': '',
       'data-color': '#FFDD00',
@@ -72,8 +72,8 @@ export default defineConfig({
             url: hostname,
             author: {
               '@type': 'Person',
-              name: 'jtenniswood',
-              url: 'https://github.com/jtenniswood',
+              name: 'set-st',
+              url: 'https://github.com/set-st',
             },
             offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
           },
@@ -111,7 +111,7 @@ export default defineConfig({
         description,
         url: canonicalUrl,
         isPartOf: { '@id': `${hostname}#website` },
-        author: { '@type': 'Person', name: 'jtenniswood', url: 'https://github.com/jtenniswood' },
+        author: { '@type': 'Person', name: 'set-st', url: 'https://github.com/set-st' },
       }
       if (isHowTo) {
         articleSchema.step = [
@@ -133,7 +133,7 @@ export default defineConfig({
     nav: [
       { text: 'Install', link: '/getting-started/install' },
       { text: 'Docs', link: '/' },
-      { text: 'GitHub', link: 'https://github.com/jtenniswood/espcontrol' },
+      { text: 'GitHub', link: 'https://github.com/set-st/espcontrol' },
     ],
 
     sidebar: [
@@ -191,11 +191,11 @@ export default defineConfig({
     ],
 
     editLink: {
-      pattern: 'https://github.com/jtenniswood/espcontrol/edit/main/docs/:path',
+      pattern: 'https://github.com/set-st/espcontrol/edit/main/docs/:path',
       text: 'Edit this page on GitHub',
     },
 
-    socialLinks: [{ icon: 'github', link: 'https://github.com/jtenniswood/espcontrol' }],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/set-st/espcontrol' }],
 
     search: {
       provider: 'local',

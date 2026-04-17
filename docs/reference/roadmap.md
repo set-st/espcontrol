@@ -22,5 +22,5 @@ These are planned directions, not commitments — the order and scope will depen
 
 ## How to get involved
 
-- **Report a bug or request a feature:** [Open an issue on GitHub](https://github.com/jtenniswood/espcontrol/issues). Include as much detail as you can — what happened, what you expected, and any relevant screenshots or log entries.
-- **Stay up to date:** Watch the [GitHub Releases](https://github.com/jtenniswood/espcontrol/releases) page to see when new versions are published. If you have auto-update enabled, your panel will pick up new releases automatically.
+- **Report a bug or request a feature:** [Open an issue on GitHub](https://github.com/set-st/espcontrol/issues). Include as much detail as you can — what happened, what you expected, and any relevant screenshots or log entries.
+- **Stay up to date:** Watch the [GitHub Releases](https://github.com/set-st/espcontrol/releases) page to see when new versions are published. If you have auto-update enabled, your panel will pick up new releases automatically.
