@@ -13,7 +13,7 @@ substitutions:
   espcontrol_component_ref: "HEAD"
 
 packages:
-  core: !include waveshare-esp32-s3-1024x600.yaml
+  core: !include ../devices/waveshare-esp32-s3-1024x600/packages.yaml
 
 esphome:
   project:

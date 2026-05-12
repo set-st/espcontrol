@@ -13,7 +13,7 @@ substitutions:
   espcontrol_component_ref: "HEAD"
 
 packages:
-  core: !include guition-esp32-p4-jc8012p4a1.yaml
+  core: !include ../devices/guition-esp32-p4-jc8012p4a1/packages.yaml
 
 esphome:
   project:

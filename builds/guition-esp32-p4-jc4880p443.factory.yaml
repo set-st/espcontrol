@@ -10,7 +10,7 @@ substitutions:
   espcontrol_component_ref: "HEAD"
 
 packages:
-  core: !include guition-esp32-p4-jc4880p443.yaml
+  core: !include ../devices/guition-esp32-p4-jc4880p443/packages.yaml
 
 esphome:
   project:
