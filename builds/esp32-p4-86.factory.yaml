@@ -10,7 +10,7 @@ substitutions:
   espcontrol_component_ref: "HEAD"
 
 packages:
-  core: !include /config/builds/esp32-p4-86.yaml
+  core: !include esp32-p4-86.yaml
 
 esphome:
   project:
