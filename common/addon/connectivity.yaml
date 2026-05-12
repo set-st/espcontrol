@@ -20,16 +20,26 @@ esphome:
     then:
       - lambda: |-
           std::string mac = get_mac_address();
+          std::string compact;
+          for (char c : mac) {
+            if (c != ':' && c != '-') compact.push_back(c);
+          }
+          std::string suffix = compact.length() > 6 ? compact.substr(compact.length() - 6) : compact;
+          if (suffix.empty()) suffix = "SETUP";
           wifi::WiFiAP ap;
-          ap.set_ssid("ESP_" + mac.substr(8));
+          ap.set_ssid("ESP_" + suffix);
           wifi::global_wifi_component->set_ap(ap);
 
 captive_portal:
 
 wifi:
-  reboot_timeout: 0s
-  ap: {}
+  power_save_mode: none
+  reboot_timeout: 30min
+  ap:
+    # Start the setup hotspot only after short WiFi outages have had time to recover.
+    ap_timeout: 90s
   on_connect:
+    - script.stop: wifi_reconnect_flow
     - script.stop: setup_screen_dim
     - lambda: |-
         ESP_LOGI("connectivity", "WiFi connected (%lu ms)", millis());
@@ -47,19 +57,14 @@ wifi:
               then:
                 - lvgl.page.show: ha_setup_page
                 - script.execute: setup_screen_dim
+              else:
+                - script.execute: navigate_after_api
   on_disconnect:
     - if:
         condition:
           lambda: 'return !id(boot_grace_period);'
         then:
-          - lvgl.widget.update:
-              id: temperatures
-              hidden: true
-          - lvgl.widget.update:
-              id: display_time
-              hidden: true
-          - lvgl.page.show: wifi_setup_page
-          - script.execute: setup_screen_dim
+          - script.execute: wifi_reconnect_flow
 
 api:
   on_client_connected:
@@ -73,6 +78,70 @@ api:
           - script.execute: navigate_after_api
 
 script:
+  - id: wifi_show_reconnecting
+    mode: restart
+    then:
+      - lvgl.widget.update:
+          id: temperatures
+          hidden: true
+      - lvgl.widget.update:
+          id: display_time
+          hidden: true
+      - lvgl.widget.update:
+          id: network_status_button
+          hidden: true
+      - lambda: |-
+          network_status_hide_modal();
+          lv_label_set_text(id(wifi_setup_title), "WiFi Disconnected");
+          lv_label_set_text(id(wifi_setup_instructions), "Trying to reconnect\nto your saved network");
+      - lvgl.page.show: wifi_setup_page
+      - script.execute: setup_screen_dim
+
+  - id: wifi_show_hotspot_setup
+    mode: restart
+    then:
+      - lvgl.widget.update:
+          id: temperatures
+          hidden: true
+      - lvgl.widget.update:
+          id: display_time
+          hidden: true
+      - lvgl.widget.update:
+          id: network_status_button
+          hidden: true
+      - lambda: |-
+          network_status_hide_modal();
+          std::string mac = get_mac_address();
+          std::string compact;
+          for (char c : mac) {
+            if (c != ':' && c != '-') compact.push_back(c);
+          }
+          std::string suffix = compact.length() > 6 ? compact.substr(compact.length() - 6) : compact;
+          if (suffix.empty()) suffix = "SETUP";
+          std::string msg = "Connect to hotspot\nESP_" + suffix + "\nOpen 192.168.4.1";
+          lv_label_set_text(id(wifi_setup_title), "WiFi Setup");
+          lv_label_set_text(id(wifi_setup_instructions), msg.c_str());
+      - lvgl.page.show: wifi_setup_page
+      - script.execute: setup_screen_dim
+
+  - id: wifi_reconnect_flow
+    mode: restart
+    then:
+      - delay: 60s
+      - if:
+          condition:
+            not:
+              wifi.connected:
+          then:
+            - script.execute: wifi_show_reconnecting
+            - delay: 30s
+            - if:
+                condition:
+                  not:
+                    wifi.connected:
+                then:
+                  - script.execute: wifi_show_hotspot_setup
+
   - id: navigate_after_api
     mode: restart
     then:
@@ -84,16 +153,43 @@ script:
             - lvgl.page.show: main_page
             - if:
                 condition:
-                  or:
-                    - switch.is_on: indoor_temp_enable
-                    - switch.is_on: outdoor_temp_enable
+                  switch.is_on: clock_bar_enabled
                 then:
+                  - if:
+                      condition:
+                        or:
+                          - switch.is_on: indoor_temp_enable
+                          - switch.is_on: outdoor_temp_enable
+                      then:
+                        - lvgl.widget.update:
+                            id: temperatures
+                            hidden: false
+                  - lvgl.widget.update:
+                      id: display_time
+                      hidden: false
+                  - if:
+                      condition:
+                        switch.is_on: network_status_enabled
+                      then:
+                        - lvgl.widget.update:
+                            id: network_status_button
+                            hidden: false
+                        - script.execute: network_status_refresh
+                      else:
+                        - lvgl.widget.update:
+                            id: network_status_button
+                            hidden: true
+                        - lambda: 'network_status_hide_modal();'
+                else:
                   - lvgl.widget.update:
                       id: temperatures
-                      hidden: false
-            - lvgl.widget.update:
-                id: display_time
-                hidden: false
+                      hidden: true
+                  - lvgl.widget.update:
+                      id: display_time
+                      hidden: true
+                  - lvgl.widget.update:
+                      id: network_status_button
+                      hidden: true
             - script.execute: screensaver_idle_check
           else:
             - lambda: |-

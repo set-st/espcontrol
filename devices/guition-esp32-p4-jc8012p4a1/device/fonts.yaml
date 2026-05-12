@@ -1,0 +1,96 @@
+# =============================================================================
+# FONTS (DEVICE OVERRIDE) - Font variants for the 1280x800 display
+# =============================================================================
+# Supplements the common fonts with device-specific variants for the main UI.
+# The common fonts still load for setup screens;
+# these _lt variants are referenced by the device theme and LVGL config.
+# =============================================================================
+
+font:
+  # Main page: large statistics / sensor values
+  - file: "gfonts://Roboto@Light"
+    id: statistics_font_lt
+    size: 52
+    bpp: 4
+    glyphs:
+      - "0123456789.-°/%"
+      - ":"
+
+  # Main page: large-card sensor values (2.5x the regular sensor value font)
+  - file: "gfonts://Roboto@Thin"
+    id: statistics_font_lt_xl
+    size: 130
+    bpp: 4
+    glyphs:
+      - "0123456789.-°/%"
+      - ":"
+
+  # Media now-playing titles (sensor value size, full text glyph coverage)
+  - file: "gfonts://Roboto@Light"
+    id: media_title_font_lt
+    size: 46
+    bpp: 4
+    glyphs: !include ../../../common/assets/text_glyphs.yaml
+    extras:
+      - file: "gfonts://Heebo@Light"
+        glyphs: !include ../../../common/assets/hebrew_glyphs.yaml
+
+  # Volume/climate modal: 96px on the 480px S3 reference scaled to this 800px short side
+  - file: "gfonts://Roboto@Thin"
+    id: volume_modal_number_font_800
+    size: 160
+    bpp: 4
+    glyphs:
+      - "0123456789.-°Of"
+
+  # Volume/climate modal labels: 22px on the 480px S3 reference scaled to this 800px short side
+  - file: "gfonts://Roboto"
+    id: volume_modal_label_font_800
+    size: 37
+    bpp: 4
+    glyphs:
+      - " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz/°"
+
+  # Main page icons: 44px on the 480px S3 reference scaled to this 800px short side
+  - file: 'https://github.com/Templarian/MaterialDesign-Webfont/raw/v7.4.47/fonts/materialdesignicons-webfont.ttf'
+    id: icon_font_800
+    size: 56
+    bpp: 4
+    glyphs: !include ../../../common/assets/icon_glyphs.yaml
+
+  # Button labels (24px)
+  - file: "gfonts://Roboto"
+    id: label_font_lt
+    size: 24
+    bpp: 4
+    glyphs: !include ../../../common/assets/text_glyphs.yaml
+    extras:
+      - file: "gfonts://Heebo"
+        glyphs: !include ../../../common/assets/hebrew_glyphs.yaml
+
+  # Top bar clock and temperature (22px)
+  - file: "gfonts://Roboto"
+    id: clockbar_font_lt
+    size: 22
+    bpp: 4
+    extras:
+      - file: "gfonts://Heebo"
+        glyphs: !include ../../../common/assets/hebrew_glyphs.yaml
+
+  # Top bar network status icon
+  - file: 'https://github.com/Templarian/MaterialDesign-Webfont/raw/v7.4.47/fonts/materialdesignicons-webfont.ttf'
+    id: network_status_font_lt
+    size: 21
+    bpp: 4
+    glyphs: !include ../../../common/assets/network_status_glyphs.yaml
+
+  # Setup screen icons: 61px on the 480px S3 reference scaled to this 800px short side
+  - file: 'https://github.com/Templarian/MaterialDesign-Webfont/raw/v7.4.47/fonts/materialdesignicons-webfont.ttf'
+    id: icon_font_setup_800
+    size: 102
+    bpp: 4
+    glyphs:
+      - "\U000F05A9"  # mdi-wifi
+      - "\U000F0200"  # mdi-ethernet
+      - "\U000F0493"  # mdi-cog
+      - "\U000F07D0"  # mdi-home-assistant

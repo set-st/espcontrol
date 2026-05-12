@@ -68,11 +68,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          sparse-checkout: src/webserver/devices.json
+          sparse-checkout: devices/manifest.json
           sparse-checkout-cone-mode: false
 
       - name: Set device slugs
-        run: echo "DEVICE_SLUGS=$(jq -r 'keys | join(" ")' src/webserver/devices.json)" >> $GITHUB_ENV
+        run: echo "DEVICE_SLUGS=$(jq -r '.devices | keys | join(" ")' devices/manifest.json)" >> $GITHUB_ENV
 
       - name: Download firmware from latest release
         env:
@@ -122,11 +122,16 @@ jobs:
       - name: Verify firmware assets
         run: |
           MISSING=false
+          OPTIONAL_FIRMWARE_SLUGS="guition-esp32-p4-jc8012p4a1 esp32-p4-86"
           for SLUG in $DEVICE_SLUGS; do
             MANIFEST="firmware/${SLUG}/manifest.json"
             if [ ! -f "$MANIFEST" ]; then
-              echo "::error::No firmware manifest found for ${SLUG} — install page will be non-functional"
-              MISSING=true
+              if echo " ${OPTIONAL_FIRMWARE_SLUGS} " | grep -q " ${SLUG} "; then
+                echo "::warning::No firmware manifest found for ${SLUG} yet — install button will work after the first release asset is published"
+              else
+                echo "::error::No firmware manifest found for ${SLUG} — install page will be non-functional"
+                MISSING=true
+              fi
             fi
           done
           if [ "$MISSING" = true ]; then exit 1; fi
@@ -153,6 +158,7 @@ jobs:
 
       - name: Download firmware artifact
         uses: actions/download-artifact@v8
+        continue-on-error: true
         with:
           name: firmware
           path: dist/firmware

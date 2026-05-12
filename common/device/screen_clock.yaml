@@ -38,3 +38,20 @@ lvgl:
                 text_font: clock_screensaver_font
                 text_color: 0xFFFFFF
                 text: "00:00"
+      - obj:
+          id: dim_screensaver_touch_guard
+          x: 0
+          y: 0
+          width: ${screen_width}
+          height: ${screen_height}
+          bg_opa: 0%
+          radius: 0
+          border_width: 0
+          pad_all: 0
+          scrollable: false
+          scrollbar_mode: "off"
+          clickable: true
+          hidden: true
+          on_press:
+            then:
+              - script.execute: screensaver_wake

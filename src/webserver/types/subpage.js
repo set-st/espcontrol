@@ -2,101 +2,235 @@
 registerButtonType("subpage", {
   label: "Subpage",
   allowInSubpage: false,
+  hideLabel: true,
   labelPlaceholder: "e.g. Lighting",
   onSelect: function (b) {
-    b.entity = ""; b.sensor = ""; b.unit = ""; b.icon_on = "Auto";
+    b.entity = ""; b.sensor = ""; b.unit = ""; b.icon = "Auto"; b.icon_on = "Auto";
   },
   renderSettings: function (panel, b, slot, helpers) {
-    panel.appendChild(helpers.makeIconPicker(
+    var mode = subpageStateDisplayMode(b);
+    var showState = mode !== "off";
+    var sensorEntity = b.sensor && b.sensor !== "indicator" ? b.sensor : "";
+    var iconStateEntity = mode === "icon" ? (b.entity || "") : "";
+
+    panel.appendChild(helpers.textField(
+      "Label", helpers.idPrefix + "label", b.label, "e.g. Lighting", "label", true).field);
+
+    var iconSectionMain = helpers.iconPickerField(
       helpers.idPrefix + "icon-picker", helpers.idPrefix + "icon",
       b.icon || "Auto", function (opt) {
         b.icon = opt;
         helpers.saveField("icon", opt);
-        renderPreview();
-      }
-    ));
-    var displayStateEnabled = b.sensor === "indicator";
-    var displayStateToggle = helpers.toggleRow("Display State", helpers.idPrefix + "whenon-toggle", displayStateEnabled);
-    panel.appendChild(displayStateToggle.row);
+      }, "Icon"
+    );
+    panel.appendChild(iconSectionMain);
 
-    var hasIconOn = b.icon_on && b.icon_on !== "Auto";
+    var showStateToggleSection = helpers.toggleSection("Show State", helpers.idPrefix + "state-toggle", showState);
+    var showStateToggle = showStateToggleSection.toggle;
+    var stateCond = showStateToggleSection.section;
+    panel.appendChild(showStateToggle.row);
+    if (showState) stateCond.classList.add("sp-visible");
 
-    var iconOnToggle = helpers.toggleRow("Change Icon When On", helpers.idPrefix + "iconon-toggle", hasIconOn);
-    iconOnToggle.row.style.display = displayStateEnabled ? "" : "none";
-    panel.appendChild(iconOnToggle.row);
+    var modeControl = helpers.segmentControl([
+      ["icon", "Icon"],
+      ["numeric", "Numeric"],
+      ["text", "Text"],
+    ], mode, function (value) { setMode(value, true); });
+    var iconBtn = modeControl.buttons.icon;
+    var numericBtn = modeControl.buttons.numeric;
+    var textBtn = modeControl.buttons.text;
+    stateCond.appendChild(helpers.fieldWithControl("Type", null, modeControl.segment));
 
-    var iconOnCond = condField();
-    if (displayStateEnabled && hasIconOn) iconOnCond.classList.add("sp-visible");
+    var stateIconSection = condField();
+    var iconEntityField = helpers.entityField(
+      "State Entity",
+      helpers.idPrefix + "icon-state-entity",
+      iconStateEntity,
+      "e.g. cover.office_blind",
+      ["light", "switch", "input_boolean", "binary_sensor", "cover", "lock", "media_player", "fan", "person", "device_tracker"]
+    );
+    var iconEntityInp = iconEntityField.input;
+    stateIconSection.appendChild(iconEntityField.field);
+    var onIconSection = helpers.iconPickerField(
+      helpers.idPrefix + "icon-on-picker", helpers.idPrefix + "icon-on",
+      b.icon_on || "Auto", function (opt) {
+        b.icon_on = opt;
+        helpers.saveField("icon_on", opt);
+      }, "On Icon"
+    );
+    stateIconSection.appendChild(onIconSection);
+    stateCond.appendChild(stateIconSection);
 
-    var iconOnSection = document.createElement("div");
-    iconOnSection.className = "sp-field";
-    iconOnSection.appendChild(helpers.fieldLabel("Icon When On", helpers.idPrefix + "icon-on"));
-    var iconOnVal = hasIconOn ? b.icon_on : "Auto";
-    var iconOnPicker = document.createElement("div");
-    iconOnPicker.className = "sp-icon-picker";
-    iconOnPicker.id = helpers.idPrefix + "icon-on-picker";
-    iconOnPicker.innerHTML =
-      '<span class="sp-icon-picker-preview mdi mdi-' + iconSlug(iconOnVal) + '"></span>' +
-      '<input class="sp-icon-picker-input" id="' + helpers.idPrefix + 'icon-on" type="text" ' +
-      'placeholder="Search icons\u2026" value="' + escAttr(iconOnVal) + '" autocomplete="off">' +
-      '<div class="sp-icon-dropdown"></div>';
-    iconOnSection.appendChild(iconOnPicker);
-    iconOnCond.appendChild(iconOnSection);
-
-    initIconPicker(iconOnPicker, iconOnVal, function (opt) {
-      b.icon_on = opt;
-      helpers.saveField("icon_on", opt);
-      renderPreview();
+    var sensorField = condField();
+    var sensorEntityField = helpers.entityField(
+      "Sensor Entity", helpers.idPrefix + "sensor", sensorEntity, "e.g. sensor.open_windows",
+      ["sensor", "binary_sensor", "text_sensor"]);
+    var sensorInp = sensorEntityField.input;
+    sensorField.appendChild(sensorEntityField.field);
+    helpers.requireField(sensorInp, "Add a sensor entity before saving.", function () {
+      return showState && (mode === "numeric" || mode === "text");
     });
 
-    panel.appendChild(iconOnCond);
-
-    iconOnToggle.input.addEventListener("change", function () {
-      if (this.checked) {
-        iconOnCond.classList.add("sp-visible");
-      } else {
-        b.icon_on = "Auto";
-        helpers.saveField("icon_on", "Auto");
-        iconOnCond.classList.remove("sp-visible");
-        var ionPreview = iconOnPicker.querySelector(".sp-icon-picker-preview");
-        if (ionPreview) ionPreview.className = "sp-icon-picker-preview mdi mdi-cog";
-        var ionInput = iconOnPicker.querySelector(".sp-icon-picker-input");
-        if (ionInput) ionInput.value = "Auto";
-        renderPreview();
+    function saveSensorEntity() {
+      sensorEntity = sensorInp.value;
+      if (showState && mode !== "icon") {
+        b.sensor = sensorEntity;
+        helpers.saveField("sensor", b.sensor);
+      }
+    }
+    sensorInp.addEventListener("input", saveSensorEntity);
+    sensorInp.addEventListener("change", saveSensorEntity);
+    sensorInp.addEventListener("blur", saveSensorEntity);
+    sensorInp.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        saveSensorEntity();
+        this.blur();
       }
     });
 
-    displayStateToggle.input.addEventListener("change", function () {
-      if (this.checked) {
-        b.sensor = "indicator";
-        helpers.saveField("sensor", "indicator");
-        iconOnToggle.row.style.display = "";
-      } else {
+    function saveIconStateEntity() {
+      iconStateEntity = iconEntityInp.value;
+      if (showState && mode === "icon") {
+        b.entity = iconStateEntity;
+        helpers.saveField("entity", b.entity);
+      }
+    }
+    iconEntityInp.addEventListener("input", saveIconStateEntity);
+    iconEntityInp.addEventListener("change", saveIconStateEntity);
+    iconEntityInp.addEventListener("blur", saveIconStateEntity);
+    iconEntityInp.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        saveIconStateEntity();
+        this.blur();
+      }
+    });
+
+    var numericSection = condField();
+
+    var unitField = helpers.textField("Unit", helpers.idPrefix + "unit", b.unit, "e.g. %", "unit", false);
+    var unitInp = unitField.input;
+    unitInp.className = "sp-input";
+    numericSection.appendChild(unitField.field);
+
+    var precisionField = helpers.precisionField(helpers.idPrefix + "precision",
+      mode === "numeric" ? (b.precision || "0") : "0", function () {
+      if (mode !== "numeric") return;
+      b.precision = this.value === "0" ? "" : this.value;
+      helpers.saveField("precision", b.precision);
+    });
+    var precisionSelect = precisionField.select;
+    numericSection.appendChild(precisionField.field);
+
+    sensorField.appendChild(numericSection);
+    stateCond.appendChild(sensorField);
+
+    panel.appendChild(stateCond);
+
+    function setMode(nextMode, persist) {
+      mode = nextMode;
+      showState = mode !== "off";
+      showStateToggle.input.checked = showState;
+      var iconLabel = iconSectionMain.querySelector(".sp-field-label");
+      if (iconLabel) iconLabel.textContent = mode === "icon" ? "Off Icon" : "Icon";
+      stateCond.classList.toggle("sp-visible", showState);
+      iconBtn.classList.toggle("active", mode === "icon");
+      numericBtn.classList.toggle("active", mode === "numeric");
+      textBtn.classList.toggle("active", mode === "text");
+      stateIconSection.classList.toggle("sp-visible", mode === "icon");
+      sensorField.classList.toggle("sp-visible", mode === "numeric" || mode === "text");
+      numericSection.classList.toggle("sp-visible", mode === "numeric");
+      if (mode !== "numeric" && mode !== "text") helpers.clearFieldError(sensorInp);
+      if (!persist) return;
+
+      if (mode === "off") {
         b.sensor = "";
+        b.entity = "";
+        b.unit = "";
+        b.precision = "";
+        b.icon_on = "Auto";
+        iconStateEntity = "";
+        iconEntityInp.value = "";
         helpers.saveField("sensor", "");
-        iconOnToggle.row.style.display = "none";
-        if (iconOnToggle.input.checked) {
-          iconOnToggle.input.checked = false;
-          b.icon_on = "Auto";
-          helpers.saveField("icon_on", "Auto");
-          iconOnCond.classList.remove("sp-visible");
-          var ionPreview = iconOnPicker.querySelector(".sp-icon-picker-preview");
-          if (ionPreview) ionPreview.className = "sp-icon-picker-preview mdi mdi-cog";
-          var ionInput = iconOnPicker.querySelector(".sp-icon-picker-input");
-          if (ionInput) ionInput.value = "Auto";
-          renderPreview();
-        }
+        helpers.saveField("entity", "");
+        helpers.saveField("unit", "");
+        helpers.saveField("precision", "");
+        helpers.saveField("icon_on", "Auto");
+      } else if (mode === "icon") {
+        b.sensor = "indicator";
+        b.entity = iconStateEntity;
+        b.unit = "";
+        b.precision = "";
+        helpers.saveField("sensor", "indicator");
+        helpers.saveField("entity", b.entity);
+        helpers.saveField("unit", "");
+        helpers.saveField("precision", "");
+      } else if (mode === "numeric") {
+        b.sensor = sensorEntity;
+        b.entity = "";
+        b.unit = unitInp.value;
+        b.precision = precisionSelect.value === "0" ? "" : precisionSelect.value;
+        b.icon_on = "Auto";
+        iconStateEntity = "";
+        iconEntityInp.value = "";
+        helpers.saveField("sensor", b.sensor);
+        helpers.saveField("entity", "");
+        helpers.saveField("unit", b.unit);
+        helpers.saveField("precision", b.precision);
+        helpers.saveField("icon_on", "Auto");
+      } else if (mode === "text") {
+        b.sensor = sensorEntity;
+        b.entity = "";
+        b.unit = "";
+        b.precision = "text";
+        b.icon_on = "Auto";
+        iconStateEntity = "";
+        iconEntityInp.value = "";
+        helpers.saveField("sensor", b.sensor);
+        helpers.saveField("entity", "");
+        helpers.saveField("unit", "");
+        helpers.saveField("precision", "text");
+        helpers.saveField("icon_on", "Auto");
       }
-    });
+    }
 
-    var configBtn = document.createElement("button");
-    configBtn.className = "sp-action-btn sp-edit-subpage-btn";
-    configBtn.textContent = "Edit subpage";
-    configBtn.addEventListener("click", function () { closeSettings(); enterSubpage(slot); });
-    panel.appendChild(configBtn);
+    showStateToggle.input.addEventListener("change", function () {
+      setMode(this.checked ? (mode === "off" ? "icon" : mode) : "off", true);
+    });
+    setMode(mode, false);
+
+    appendEditSubpageButton(panel, slot);
   },
   renderPreview: function (b, helpers) {
     var label = b.label || b.entity || "Configure";
+    var mode = subpageStateDisplayMode(b);
+
+    if (mode === "numeric") {
+      var unit = b.unit ? helpers.escHtml(b.unit) : "";
+      var prec = parseInt(b.precision || "0", 10) || 0;
+      var sampleVal = (0).toFixed(prec);
+      return {
+        iconHtml:
+          '<span class="sp-sensor-preview">' +
+            '<span class="sp-sensor-value">' + sampleVal + '</span>' +
+            '<span class="sp-sensor-unit">' + unit + '</span>' +
+          '</span>',
+        labelHtml:
+          '<span class="sp-btn-label-row"><span class="sp-btn-label">' +
+            helpers.escHtml(b.label || b.sensor || "Subpage") +
+          '</span><span class="sp-subpage-badge mdi mdi-chevron-right"></span></span>',
+      };
+    }
+
+    if (mode === "text") {
+      var iconName = b.icon && b.icon !== "Auto" ? iconSlug(b.icon) : "cog";
+      return {
+        iconHtml: '<span class="sp-btn-icon mdi mdi-' + iconName + '"></span>',
+        labelHtml:
+          '<span class="sp-btn-label-row"><span class="sp-btn-label">State</span>' +
+          '<span class="sp-subpage-badge mdi mdi-chevron-right"></span></span>',
+      };
+    }
+
     return {
       labelHtml:
         '<span class="sp-btn-label-row"><span class="sp-btn-label">' + helpers.escHtml(label) + '</span>' +
@@ -107,3 +241,11 @@ registerButtonType("subpage", {
     helpers.addCtxItem("cog", "Edit Subpage", function () { enterSubpage(slot); });
   },
 });
+
+function appendEditSubpageButton(panel, slot) {
+  var configBtn = document.createElement("button");
+  configBtn.className = "sp-action-btn sp-edit-subpage-btn";
+  configBtn.textContent = "Edit Subpage";
+  configBtn.addEventListener("click", function () { closeSettings(); enterSubpage(slot); });
+  panel.appendChild(configBtn);
+}

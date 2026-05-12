@@ -6,6 +6,10 @@
 # capacitive touchscreen, and backlight PWM.
 # =============================================================================
 
+substitutions:
+  espcontrol_component_url: "https://github.com/set-st/espcontrol"
+  espcontrol_component_ref: "main"
+
 # ---------------------------------------------------------------------------
 # ESP32-S3 platform (16MB flash, ESP-IDF framework)
 # ---------------------------------------------------------------------------
@@ -14,17 +18,28 @@ esp32:
   flash_size: 16MB
   framework:
     type: esp-idf
+    version: 5.5.2
+    source: https://github.com/pioarduino/esp-idf/releases/download/v5.5.2/esp-idf-v5.5.2.tar.xz
+    platform_version: 55.03.37
+    sdkconfig_options:
+      # The S3 display stack leaves little internal RAM for HTTPS OTA checks.
+      # Allocate mbedTLS buffers from PSRAM so firmware downloads can connect.
+      CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC: "y"
+      # Keep WiFi startup inside the internal-RAM budget after the RGB display
+      # and LVGL buffers are initialized.
+      CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM: "8"
+      CONFIG_SPIRAM_TRY_ALLOCATE_WIFI_LWIP: "y"
 
 # ---------------------------------------------------------------------------
-# External component (sun_calc.h for on-device sunrise/sunset)
+# External component
 # ---------------------------------------------------------------------------
 external_components:
   - source:
       type: git
-      url: https://github.com/set-st/espcontrol
-      ref: main
+      url: ${espcontrol_component_url}
+      ref: ${espcontrol_component_ref}
       path: components
-    components: [espcontrol]
+    components: [espcontrol, web_server_idf]
     refresh: 0s
 
 espcontrol:
@@ -42,9 +57,6 @@ espcontrol:
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-  platformio_options:
-    build_src_flags:
-      - "-include esp_sleep.h"
   on_boot:
     - priority: 800
       then:
@@ -54,6 +66,36 @@ esphome:
               esp_sleep_enable_timer_wakeup(100000);
               esp_deep_sleep_start();
             }
+    - priority: 700
+      then:
+        - lambda: |-
+            register_internal_relay(
+              "relay_1", "Relay 1",
+              [=](bool on) {
+                if (on) id(relay_1).turn_on();
+                else id(relay_1).turn_off();
+              },
+              [=]() { id(relay_1_push).execute(); },
+              [=]() -> bool { return id(relay_1).state; });
+            register_internal_relay(
+              "relay_2", "Relay 2",
+              [=](bool on) {
+                if (on) id(relay_2).turn_on();
+                else id(relay_2).turn_off();
+              },
+              [=]() { id(relay_2_push).execute(); },
+              [=]() -> bool { return id(relay_2).state; });
+            register_internal_relay(
+              "relay_3", "Relay 3",
+              [=](bool on) {
+                if (on) id(relay_3).turn_on();
+                else id(relay_3).turn_off();
+              },
+              [=]() { id(relay_3_push).execute(); },
+              [=]() -> bool { return id(relay_3).state; });
+    - priority: -100
+      then:
+        - script.execute: apply_screen_rotation
 
 # ---------------------------------------------------------------------------
 # PSRAM (video frame buffer memory)
@@ -83,6 +125,24 @@ ota:
 packages:
   core_infra: !include ../../../common/device/core_infra.yaml
 
+# The S3 panel runs close to the internal RAM limit once the RGB display,
+# LVGL, web UI, and API are all active. Keep the native API connection pool
+# small so Home Assistant can connect without reserving memory for unused
+# concurrent clients.
+api:
+  listen_backlog: 2
+  max_connections: 2
+  max_send_queue: 4
+
+# The 4848S040 USB-C port is exposed as UART0 through a USB-UART bridge.
+# GPIO19/20 are used by the touchscreen/display path, so USB_SERIAL_JTAG
+# stops working once the application starts.
+logger:
+  hardware_uart: UART0
+
+wifi:
+  use_psram: true
+
 # ---------------------------------------------------------------------------
 # Backlight (LEDC PWM output + monochromatic light entity)
 # ---------------------------------------------------------------------------
@@ -100,9 +160,93 @@ light:
     name: Display Backlight
     icon: mdi:lightbulb-on
     id: display_backlight
-    restore_mode: ALWAYS_ON
+    restore_mode: RESTORE_DEFAULT_ON
     default_transition_length: 0s
     gamma_correct: 1.0
+    on_turn_on:
+      then:
+        - if:
+            condition:
+              lambda: |-
+                return id(screen_schedule_asleep) ||
+                       (id(schedule_enabled).state && !panel_time_or_fallback(id(panel_time).now(), id(homeassistant_time).now()).is_valid());
+            then:
+              - script.execute: backlight_force_display_off
+            else:
+              - if:
+                  condition:
+                    lambda: 'return id(screensaver_display_off_active);'
+                  then:
+                    - script.execute: screensaver_wake
+
+# ---------------------------------------------------------------------------
+# Built-in relays (4848S040C relay variant)
+# ---------------------------------------------------------------------------
+switch:
+  - platform: gpio
+    name: Relay 1
+    id: relay_1
+    icon: mdi:electric-switch
+    pin:
+      number: GPIO40
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      then:
+        - lambda: 'notify_internal_relay_changed("relay_1", true);'
+    on_turn_off:
+      then:
+        - lambda: 'notify_internal_relay_changed("relay_1", false);'
+
+  - platform: gpio
+    name: Relay 2
+    id: relay_2
+    icon: mdi:electric-switch
+    pin:
+      number: GPIO2
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      then:
+        - lambda: 'notify_internal_relay_changed("relay_2", true);'
+    on_turn_off:
+      then:
+        - lambda: 'notify_internal_relay_changed("relay_2", false);'
+
+  - platform: gpio
+    name: Relay 3
+    id: relay_3
+    icon: mdi:electric-switch
+    pin:
+      number: GPIO1
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      then:
+        - lambda: 'notify_internal_relay_changed("relay_3", true);'
+    on_turn_off:
+      then:
+        - lambda: 'notify_internal_relay_changed("relay_3", false);'
+
+# Momentary relay buttons for push-button/dimmer inputs.
+button:
+  - platform: template
+    name: Relay 1 Push
+    icon: mdi:gesture-tap-button
+    on_press:
+      then:
+        - script.execute: relay_1_push
+
+  - platform: template
+    name: Relay 2 Push
+    icon: mdi:gesture-tap-button
+    on_press:
+      then:
+        - script.execute: relay_2_push
+
+  - platform: template
+    name: Relay 3 Push
+    icon: mdi:gesture-tap-button
+    on_press:
+      then:
+        - script.execute: relay_3_push
 
 # ---------------------------------------------------------------------------
 # SPI bus (used by MIPI RGB driver for ST7701S init sequence)
@@ -126,6 +270,9 @@ touchscreen:
     id: my_touchscreen
     display: my_display
     update_interval: 16ms
+    transform:
+      mirror_x: true
+      mirror_y: true
     on_touch:
       - script.execute: screensaver_wake
 
@@ -136,17 +283,87 @@ display:
   - platform: mipi_rgb
     model: GUITION-4848S040
     id: my_display
+    # Start WiFi before the RGB panel allocates its frame buffers; otherwise the
+    # WiFi driver can fail to claim enough internal RX buffers on fresh boots.
+    setup_priority: 240
     pclk_frequency: 8MHz
     update_interval: never
     auto_clear_enabled: False
-    transform:
-      mirror_x: false
-      mirror_y: false
 
 # ---------------------------------------------------------------------------
 # LVGL base (display binding, must be before any page definitions)
 # ---------------------------------------------------------------------------
 lvgl:
+  id: main_lvgl
+  # Keep LVGL after WiFi and after the display driver.
+  setup_priority: 230
   buffer_size: 25%
   displays: my_display
-  touchscreens: my_touchscreen
+  rotation: 180
+  touchscreens:
+    - touchscreen_id: my_touchscreen
+      long_press_time: 3s
+
+script:
+  - id: relay_1_push
+    mode: restart
+    then:
+      - switch.turn_on: relay_1
+      - delay: 200ms
+      - switch.turn_off: relay_1
+
+  - id: relay_2_push
+    mode: restart
+    then:
+      - switch.turn_on: relay_2
+      - delay: 200ms
+      - switch.turn_off: relay_2
+
+  - id: relay_3_push
+    mode: restart
+    then:
+      - switch.turn_on: relay_3
+      - delay: 200ms
+      - switch.turn_off: relay_3
+
+  - id: apply_screen_rotation
+    then:
+      - if:
+          condition:
+            lambda: 'return id(screen_rotation_select).current_option() == "90";'
+          then:
+            - lvgl.display.set_rotation: 270
+          else:
+            - if:
+                condition:
+                  lambda: 'return id(screen_rotation_select).current_option() == "180";'
+                then:
+                  - lvgl.display.set_rotation: 0
+                else:
+                  - if:
+                      condition:
+                        lambda: 'return id(screen_rotation_select).current_option() == "270";'
+                      then:
+                        - lvgl.display.set_rotation: 90
+                      else:
+                        - lvgl.display.set_rotation: 180
+
+select:
+  - platform: template
+    name: "Screen: Rotation"
+    internal: true
+    disabled_by_default: true
+    id: screen_rotation_select
+    entity_category: config
+    icon: "mdi:screen-rotation"
+    optimistic: true
+    restore_value: true
+    initial_option: "180"
+    options:
+      - "0"
+      - "90"
+      - "180"
+      - "270"
+    on_value:
+      then:
+        - script.execute: apply_screen_rotation

@@ -1,14 +1,14 @@
 ---
-title: Firmware Updates
+title: EspControl Firmware Updates
 description:
-  How the Espcontrol panel checks for and installs firmware updates over the air, and how to control update behaviour.
+  How the EspControl panel checks for and installs firmware updates over the air, and how to control update behaviour.
 ---
 
 # Firmware Updates
 
 Your panel can update its firmware over the air — no USB cable or computer needed after the initial install. When a new version is available, the panel downloads and installs it automatically (if enabled) or waits for you to trigger the update manually.
 
-## Update settings
+## Update Settings
 
 These are configured from the **Settings** tab in the [Setup](/features/setup) under the **Firmware** section. They also appear as controls in Home Assistant.
 
@@ -17,15 +17,19 @@ These are configured from the **Settings** tab in the [Setup](/features/setup) u
 - **Update Frequency** — how often the panel checks for updates: **Hourly**, **Daily**, **Weekly**, or **Monthly**.
 - **Check for Update** — press this button to check for a new version right now, regardless of the automatic schedule.
 
-## What happens during an update
+## What Happens During an Update
 
 1. The panel checks the update server for a newer version.
 2. If one is available and **Auto Update** is on, it downloads and installs the update.
-3. The panel restarts with the new firmware. Your settings (buttons, colours, temperatures, etc.) are preserved.
+3. The panel restarts with the new firmware. Your settings (cards, colours, temperatures, etc.) are preserved.
 
 The update usually takes a minute or two. The display may show a loading screen briefly during the restart.
 
-## Checking updates from Home Assistant
+## When New Cards Appear
+
+Some features, especially new card types, need both the web setup page and the panel firmware. If the setup page shows a new card type but the panel does not display it correctly after you apply the configuration, check for a firmware update and install the latest version.
+
+## Checking Updates from Home Assistant
 
 You can also manage updates from Home Assistant. The **Auto Update** toggle, **Update Frequency** selector, and **Check for Update** button all appear as entities that you can control from the Home Assistant dashboard or use in automations.
 

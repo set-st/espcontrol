@@ -6,9 +6,9 @@
   },
   "structural": [
     {
-      "name": "Arrow Left",
-      "codepoint": "F004D",
-      "mdi": "arrow-left",
+      "name": "Chevron Left",
+      "codepoint": "F0141",
+      "mdi": "chevron-left",
       "comment": "Back button"
     },
     {
@@ -16,6 +16,12 @@
       "codepoint": "F0142",
       "mdi": "chevron-right",
       "comment": "Subpage indicator"
+    },
+    {
+      "name": "Close",
+      "codepoint": "F0156",
+      "mdi": "close",
+      "comment": "Modal close button"
     }
   ],
   "icons": [
@@ -40,6 +46,11 @@
       "mdi": "air-purifier"
     },
     {
+      "name": "Air Purifier Off",
+      "codepoint": "F1B57",
+      "mdi": "air-purifier-off"
+    },
+    {
       "name": "Alarm",
       "codepoint": "F009E",
       "mdi": "bell-ring"
@@ -53,6 +64,16 @@
       "name": "Application",
       "codepoint": "F0614",
       "mdi": "application-outline"
+    },
+    {
+      "name": "Arrow Down",
+      "codepoint": "F0045",
+      "mdi": "arrow-down"
+    },
+    {
+      "name": "Arrow Up",
+      "codepoint": "F005D",
+      "mdi": "arrow-up"
     },
     {
       "name": "Battery",
@@ -225,9 +246,29 @@
       "mdi": "ceiling-light"
     },
     {
+      "name": "Ceiling Lights Multiple",
+      "codepoint": "F18DD",
+      "mdi": "ceiling-light-multiple"
+    },
+    {
       "name": "Chandelier",
       "codepoint": "F1793",
       "mdi": "chandelier"
+    },
+    {
+      "name": "Check",
+      "codepoint": "F012C",
+      "mdi": "check"
+    },
+    {
+      "name": "Chevron Down",
+      "codepoint": "F0140",
+      "mdi": "chevron-down"
+    },
+    {
+      "name": "Chevron Up",
+      "codepoint": "F0143",
+      "mdi": "chevron-up"
     },
     {
       "name": "Clock",
@@ -258,6 +299,21 @@
       "name": "Curtains Closed",
       "codepoint": "F1847",
       "mdi": "curtains-closed"
+    },
+    {
+      "name": "Delete",
+      "codepoint": "F01B4",
+      "mdi": "delete"
+    },
+    {
+      "name": "Delete Empty",
+      "codepoint": "F06CC",
+      "mdi": "delete-empty"
+    },
+    {
+      "name": "Delete Outline",
+      "codepoint": "F09E7",
+      "mdi": "delete-outline"
     },
     {
       "name": "Desk Lamp",
@@ -295,6 +351,11 @@
       "mdi": "doorbell-video"
     },
     {
+      "name": "Dots Horizontal",
+      "codepoint": "F01D8",
+      "mdi": "dots-horizontal"
+    },
+    {
       "name": "Dryer",
       "codepoint": "F0917",
       "mdi": "tumble-dryer"
@@ -313,6 +374,11 @@
       "name": "Fire",
       "codepoint": "F0238",
       "mdi": "fire"
+    },
+    {
+      "name": "Fire Off",
+      "codepoint": "F1722",
+      "mdi": "fire-off"
     },
     {
       "name": "Fireplace",
@@ -346,7 +412,7 @@
     },
     {
       "name": "Garage",
-      "codepoint": "F0372",
+      "codepoint": "F06D9",
       "mdi": "garage"
     },
     {
@@ -420,14 +486,44 @@
       "mdi": "headphones"
     },
     {
-      "name": "Heater",
+      "name": "Radiator",
       "codepoint": "F0438",
       "mdi": "radiator"
+    },
+    {
+      "name": "Radiator Off",
+      "codepoint": "F0AD8",
+      "mdi": "radiator-off"
     },
     {
       "name": "Home",
       "codepoint": "F02DC",
       "mdi": "home"
+    },
+    {
+      "name": "Heat Pump",
+      "codepoint": "F1A43",
+      "mdi": "heat-pump"
+    },
+    {
+      "name": "Heat Wave",
+      "codepoint": "F1A45",
+      "mdi": "heat-wave"
+    },
+    {
+      "name": "Heating Coil",
+      "codepoint": "F1AAF",
+      "mdi": "heating-coil"
+    },
+    {
+      "name": "HVAC",
+      "codepoint": "F1352",
+      "mdi": "hvac"
+    },
+    {
+      "name": "HVAC Off",
+      "codepoint": "F159E",
+      "mdi": "hvac-off"
     },
     {
       "name": "Hot Tub",
@@ -600,6 +696,16 @@
       "mdi": "message-video"
     },
     {
+      "name": "Medication",
+      "codepoint": "F1B14",
+      "mdi": "medication"
+    },
+    {
+      "name": "Medication Outline",
+      "codepoint": "F1B15",
+      "mdi": "medication-outline"
+    },
+    {
       "name": "Meter Electric",
       "codepoint": "F1A57",
       "mdi": "meter-electric"
@@ -610,9 +716,19 @@
       "mdi": "meter-gas"
     },
     {
+      "name": "Microsoft Xbox",
+      "codepoint": "F05B9",
+      "mdi": "microsoft-xbox"
+    },
+    {
       "name": "Microwave",
       "codepoint": "F0C99",
       "mdi": "microwave"
+    },
+    {
+      "name": "Minus",
+      "codepoint": "F0374",
+      "mdi": "minus"
     },
     {
       "name": "Monitor",
@@ -655,6 +771,26 @@
       "mdi": "package-variant-closed"
     },
     {
+      "name": "Pill",
+      "codepoint": "F0402",
+      "mdi": "pill"
+    },
+    {
+      "name": "Pill Multiple",
+      "codepoint": "F1B4C",
+      "mdi": "pill-multiple"
+    },
+    {
+      "name": "Plus",
+      "codepoint": "F0415",
+      "mdi": "plus"
+    },
+    {
+      "name": "Play Pause",
+      "codepoint": "F040E",
+      "mdi": "play-pause"
+    },
+    {
       "name": "Pool",
       "codepoint": "F0606",
       "mdi": "pool"
@@ -666,8 +802,13 @@
     },
     {
       "name": "Power Plug",
-      "codepoint": "F0654",
+      "codepoint": "F06A5",
       "mdi": "power-plug"
+    },
+    {
+      "name": "Progress Clock",
+      "codepoint": "F0996",
+      "mdi": "progress-clock"
     },
     {
       "name": "Printer",
@@ -688,6 +829,11 @@
       "name": "Projector Off",
       "codepoint": "F1A23",
       "mdi": "projector-off"
+    },
+    {
+      "name": "Recycle",
+      "codepoint": "F044C",
+      "mdi": "recycle"
     },
     {
       "name": "Robot Vacuum",
@@ -723,6 +869,16 @@
       "name": "Shower",
       "codepoint": "F09A1",
       "mdi": "shower-head"
+    },
+    {
+      "name": "Skip Next",
+      "codepoint": "F04AD",
+      "mdi": "skip-next"
+    },
+    {
+      "name": "Skip Previous",
+      "codepoint": "F04AE",
+      "mdi": "skip-previous"
     },
     {
       "name": "Smoke Detector",
@@ -785,6 +941,11 @@
       "mdi": "sprinkler"
     },
     {
+      "name": "Stop",
+      "codepoint": "F04DB",
+      "mdi": "stop"
+    },
+    {
       "name": "String Lights",
       "codepoint": "F12BA",
       "mdi": "string-lights"
@@ -793,6 +954,21 @@
       "name": "String Lights Off",
       "codepoint": "F12BB",
       "mdi": "string-lights-off"
+    },
+    {
+      "name": "Power Socket UK",
+      "codepoint": "F07E8",
+      "mdi": "power-socket-uk"
+    },
+    {
+      "name": "Power Socket EU",
+      "codepoint": "F07E7",
+      "mdi": "power-socket-eu"
+    },
+    {
+      "name": "Power Socket US",
+      "codepoint": "F07E9",
+      "mdi": "power-socket-us"
     },
     {
       "name": "Sun",
@@ -835,9 +1011,34 @@
       "mdi": "thermometer-low"
     },
     {
+      "name": "Thermometer Off",
+      "codepoint": "F1531",
+      "mdi": "thermometer-off"
+    },
+    {
       "name": "Thermostat",
       "codepoint": "F0393",
       "mdi": "thermostat"
+    },
+    {
+      "name": "Thermostat Box",
+      "codepoint": "F0891",
+      "mdi": "thermostat-box"
+    },
+    {
+      "name": "Home-Thermostat",
+      "codepoint": "F0F54",
+      "mdi": "home-thermometer"
+    },
+    {
+      "name": "Thermostat Auto",
+      "codepoint": "F1B17",
+      "mdi": "thermostat-auto"
+    },
+    {
+      "name": "Thermometer Water",
+      "codepoint": "F1A80",
+      "mdi": "thermometer-water"
     },
     {
       "name": "Timer",
@@ -860,6 +1061,16 @@
       "mdi": "trash-can"
     },
     {
+      "name": "Trash Can Outline",
+      "codepoint": "F0A7A",
+      "mdi": "trash-can-outline"
+    },
+    {
+      "name": "Volume High",
+      "codepoint": "F057E",
+      "mdi": "volume-high"
+    },
+    {
       "name": "Wall Outlet",
       "codepoint": "F0427",
       "mdi": "power-socket"
@@ -870,9 +1081,14 @@
       "mdi": "wall-sconce"
     },
     {
-      "name": "Washer",
+      "name": "Washing Machine",
       "codepoint": "F072A",
       "mdi": "washing-machine"
+    },
+    {
+      "name": "Washing Machine Off",
+      "codepoint": "F11BD",
+      "mdi": "washing-machine-off"
     },
     {
       "name": "Water",
@@ -880,14 +1096,24 @@
       "mdi": "water"
     },
     {
-      "name": "Water Heater",
+      "name": "Water Boiler",
       "codepoint": "F0F92",
       "mdi": "water-boiler"
+    },
+    {
+      "name": "Water Boiler Off",
+      "codepoint": "F11B4",
+      "mdi": "water-boiler-off"
     },
     {
       "name": "Water Percent",
       "codepoint": "F058E",
       "mdi": "water-percent"
+    },
+    {
+      "name": "Water Alert",
+      "codepoint": "F1502",
+      "mdi": "water-alert"
     },
     {
       "name": "Weather Cloudy",
@@ -1060,6 +1286,16 @@
       "mdi": "wind-turbine-check"
     },
     {
+      "name": "Window Closed",
+      "codepoint": "F05AE",
+      "mdi": "window-closed"
+    },
+    {
+      "name": "Window Open",
+      "codepoint": "F05B1",
+      "mdi": "window-open"
+    },
+    {
       "name": "Window Shutter",
       "codepoint": "F111C",
       "mdi": "window-shutter"
@@ -1079,6 +1315,7 @@
     "climate": "Air Conditioner",
     "media_player": "Speaker",
     "camera": "Camera",
+    "button": "Gesture Tap",
     "binary_sensor": "Motion Sensor"
   }
 }

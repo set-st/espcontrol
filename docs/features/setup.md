@@ -1,60 +1,78 @@
 ---
-title: Screen Setup
+title: EspControl Screen Setup
 description:
-  How to use the built-in web page to configure buttons, icons, display settings, screensaver, and brightness on your Espcontrol panel.
+  How to use the built-in web page to configure cards, icons, display settings, screensaver, and brightness on your EspControl panel.
 ---
 
-# Setting up your device's screen
+# Setting Up Your Device's Screen
 
-Your Espcontrol panel has a built-in web page where you can set everything up. Open it by typing the panel's address into any browser on your phone or computer.
+Your EspControl panel has a built-in web page where you can set everything up. Open it by typing the panel's address into any browser on your phone or computer.
 
 ![Screen setup page](/images/screen-setup.png)
 
 ::: tip Finding the address
-The address is shown on the display screen when no buttons are configured yet. You can also find it in your router's connected devices list, or in Home Assistant under **Settings > Devices & Services > ESPHome**.
+The address is shown on the display screen when no cards are configured yet. You can also find it in your router's connected devices list, or in Home Assistant under **Settings > Devices & Services > ESPHome**.
 :::
 
-### Adding a button
+### Adding a Card
 
-Tap any empty space in the grid (shown as a dashed outline with a **+** icon). A settings panel appears below the preview where you configure the button:
+Tap any empty space in the grid (shown as a dashed outline with a **+** icon). A settings panel appears below the preview where you configure the card:
 
 ![Card settings panel](/images/button-settings.png)
 
-![Toggle card showing a Heater icon](/images/card-toggle.png)
+![Switch card showing a Heater icon](/images/card-toggle.png)
 
-1. **Choose a type** — **Toggle** (the default) to control a device, **Subpage** to create a folder of extra cards, **[Button](/card-types/buttons)** to trigger Home Assistant automations with a single tap, **[Sensor](/card-types/sensors)** to display a live numeric reading or text state, **[Weather](/card-types/weather)** to show the current weather condition, **[Slider](/card-types/sliders)** to control light brightness, or **[Cover](/card-types/covers)** to control blinds and shutters.
-2. **Pick the device** you want to control by entering its Home Assistant entity name (for example, `light.living_room` or `switch.garden_lights`). You can find these under **Settings > Devices & Services** in Home Assistant. Subpage buttons don't need a device name.
-3. **Choose an icon** — type to search, or select **Auto** to let the panel pick one based on the device type.
-4. **Set a label** (optional). If left blank the button uses the device's friendly name from Home Assistant.
+The **Type** dropdown uses these card names on the device:
 
-**[Subpage](/features/subpages)** — works like a folder that opens a new page of buttons. 
+| Type | What it does | Needs an entity? |
+|---|---|---|
+| **[Switch](/card-types/switches)** | Controls a Home Assistant entity and shows its on/off state. This is the default card type. | Yes |
+| **[Action](/card-types/actions)** | Runs a one-tap Home Assistant scene, script, button, or helper action. | Yes |
+| **[Trigger](/card-types/buttons)** | Fires an event to Home Assistant for use in automations. | No |
+| **[Sensor](/card-types/sensors)** | Shows a live numeric reading or text state. | Yes, as **Sensor Entity** |
+| **[Light Brightness](/card-types/sliders)** | Controls light brightness with a draggable fill bar. | Yes |
+| **[Slider](/card-types/sliders)** | Controls light brightness or fan speed with a draggable fill bar. | Yes |
+| **[Cover](/card-types/covers)** | Controls blinds, shutters, and similar cover entities with a slider or tap action. | Yes |
+| **[Garage Door](/card-types/garage-doors)** | Controls a garage door cover entity with an open/close tap action. | Yes |
+| **[Date](/card-types/calendar)** | Shows the local date, or the date and time. | No |
+| **[World Clock](/card-types/timezones)** | Shows the current time for another city. | No, choose a city/timezone |
+| **[Weather](/card-types/weather)** | Shows the current condition or tomorrow's forecast from a weather entity. | Yes, as **Weather Entity** |
+| **[Internal Switches](/card-types/internal-relays)** | Controls a built-in relay locally on panels that have relay hardware. | Choose a relay |
+| **[Subpage](/features/subpages)** | Opens a folder-like page of extra cards. | No |
 
-**[Button](/card-types/buttons)** — a momentary button that fires an event to Home Assistant for use as an automation trigger. 
+For cards that use Home Assistant, enter the entity name from Home Assistant in the **Entity** field, such as `light.living_room`, `switch.garden_lights`, `scene.movie_mode`, or `weather.forecast_home`. Some card types use a more specific label, such as **Sensor Entity**, **Weather Entity**, or **Media Player Entity**. You can find entity names under **Settings > Devices & Services** in Home Assistant.
 
-**[Sensor](/card-types/sensors)** — displays a live reading from a Home Assistant sensor entity. Use the mode tabs to choose **Numeric** or **Text**.
+Most cards also let you choose an icon and set a label. If the label is left blank, the panel uses the friendly name from Home Assistant when it can.
 
-**[Weather](/card-types/weather)** — displays the current condition from a Home Assistant weather entity.
+### Active Switch Display
 
-**[Slider](/card-types/sliders)** — controls light brightness with a draggable fill bar. 
+Each [Switch](/card-types/switches) card has separate **Off Icon** and **On Icon** settings. The on icon is used while the entity is active.
 
-**[Cover](/card-types/covers)** — controls blinds, shutters, and garage doors with a position slider. 
+You can also turn on **Active Display**:
 
-### When Entity On
+- **Numeric** — show a live reading instead of the icon, for example temperature, power usage, or a percentage. Pick the **Sensor Entity**, **Unit**, and **Unit Precision**.
+- **Text** — show a live text state instead of the label, for example a machine status or current mode.
 
-Each toggle button has an optional **When Entity On** setting that changes what the button shows while the device is on:
+When the entity is not active, the card goes back to its off icon and normal label.
 
-- **Replace Icon** — show a different icon when the device is on (for example, an outline lightbulb when off and a filled one when on).
-- **Sensor Data** — show a live reading when the device is on (for example, temperature, power usage, or a percentage). Pick the **Sensor** entity and a **Unit** (`%`, `°C`, `W`, etc.).
+### Moving Cards
 
-When the device is off, the button reverts to its normal icon.
+Drag and drop any card to reposition it. If you drop it onto an occupied space, the existing card shifts to the next available slot.
 
-### Moving buttons
+### Card Sizes
 
-Drag and drop any button to reposition it. If you drop it onto an occupied space, the existing button shifts to the next available slot.
+Right-click a card and open **Size** to choose:
 
-### Double-height buttons
+- **Single** - normal one-slot card.
+- **Tall** - spans two rows.
+- **Wide** - spans two columns.
+- **Large** - spans a 2 x 2 area.
 
-Right-click a button and choose **Double Height** to make it span two rows. To revert, right-click and choose **Single Height**. If a button already occupies the space below, it gets moved automatically.
+If a card already occupies the space needed for a larger size, the setup page tries to move it to the next available slot. If there is not enough room, the size change is not applied.
+
+## Device Settings
+
+The **Settings** tab also includes display, brightness, screensaver, backup, and firmware update controls.
 
 ## Apply Configuration
 

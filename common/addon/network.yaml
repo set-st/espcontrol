@@ -14,6 +14,29 @@ binary_sensor:
     id: ink_ha_connected
     icon: mdi:check-network
 
+script:
+  - id: network_status_refresh
+    mode: restart
+    then:
+      - lambda: |-
+          network_status_set_wifi_icon(id(network_status_icon_label),
+                                       id(wifi_strength_percent).state);
+
+  - id: network_status_open_info
+    mode: single
+    then:
+      - lambda: |-
+          network_status_open_modal(
+            "${friendly_name}",
+            network_status_ip_address(),
+            network_status_wifi_strength_text(id(wifi_strength_percent).state),
+            id(uptime_sensor).state,
+            id(firmware_version_sensor).state,
+            id(${label_font})->get_lv_font(),
+            id(${media_title_font})->get_lv_font(),
+            id(${icon_font})->get_lv_font(),
+            id(sensor_card_color).state);
+
 # ---------------------------------------------------------------------------
 # Uptime and WiFi signal sensors
 # ---------------------------------------------------------------------------
@@ -36,17 +59,31 @@ sensor:
   - platform: copy
     source_id: wifi_signal_db
     name: "Wifi Strength"
+    id: wifi_strength_percent
     filters:
       - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
     unit_of_measurement: "%"
     icon: mdi:wifi
     entity_category: "diagnostic"
     device_class: ""
+    on_value:
+      then:
+        - script.execute: network_status_refresh
 
 # ---------------------------------------------------------------------------
 # IP address (text_sensor)
 # ---------------------------------------------------------------------------
 text_sensor:
+  - platform: template
+    name: "Network Transport"
+    id: network_transport_sensor
+    icon: mdi:wifi
+    entity_category: diagnostic
+    internal: true
+    update_interval: 60s
+    lambda: |-
+      return {"wifi"};
+
   - platform: wifi_info
     ip_address:
       name: IP Address

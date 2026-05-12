@@ -8,87 +8,66 @@ registerButtonType("sensor", {
     b.icon_on = "Auto";
     if (!b.precision) b.precision = "";
     if (b.precision !== "text") b.icon = "Auto";
+    if (b.precision === "text") b.options = "";
   },
   renderSettings: function (panel, b, slot, helpers) {
     var isTextMode = b.precision === "text";
+    var isLargeCard = helpers.cardSize === 4;
 
-    var modeField = document.createElement("div");
-    modeField.className = "sp-field";
-    modeField.appendChild(helpers.fieldLabel("Mode"));
-    var modeSeg = document.createElement("div");
-    modeSeg.className = "sp-segment";
-    var numericBtn = document.createElement("button");
-    numericBtn.type = "button";
-    numericBtn.textContent = "Numeric";
-    var textBtn = document.createElement("button");
-    textBtn.type = "button";
-    textBtn.textContent = "Text";
-    modeSeg.appendChild(numericBtn);
-    modeSeg.appendChild(textBtn);
-    modeField.appendChild(modeSeg);
-    panel.appendChild(modeField);
+    var mode = helpers.segmentControl([
+      ["numeric", "Numeric"],
+      ["text", "Text"],
+    ], isTextMode ? "text" : "numeric", function (value) { setMode(value, true); });
+    var numericBtn = mode.buttons.numeric;
+    var textBtn = mode.buttons.text;
+    panel.appendChild(helpers.fieldWithControl("Type", null, mode.segment));
 
-    var sf = document.createElement("div");
-    sf.className = "sp-field";
-    sf.appendChild(helpers.fieldLabel("Sensor Entity", helpers.idPrefix + "sensor"));
-    var sensorInp = helpers.textInput(helpers.idPrefix + "sensor", b.sensor, "e.g. sensor.living_room_temperature");
-    sf.appendChild(sensorInp);
-    panel.appendChild(sf);
-    helpers.bindField(sensorInp, "sensor", true);
+    var sensorField = helpers.entityField(
+      "Sensor Entity", helpers.idPrefix + "sensor", b.sensor,
+      "e.g. sensor.living_room_temperature",
+      ["sensor", "binary_sensor", "text_sensor"], "sensor", true,
+      "Add a sensor entity before saving.");
+    panel.appendChild(sensorField.field);
 
     var numericSection = condField();
 
-    var lf = document.createElement("div");
-    lf.className = "sp-field";
-    lf.appendChild(helpers.fieldLabel("Label", helpers.idPrefix + "label"));
-    var labelInp = helpers.textInput(helpers.idPrefix + "label", b.label, "e.g. Living Room");
-    lf.appendChild(labelInp);
-    numericSection.appendChild(lf);
-    helpers.bindField(labelInp, "label", true);
+    var labelField = helpers.textField(
+      "Label", helpers.idPrefix + "label", b.label, "e.g. Living Room", "label", true);
+    var labelInp = labelField.input;
+    numericSection.appendChild(labelField.field);
 
-    var uf = document.createElement("div");
-    uf.className = "sp-field";
-    uf.appendChild(helpers.fieldLabel("Unit", helpers.idPrefix + "unit"));
-    var unitInp = helpers.textInput(helpers.idPrefix + "unit", b.unit, "e.g. \u00B0C");
+    var unitField = helpers.textField(
+      "Unit", helpers.idPrefix + "unit", b.unit, "e.g. \u00B0C", "unit", true);
+    var unitInp = unitField.input;
     unitInp.className = "sp-input";
-    uf.appendChild(unitInp);
-    numericSection.appendChild(uf);
-    helpers.bindField(unitInp, "unit", true);
+    numericSection.appendChild(unitField.field);
 
-    var pf = document.createElement("div");
-    pf.className = "sp-field";
-    pf.appendChild(helpers.fieldLabel("Unit precision", helpers.idPrefix + "precision"));
-    var precSeg = document.createElement("div");
-    precSeg.className = "sp-segment";
-    var precOpts = [["0", "10"], ["1", "10.2"], ["2", "10.21"]];
-    for (var i = 0; i < precOpts.length; i++) {
-      (function (val, label) {
-        var btn = document.createElement("button");
-        btn.type = "button";
-        btn.textContent = label;
-        if (!isTextMode && (b.precision || "0") === val) btn.classList.add("active");
-        btn.addEventListener("click", function () {
-          b.precision = val === "0" ? "" : val;
-          helpers.saveField("precision", b.precision);
-          var btns = precSeg.querySelectorAll("button");
-          for (var j = 0; j < btns.length; j++) btns[j].classList.remove("active");
-          btn.classList.add("active");
-          renderPreview();
-        });
-        precSeg.appendChild(btn);
-      })(precOpts[i][0], precOpts[i][1]);
+    var precisionField = helpers.precisionField(helpers.idPrefix + "precision",
+      !isTextMode ? (b.precision || "0") : "0", function () {
+      b.precision = this.value === "0" ? "" : this.value;
+      helpers.saveField("precision", b.precision);
+    });
+    var precisionSelect = precisionField.select;
+    numericSection.appendChild(precisionField.field);
+
+    if (isLargeCard) {
+      var largeNumbersToggle = helpers.toggleRow(
+        "Large Sensor Numbers", helpers.idPrefix + "large-sensor-numbers",
+        sensorLargeNumbersEnabled(b));
+      numericSection.appendChild(largeNumbersToggle.row);
+      largeNumbersToggle.input.addEventListener("change", function () {
+        setSensorLargeNumbersEnabled(b, this.checked);
+        helpers.saveField("options", b.options);
+      });
     }
-    pf.appendChild(precSeg);
-    numericSection.appendChild(pf);
     panel.appendChild(numericSection);
 
     var textSection = condField();
-    var textIconPicker = helpers.makeIconPicker(
+    var textIconPicker = helpers.iconPickerField(
       helpers.idPrefix + "icon-picker", helpers.idPrefix + "icon",
       b.icon || "Auto", function (opt) {
         b.icon = opt;
         helpers.saveField("icon", opt);
-        renderPreview();
       }
     );
     textSection.appendChild(textIconPicker);
@@ -106,12 +85,14 @@ registerButtonType("sensor", {
         b.label = "";
         b.unit = "";
         b.icon_on = "Auto";
+        b.options = "";
         labelInp.value = "";
         unitInp.value = "";
         helpers.saveField("precision", "text");
         helpers.saveField("label", "");
         helpers.saveField("unit", "");
         helpers.saveField("icon_on", "Auto");
+        helpers.saveField("options", "");
       } else {
         b.precision = "";
         b.icon = "Auto";
@@ -121,14 +102,10 @@ registerButtonType("sensor", {
         if (iconPreview) iconPreview.className = "sp-icon-picker-preview mdi mdi-cog";
         var iconInput = textIconPicker.querySelector(".sp-icon-picker-input");
         if (iconInput) iconInput.value = "Auto";
-        var pbs = precSeg.querySelectorAll("button");
-        for (var j = 0; j < pbs.length; j++) pbs[j].classList.toggle("active", j === 0);
+        precisionSelect.value = "0";
       }
-      renderPreview();
     }
 
-    numericBtn.addEventListener("click", function () { setMode("numeric", true); });
-    textBtn.addEventListener("click", function () { setMode("text", true); });
     setMode(isTextMode ? "text" : "numeric", false);
   },
   renderPreview: function (b, helpers) {
@@ -146,9 +123,11 @@ registerButtonType("sensor", {
     var unit = b.unit ? helpers.escHtml(b.unit) : "";
     var prec = parseInt(b.precision || "0", 10) || 0;
     var sampleVal = (0).toFixed(prec);
+    var previewClass = "sp-sensor-preview" +
+      (helpers.cardSize === 4 && sensorLargeNumbersEnabled(b) ? " sp-sensor-preview-large" : "");
     return {
       iconHtml:
-        '<span class="sp-sensor-preview">' +
+        '<span class="' + previewClass + '">' +
           '<span class="sp-sensor-value">' + sampleVal + '</span>' +
           '<span class="sp-sensor-unit">' + unit + '</span>' +
         '</span>',

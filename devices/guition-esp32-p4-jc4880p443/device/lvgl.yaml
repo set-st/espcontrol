@@ -16,7 +16,7 @@ lvgl:
     widgets:
       # Indoor/outdoor temperature (top-left)
       - label:
-          text: "-° / -°"
+          text: "-°C / -°C"
           id: temperatures
           text_font: clockbar_font_lg
           align: top_left
@@ -37,6 +37,33 @@ lvgl:
           text_color: 0xFFFFFF
           hidden: true
 
+      # Network status (tappable, right side of clock bar)
+      - obj:
+          id: network_status_button
+          align: top_right
+          x: -16
+          y: 1
+          width: 42
+          height: 38
+          bg_opa: 0%
+          border_width: 0
+          pad_all: 0
+          scrollable: false
+          scrollbar_mode: "off"
+          clickable: true
+          hidden: true
+          widgets:
+            - label:
+                id: network_status_icon_label
+                text: "\U000F0928"
+                text_font: network_status_font_lg
+                align: center
+                text_align: center
+                text_color: 0xFFFFFF
+          on_press:
+            then:
+              - script.execute: network_status_open_info
+
   # ---------------------------------------------------------------------------
   # Main page (fixed 3x2 grid of button widgets)
   # ---------------------------------------------------------------------------
@@ -52,7 +79,7 @@ lvgl:
       width: 100%
       bg_color: Black
       bg_opa: cover
-      pad_top: 50
+      pad_top: ${main_page_pad_top}
       pad_bottom: 5
       pad_left: 5
       pad_right: 5

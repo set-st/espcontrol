@@ -3,6 +3,20 @@ name: CI
 on:
   pull_request:
     paths:
+      - '.github/workflows/ci.yml'
+      - 'common/**'
+      - 'components/**'
+      - 'devices/**'
+      - 'builds/**'
+      - 'src/**'
+      - 'scripts/**'
+      - 'docs/**'
+      - 'package.json'
+      - 'package-lock.json'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ci.yml'
       - 'common/**'
       - 'components/**'
       - 'devices/**'
@@ -15,6 +29,7 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  ESPHOME_DOCKER_IMAGE: ghcr.io/esphome/esphome:2026.4.5
 
 jobs:
   validate:
@@ -22,8 +37,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - run: python scripts/build.py --check
-      - run: python scripts/check_icon_groups.py
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Cache node_modules
+        id: node-modules-cache
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - run: python3 scripts/build.py --check
+      - run: python3 scripts/generate_device_slots.py --check
+      - run: python3 scripts/check_icon_groups.py
+      - run: npm run check:config
 
   docs:
     name: Build Docs
@@ -49,8 +82,17 @@ jobs:
       - run: npm run docs:build
 
   compile:
-    name: Compile Firmware
+    name: Compile Firmware (${{ matrix.slug }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        slug:
+          - guition-esp32-p4-jc1060p470
+          - guition-esp32-p4-jc4880p443
+          - guition-esp32-p4-jc8012p4a1
+          - esp32-p4-86
+          - guition-esp32-s3-4848s040
     steps:
       - uses: actions/checkout@v6
 
@@ -58,12 +100,37 @@ jobs:
         uses: actions/cache@v5
         with:
           path: builds/.esphome
-          key: esphome-ci-s3-${{ hashFiles('builds/*.yaml', 'common/**', 'devices/**', 'components/**') }}
+          key: esphome-ci-${{ matrix.slug }}-${{ hashFiles('builds/*.yaml', 'common/**', 'devices/**', 'components/**') }}
           restore-keys: |
-            esphome-ci-s3-
+            esphome-ci-${{ matrix.slug }}-
 
-      - name: Compile S3 firmware
+      - name: Pull ESPHome image
+        run: |
+          for attempt in 1 2 3 4 5; do
+            echo "Pulling $ESPHOME_DOCKER_IMAGE (attempt $attempt of 5)"
+            if docker pull "$ESPHOME_DOCKER_IMAGE"; then
+              exit 0
+            fi
+
+            if [ "$attempt" -eq 5 ]; then
+              echo "Unable to pull $ESPHOME_DOCKER_IMAGE after $attempt attempts"
+              exit 1
+            fi
+
+            delay=$((attempt * 15))
+            echo "Pull failed; retrying in $delay seconds"
+            sleep "$delay"
+          done
+
+      - name: Compile firmware
         run: >-
           docker run --rm -v "${PWD}:/config"
-          ghcr.io/esphome/esphome:2026.3.3
-          compile /config/builds/guition-esp32-s3-4848s040.factory.yaml
+          "$ESPHOME_DOCKER_IMAGE"
+          compile /config/builds/${{ matrix.slug }}.factory.yaml
+
+      - name: Fix ESPHome cache permissions
+        if: always()
+        run: |
+          if [ -d builds/.esphome ]; then
+            sudo chown -R "$USER:$USER" builds/.esphome
+          fi

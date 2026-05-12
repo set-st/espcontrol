@@ -1,6 +1,6 @@
 ---
-title: Icon Reference
-description: Browse all available icons for your Espcontrol buttons.
+title: EspControl Icon Reference
+description: Browse all available icons for your EspControl cards.
 ---
 
 # Icon Reference
@@ -9,6 +9,6 @@ Click any icon to copy its name to the clipboard, then paste it into the icon fi
 
 <IconGallery />
 
-## Missing an icon?
+## Missing an Icon?
 
 If the icon you need isn't in the list, [open an issue](https://github.com/set-st/espcontrol/issues) with the icon name and what you'd use it for, and we'll look into adding it.

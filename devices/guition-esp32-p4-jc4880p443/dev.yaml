@@ -1,22 +1,17 @@
 # =============================================================================
 # DEV CONFIG - Local development entry point (4.3" P4 portrait panel)
-# =============================================================================
-# Uses local component path for immediate iteration on C++ and YAML changes.
+# Flash with: esphome run dev.yaml
 # =============================================================================
 
 substitutions:
   name: "jc4880p443-dev"
-  friendly_name: "Espcontrol JC4880P443 Dev"
+  friendly_name: "EspControl JC4880P443 Dev"
+  espcontrol_component_url: "../.."
+  espcontrol_component_ref: "HEAD"
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
-
-external_components:
-  - source:
-      type: local
-      path: ../../components
-    components: [espcontrol]
 
 packages:
   espcontrol: !include packages.yaml

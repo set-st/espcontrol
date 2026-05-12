@@ -1,8 +1,9 @@
 # =============================================================================
-# TIME - Home Assistant time source and timezone selector
+# TIME - NTP/Home Assistant time sources and timezone selector
 # =============================================================================
-# HA time drives the on-screen clock. The timezone selector provides
-# approximate lat/lon for on-device sunrise/sunset calculation (sun_calc.h).
+# SNTP drives the on-screen clock when network NTP is available. Home Assistant
+# time remains enabled as a fallback. The timezone selector provides approximate
+# lat/lon for on-device sunrise/sunset calculation (sun_calc.h).
 # =============================================================================
 
 esphome:
@@ -10,7 +11,21 @@ esphome:
     priority: -100
     then:
       - lambda: |-
-          apply_timezone(id(timezone_select).current_option());
+          const char *posix = apply_timezone(id(timezone_select).current_option());
+          id(panel_time).set_timezone(posix);
+          id(homeassistant_time).set_timezone(posix);
+          set_display_temperature_unit(id(temperature_unit_select).current_option(),
+                                       id(timezone_select).current_option());
+      - script.execute: ntp_servers_apply
+
+# Ask Home Assistant for time as soon as the native API connects. This makes
+# the HA time source a practical fallback when public NTP is unavailable.
+api:
+  on_client_connected:
+    - lambda: |-
+        id(homeassistant_time).update();
+    - delay: 1s
+    - script.execute: time_update
 
 # ---------------------------------------------------------------------------
 # Timezone selector (drives sunrise/sunset calculation via sun_calc.h)
@@ -18,6 +33,8 @@ esphome:
 select:
   - platform: template
     name: "Screen: Timezone"
+    internal: true
+    disabled_by_default: true
     id: timezone_select
     entity_category: config
     icon: "mdi:map-clock"
@@ -160,12 +177,25 @@ select:
     on_value:
       then:
         - lambda: |-
-            apply_timezone(id(timezone_select).current_option());
+            const char *posix = apply_timezone(id(timezone_select).current_option());
+            id(panel_time).set_timezone(posix);
+            id(homeassistant_time).set_timezone(posix);
+            set_display_temperature_unit(id(temperature_unit_select).current_option(),
+                                         id(timezone_select).current_option());
+            refresh_temperature_unit_labels();
+            refresh_temp_label_values(id(temperatures), id(main_page)->obj,
+                                      id(clock_bar_enabled).state,
+                                      id(indoor_temp_enable).state,
+                                      id(outdoor_temp_enable).state,
+                                      id(indoor_temp), id(outdoor_temp));
         - script.execute: time_update
         - script.execute: backlight_recalc_sunrise_sunset
+        - script.execute: screen_schedule_check
 
   - platform: template
     name: "Screen: Clock Format"
+    internal: true
+    disabled_by_default: true
     id: clock_format_select
     entity_category: config
     icon: "mdi:clock-outline"
@@ -183,15 +213,122 @@ select:
         - script.execute: backlight_recalc_sunrise_sunset
 
 # ---------------------------------------------------------------------------
-# HA time source; sync triggers clock and sunrise/sunset recalculation
+# NTP server settings and date source for Date cards
+# ---------------------------------------------------------------------------
+text:
+  - platform: template
+    name: "Screen: NTP Server 1"
+    internal: true
+    id: ntp_server_1
+    optimistic: true
+    restore_value: true
+    initial_value: "0.pool.ntp.org"
+    min_length: 0
+    max_length: 100
+    mode: text
+    entity_category: config
+    icon: "mdi:server-network"
+    update_interval: never
+    web_server:
+      sorting_group_id: sg_brightness
+    on_value:
+      then:
+        - script.execute: ntp_servers_apply
+
+  - platform: template
+    name: "Screen: NTP Server 2"
+    internal: true
+    id: ntp_server_2
+    optimistic: true
+    restore_value: true
+    initial_value: "1.pool.ntp.org"
+    min_length: 0
+    max_length: 100
+    mode: text
+    entity_category: config
+    icon: "mdi:server-network"
+    update_interval: never
+    web_server:
+      sorting_group_id: sg_brightness
+    on_value:
+      then:
+        - script.execute: ntp_servers_apply
+
+  - platform: template
+    name: "Screen: NTP Server 3"
+    internal: true
+    id: ntp_server_3
+    optimistic: true
+    restore_value: true
+    initial_value: "2.pool.ntp.org"
+    min_length: 0
+    max_length: 100
+    mode: text
+    entity_category: config
+    icon: "mdi:server-network"
+    update_interval: never
+    web_server:
+      sorting_group_id: sg_brightness
+    on_value:
+      then:
+        - script.execute: ntp_servers_apply
+
+text_sensor:
+  # Diagnostic value published from the active time source. This makes
+  # the date visible as an ESPHome state and gives Date cards a clear source.
+  - platform: template
+    name: "Screen: Date"
+    id: screen_date_sensor
+    entity_category: diagnostic
+    icon: "mdi:calendar"
+    update_interval: never
+    web_server:
+      sorting_group_id: sg_brightness
+
+  # Optional direct Home Assistant Date & Time integration source. When
+  # Home Assistant has sensor.date, use it immediately; otherwise the active
+  # panel time source below remains the fallback.
+  - platform: homeassistant
+    id: homeassistant_date_sensor
+    entity_id: sensor.date
+    internal: true
+    on_value:
+      then:
+        - lambda: |-
+            if (update_calendar_cards_from_date_text(x)) {
+              id(screen_date_sensor).publish_state(x);
+            }
+
+# ---------------------------------------------------------------------------
+# SNTP primary time source and Home Assistant fallback. Sync triggers clock and
+# sunrise/sunset recalculation.
 # ---------------------------------------------------------------------------
 time:
-  - platform: homeassistant
-    id: ha_time
+  - platform: sntp
+    id: panel_time
     timezone: "UTC0"
+    servers:
+      - "0.pool.ntp.org"
+      - "1.pool.ntp.org"
+      - "2.pool.ntp.org"
     on_time_sync:
       - script.execute: time_update
       - script.execute: backlight_recalc_sunrise_sunset
+      - script.execute: screen_schedule_check
+    on_time:
+      - minutes: '*'
+        seconds: 0
+        then:
+          - script.execute: time_update
+
+  - platform: homeassistant
+    id: homeassistant_time
+    timezone: "UTC0"
+    update_interval: 1min
+    on_time_sync:
+      - script.execute: time_update
+      - script.execute: backlight_recalc_sunrise_sunset
+      - script.execute: screen_schedule_check
     on_time:
       - minutes: '*'
         seconds: 0
@@ -199,15 +336,26 @@ time:
           - script.execute: time_update
 
 script:
+  - id: ntp_servers_apply
+    mode: restart
+    then:
+      - lambda: |-
+          apply_ntp_servers(id(ntp_server_1).state,
+                            id(ntp_server_2).state,
+                            id(ntp_server_3).state);
+
   - id: time_update
     then:
       - lambda: |-
-          apply_timezone(id(timezone_select).current_option());
+          const char *posix = apply_timezone(id(timezone_select).current_option());
+          id(panel_time).set_timezone(posix);
+          id(homeassistant_time).set_timezone(posix);
       - lvgl.label.update:
           id: display_time
           text: !lambda |-
             static char time_buf[17];
-            auto now = id(ha_time).now();
+            auto now = panel_time_or_fallback(id(panel_time).now(),
+                                              id(homeassistant_time).now());
             if (!now.is_valid()) return "--:--";
             int h = now.hour;
             int m = now.minute;
@@ -221,3 +369,29 @@ script:
               snprintf(time_buf, sizeof(time_buf), "%02d:%02d", h, m);
             }
             return time_buf;
+      - lambda: |-
+          auto now = panel_time_or_fallback(id(panel_time).now(),
+                                            id(homeassistant_time).now());
+          bool use_12h =
+              id(clock_format_select).current_option() == "12h";
+          if (now.is_valid()) {
+            static char date_buf[11];
+            snprintf(date_buf, sizeof(date_buf), "%04d-%02d-%02d",
+                     now.year, now.month, now.day_of_month);
+            id(screen_date_sensor).publish_state(date_buf);
+            update_calendar_cards(true, now.day_of_month, now.month);
+            update_calendar_cards_time(
+                true, now.day_of_month, now.month, now.hour, now.minute, use_12h);
+            update_timezone_cards(true, now.timestamp,
+                                  id(timezone_select).current_option(), use_12h);
+          } else if (!calendar_date_valid()) {
+            id(homeassistant_time).update();
+            id(screen_date_sensor).publish_state("");
+            update_calendar_cards(false, 0, 0);
+            update_calendar_cards_time(false, 0, 0, 0, 0, false);
+            update_timezone_cards(false, 0, id(timezone_select).current_option(), use_12h);
+          } else {
+            id(homeassistant_time).update();
+            update_calendar_cards_time(false, 0, 0, 0, 0, false);
+            update_timezone_cards(false, 0, id(timezone_select).current_option(), use_12h);
+          }

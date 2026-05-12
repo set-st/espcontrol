@@ -1,0 +1,32 @@
+# =============================================================================
+# FIRMWARE UPDATE DISABLED - Version metadata only
+# =============================================================================
+# Keeps firmware version reporting available while omitting the GitHub firmware
+# update checker, auto-update switch, update frequency selector, and manual
+# update button.
+# =============================================================================
+
+substitutions:
+  firmware_version: "dev"
+
+esphome:
+  project:
+    name: jtenniswood.espcontrol
+    version: "${firmware_version}"
+  on_boot:
+    priority: 200
+    then:
+      - text_sensor.template.publish:
+          id: firmware_version_sensor
+          state: "${firmware_version}"
+
+text_sensor:
+  - platform: template
+    name: "Firmware: Version"
+    id: firmware_version_sensor
+    entity_category: diagnostic
+    icon: "mdi:tag"
+    update_interval: never
+    lambda: 'return {"${firmware_version}"};'
+    web_server:
+      sorting_group_id: sg_firmware

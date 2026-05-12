@@ -1,23 +1,18 @@
 # =============================================================================
 # DEV CONFIG - Local development entry point (7" P4 panel)
 # =============================================================================
-# Uses local component path instead of GitHub remote so changes to C++ headers
-# and YAML are picked up immediately. Flash with: esphome run dev.yaml
+# Flash with: esphome run dev.yaml
 # =============================================================================
 
 substitutions:
   name: "espcontrol-dev"
-  friendly_name: "Espcontrol Dev"
+  friendly_name: "EspControl Dev"
+  espcontrol_component_url: "../.."
+  espcontrol_component_ref: "HEAD"
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
-
-external_components:
-  - source:
-      type: local
-      path: ../../components
-    components: [espcontrol]
 
 packages:
   espcontrol: !include packages.yaml

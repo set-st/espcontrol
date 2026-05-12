@@ -5,14 +5,35 @@
 # identical across all hardware targets.
 # =============================================================================
 
+esphome:
+  # Enable LVGL's bidirectional text algorithm so right-to-left scripts
+  # (Hebrew, Arabic) render in visual order.
+  platformio_options:
+    build_flags:
+      - "-DLV_USE_BIDI=1"
+      - "-DLV_DRAW_SW_SUPPORT_RGB565=1"
+
 api:
   reboot_timeout: 0s
   homeassistant_states: true
   homeassistant_services: true
+  on_client_connected:
+    - lambda: |-
+        refresh_weather_forecast_cards();
+    - delay: 10s
+    - lambda: |-
+        refresh_weather_forecast_cards();
+
+interval:
+  - interval: 1h
+    then:
+      - lambda: |-
+          refresh_weather_forecast_cards();
 
 logger:
   logs:
     light: WARN
+    script: INFO
 
 http_request:
   id: http_req
@@ -36,12 +57,39 @@ web_server:
     - id: sg_screensaver
       name: "Screensaver"
       sorting_weight: 30
+    - id: sg_connectivity
+      name: "Connectivity"
+      sorting_weight: 35
     - id: sg_firmware
       name: "Firmware"
       sorting_weight: 40
+    - id: sg_developer
+      name: "Developer"
+      sorting_weight: 90
 
 button:
-  - platform: restart
+  - platform: template
     name: "Apply Configuration"
+    internal: true
+    disabled_by_default: true
     icon: mdi:restart
     entity_category: config
+    on_press:
+      then:
+        # Flush web UI settings before rebooting; ESPHome normally batches
+        # preference writes, so an immediate restart can otherwise lose them.
+        - lambda: |-
+            global_preferences->sync();
+            App.safe_reboot();
+
+switch:
+  - platform: template
+    name: "Developer: Experimental Features"
+    internal: true
+    id: developer_experimental_features
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+    icon: "mdi:flask-outline"
+    web_server:
+      sorting_group_id: sg_developer

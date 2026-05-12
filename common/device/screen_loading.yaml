@@ -30,23 +30,23 @@ lvgl:
               flex_flow: COLUMN
               flex_align_main: center
               flex_align_cross: center
-              pad_row: 40
+              pad_row: $setup_loading_pad_row
             widgets:
               - label:
-                  text_font: icon_font_setup
+                  text_font: $setup_icon_font_id
                   text: $icon_wifi
                   text_color: 0xFFFFFF
                   text_align: center
               - label:
                   text: "Starting up"
-                  text_font: setup_title_font
+                  text_font: $setup_title_font_id
                   text_color: 0xFFFFFF
                   width: $content_width
                   text_align: center
               - label:
                   id: loading_status_label
                   text: "Booting"
-                  text_font: setup_body_font
+                  text_font: $setup_body_font_id
                   text_color: 0x888888
                   width: $content_width
                   text_align: center
@@ -55,6 +55,14 @@ lvgl:
                   hidden: true
                   width: 0
                   height: 0
+              # Hidden arc ensures LVGL compiles lv_arc for modal controls.
+              - arc:
+                  hidden: true
+                  width: 0
+                  height: 0
+    - id: screen_off_page
+      bg_color: 0x000000
+      scrollable: false
 
 esphome:
   on_boot:
@@ -63,11 +71,20 @@ esphome:
         - lambda: |-
             lv_obj_add_flag(id(temperatures), LV_OBJ_FLAG_HIDDEN);
             lv_obj_add_flag(id(display_time), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(network_status_button), LV_OBJ_FLAG_HIDDEN);
         - delay: 100ms
-        - light.turn_on:
-            id: display_backlight
-            brightness: 90%
-            transition_length: 500ms
+        - if:
+            condition:
+              lambda: |-
+                return id(screen_schedule_asleep) ||
+                       (id(schedule_enabled).state && !panel_time_or_fallback(id(panel_time).now(), id(homeassistant_time).now()).is_valid());
+            then:
+              - script.execute: backlight_force_display_off
+            else:
+              - light.turn_on:
+                  id: display_backlight
+                  brightness: 90%
+                  transition_length: 500ms
     - priority: -100
       then:
         - if:
@@ -76,16 +93,21 @@ esphome:
             then:
               - lambda: |-
                   lv_label_set_text(id(loading_status_label), "Connecting to WiFi");
-              - delay: 15s
+              - delay: 60s
               - lambda: 'id(boot_grace_period) = false;'
               - if:
                   condition:
                     not:
                       wifi.connected:
                   then:
-                    - lvgl.page.show: wifi_setup_page
-                    - script.execute: setup_screen_dim
+                    - script.execute: wifi_show_reconnecting
+                    - delay: 30s
+                    - if:
+                        condition:
+                          not:
+                            wifi.connected:
+                        then:
+                          - script.execute: wifi_show_hotspot_setup
             else:
               - lambda: 'id(boot_grace_period) = false;'
-              - lvgl.page.show: wifi_setup_page
-              - script.execute: setup_screen_dim
+              - script.execute: wifi_show_hotspot_setup

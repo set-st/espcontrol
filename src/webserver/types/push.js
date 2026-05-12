@@ -1,6 +1,7 @@
-// Momentary push button: fires an esphome.push_button_pressed event (no toggle state)
+// Momentary trigger card: stored as "push" for config compatibility.
+// Fires an esphome.push_button_pressed event with no toggle state.
 registerButtonType("push", {
-  label: "Button",
+  label: "Trigger",
   allowInSubpage: true,
   labelPlaceholder: "e.g. Doorbell",
   onSelect: function (b) {
@@ -8,17 +9,16 @@ registerButtonType("push", {
     b.icon = "Gesture Tap";
   },
   renderSettings: function (panel, b, slot, helpers) {
-    panel.appendChild(helpers.makeIconPicker(
+    panel.appendChild(helpers.iconPickerField(
       helpers.idPrefix + "icon-picker", helpers.idPrefix + "icon",
       b.icon || "Auto", function (opt) {
         b.icon = opt;
         helpers.saveField("icon", opt);
-        renderPreview();
       }
     ));
   },
   renderPreview: function (b, helpers) {
-    var label = b.label || "Button";
+    var label = b.label || "Trigger";
     var iconName = b.icon && b.icon !== "Auto" ? iconSlug(b.icon) : "gesture-tap";
     return {
       iconHtml: '<span class="sp-btn-icon mdi mdi-' + iconName + '"></span>',

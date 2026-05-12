@@ -1,0 +1,39 @@
+name: Update Generated Icons
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'common/assets/icons.json'
+      - 'scripts/build.py'
+      - '.github/workflows/generated-icons.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-icons:
+    name: Sync generated icon files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Generate icon outputs
+        run: python3 scripts/build.py icons
+
+      - name: Commit generated icon outputs
+        run: |
+          if git diff --quiet; then
+            echo "Generated icon files are already up to date."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            common/assets/icon_glyphs.yaml \
+            components/espcontrol/icons.h \
+            src/webserver/www.js
+          git commit -m "Build generated icon files"
+          git push

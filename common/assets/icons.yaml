@@ -2,7 +2,7 @@
 # ICONS - Material Design Icons for buttons and setup screens
 # =============================================================================
 # http://materialdesignicons.com/cdn/7.4.47/
-# Two icon fonts: 48px for button icons, 64px for setup screen icons.
+# Two icon fonts: button icons and setup icons.
 # =============================================================================
 
 font:
@@ -20,12 +20,14 @@ font:
     bpp: 4
     glyphs:
       - "\U000F05A9"  # mdi-wifi
+      - "\U000F0200"  # mdi-ethernet
       - "\U000F0493"  # mdi-cog
       - "\U000F07D0"  # mdi-home-assistant
 
 substitutions:
   icon_wifi: "\U000F05A9"
+  icon_ethernet: "\U000F0200"
   icon_cog: "\U000F0493"
   icon_home_assistant: "\U000F07D0"
-  icon_arrow_left: "\U000F004D"
+  icon_chevron_left: "\U000F0141"
   icon_chevron_right: "\U000F0142"
