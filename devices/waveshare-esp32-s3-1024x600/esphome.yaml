@@ -1,5 +1,5 @@
 # =============================================================================
-# ESPHOME ENTRY POINT - Guition ESP32-P4 JC1060P470
+# ESPHOME ENTRY POINT - Waveshare ESP32-S3 1024x600
 # =============================================================================
 # User-facing config file. Set your device name and WiFi credentials here.
 # The remote package reference pulls in the full device configuration from
