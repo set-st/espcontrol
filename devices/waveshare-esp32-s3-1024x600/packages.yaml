@@ -37,6 +37,7 @@ substitutions:
   network_package_suffix: ${ "_ethernet" if network_transport == "ethernet" else "" }
   firmware_update_package_suffix: ${ "_disabled" if disable_updates == "true" else "" }
   backlight_pwm_frequency: "1000Hz"
+  backlight_output_id: "pwm_backlight_output"
 
 packages:
   # ---------------------------------------------------------------------------
@@ -96,3 +97,4 @@ packages:
   # ---------------------------------------------------------------------------
   lvgl:            !include device/lvgl.yaml
   sensors:         !include device/sensors.yaml
+  backlight_output_id: "pwm_backlight_output"
