@@ -10,7 +10,7 @@ substitutions:
   espcontrol_component_ref: "HEAD"
 
 packages:
-  core: !include builds/guition-esp32-s3-4848s040.yaml
+  core: !include guition-esp32-s3-4848s040.yaml
 
 esphome:
   project:
