@@ -36,14 +36,15 @@ substitutions:
   disable_updates: "false"
   network_package_suffix: ${ "_ethernet" if network_transport == "ethernet" else "" }
   firmware_update_package_suffix: ${ "_disabled" if disable_updates == "true" else "" }
-  backlight_pwm_frequency: "1000Hz"
-  backlight_output_id: "pwm_backlight_output"
+  backlight_pwm_frequency: ${ "20000Hz" if network_transport == "ethernet" else "1000Hz" }
+  backlight_output_id: "gpio_backlight_pwm"
 
 packages:
   # ---------------------------------------------------------------------------
   # Device, assets, and LVGL base
   # ---------------------------------------------------------------------------
   device:          !include device/device.yaml
+  network_coprocessor: !include device/network_coprocessor${network_package_suffix}.yaml
   fonts:           !include ../../common/assets/fonts.yaml
   icons:           !include ../../common/assets/icons.yaml
   fonts_device:    !include device/fonts.yaml
@@ -97,4 +98,4 @@ packages:
   # ---------------------------------------------------------------------------
   lvgl:            !include device/lvgl.yaml
   sensors:         !include device/sensors.yaml
-  backlight_output_id: "pwm_backlight_output"
+  backlight_output_id: "gpio_backlight_pwm"

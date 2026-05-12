@@ -1,8 +1,7 @@
 # =============================================================================
-# DEV CONFIG - Local development entry point (Waveshare 7" S3 panel)
+# DEV CONFIG - Local development entry point (7" P4 panel)
 # =============================================================================
-# Uses local component path instead of GitHub remote so changes to C++ headers
-# and YAML are picked up immediately. Flash with: esphome run dev.yaml
+# Flash with: esphome run dev.yaml
 # =============================================================================
 
 substitutions:
