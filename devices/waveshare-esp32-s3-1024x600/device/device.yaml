@@ -106,11 +106,11 @@ packages:
 output:
   - platform: waveshare_io_ch32v003
     inverted: true
-    id: pwm_backlight_output
+    id: gpio_backlight_pwm
 
 light:
   - platform: monochromatic
-    output: pwm_backlight_output
+    output: gpio_backlight_pwm
     name: Display Backlight
     icon: mdi:lightbulb-on
     id: display_backlight
