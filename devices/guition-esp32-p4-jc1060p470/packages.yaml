@@ -98,4 +98,3 @@ packages:
   # ---------------------------------------------------------------------------
   lvgl:            !include device/lvgl.yaml
   sensors:         !include device/sensors.yaml
-  backlight_output_id: "gpio_backlight_pwm"
