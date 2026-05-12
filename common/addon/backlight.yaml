@@ -236,8 +236,8 @@ script:
             - light.turn_off:
                 id: display_backlight
                 transition_length: 0s
-      - output.turn_off: gpio_backlight_pwm
-      - lambda: 'id(gpio_backlight_pwm).turn_off();'
+      - output.turn_off: pwm_backlight_output
+      - lambda: 'id(pwm_backlight_output).turn_off();'
 
   - id: backlight_fade_current_ui_to_black
     mode: restart
@@ -249,35 +249,35 @@ script:
           if (brightness <= 0.01f) brightness = 1.0f;
           id(screensaver_fade_start_level) = brightness;
       - output.set_level:
-          id: gpio_backlight_pwm
+          id: pwm_backlight_output
           level: !lambda 'return id(screensaver_fade_start_level) * 0.85f;'
       - delay: 50ms
       - output.set_level:
-          id: gpio_backlight_pwm
+          id: pwm_backlight_output
           level: !lambda 'return id(screensaver_fade_start_level) * 0.70f;'
       - delay: 50ms
       - output.set_level:
-          id: gpio_backlight_pwm
+          id: pwm_backlight_output
           level: !lambda 'return id(screensaver_fade_start_level) * 0.55f;'
       - delay: 50ms
       - output.set_level:
-          id: gpio_backlight_pwm
+          id: pwm_backlight_output
           level: !lambda 'return id(screensaver_fade_start_level) * 0.40f;'
       - delay: 50ms
       - output.set_level:
-          id: gpio_backlight_pwm
+          id: pwm_backlight_output
           level: !lambda 'return id(screensaver_fade_start_level) * 0.25f;'
       - delay: 50ms
       - output.set_level:
-          id: gpio_backlight_pwm
+          id: pwm_backlight_output
           level: !lambda 'return id(screensaver_fade_start_level) * 0.12f;'
       - delay: 50ms
       - output.set_level:
-          id: gpio_backlight_pwm
+          id: pwm_backlight_output
           level: !lambda 'return id(screensaver_fade_start_level) * 0.04f;'
       - delay: 50ms
       - output.set_level:
-          id: gpio_backlight_pwm
+          id: pwm_backlight_output
           level: 0%
       - delay: 50ms
 
@@ -608,27 +608,27 @@ script:
       - lvgl.widget.hide: network_status_button
       - lambda: 'network_status_hide_modal();'
       - output.set_level:
-          id: gpio_backlight_pwm
+          id: pwm_backlight_output
           level: 0%
       - delay: 50ms
       - output.set_level:
-          id: gpio_backlight_pwm
+          id: pwm_backlight_output
           level: !lambda 'return id(screensaver_clock_target_level) * 0.20f;'
       - delay: 50ms
       - output.set_level:
-          id: gpio_backlight_pwm
+          id: pwm_backlight_output
           level: !lambda 'return id(screensaver_clock_target_level) * 0.40f;'
       - delay: 50ms
       - output.set_level:
-          id: gpio_backlight_pwm
+          id: pwm_backlight_output
           level: !lambda 'return id(screensaver_clock_target_level) * 0.60f;'
       - delay: 50ms
       - output.set_level:
-          id: gpio_backlight_pwm
+          id: pwm_backlight_output
           level: !lambda 'return id(screensaver_clock_target_level) * 0.80f;'
       - delay: 50ms
       - output.set_level:
-          id: gpio_backlight_pwm
+          id: pwm_backlight_output
           level: !lambda 'return id(screensaver_clock_target_level);'
       - delay: 50ms
       - light.turn_on:
