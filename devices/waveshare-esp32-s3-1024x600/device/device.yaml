@@ -1,0 +1,361 @@
+# =============================================================================
+# DEVICE - Waveshare ESP32-S3 1024x600 (7" landscape touch panel)
+# =============================================================================
+# Pin assignments, peripherals, and platform config for the 7" Waveshare
+# panel built on the ESP32-S3 (octal PSRAM) with an RGB DPI display and a
+# GT911 capacitive touchscreen.
+#
+# Display pins (DE/HSYNC/VSYNC/PCLK + R/G/B data bits) match the ESPHome
+# mipi_rgb model WAVESHARE-5-1024X600 exactly, so only the pixel clock and
+# porch values are overridden here to the known-good timings.
+#
+# IMPORTANT: the panel's backlight enable (DISP) and touch reset are routed
+# through the on-board CH422G I/O expander (I2C), NOT direct ESP32-S3 GPIO.
+# The mipi_rgb driver itself toggles the display enable on CH422G pin 2; the
+# backlight light entity below reuses the same expander pin for on/off control
+# (CH422G has no PWM, so brightness is binary on this board).
+# =============================================================================
+
+substitutions:
+  espcontrol_component_url: "https://github.com/set-st/espcontrol"
+  espcontrol_component_ref: "main"
+  mdi_font_file: "https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/fonts/materialdesignicons-webfont.ttf"
+
+# ---------------------------------------------------------------------------
+# ESP32-S3 platform (16MB flash, ESP-IDF framework)
+# ---------------------------------------------------------------------------
+esp32:
+  board: esp32-s3-devkitc-1
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      # The S3 display stack leaves little internal RAM for HTTPS OTA checks.
+      # Allocate mbedTLS buffers from PSRAM so firmware downloads can connect.
+      CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC: "y"
+      # Keep the ESP32 task watchdog long enough for display startup while
+      # remaining compatible with ESPHome 2026.4 and newer.
+      CONFIG_ESP_TASK_WDT_TIMEOUT_S: "30"
+      # Keep WiFi startup inside the internal-RAM budget after the RGB display
+      # and LVGL buffers are initialized.
+      CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM: "8"
+      CONFIG_WIFI_STATIC_RX_BUFFER_NUM: "8"
+      CONFIG_SPIRAM_TRY_ALLOCATE_WIFI_LWIP: "y"
+      # The RGB driver already restarts after a genuine DMA underflow. Restarting
+      # on every VSYNC can instead shift the framebuffer by one bounce-buffer block.
+      CONFIG_LCD_RGB_RESTART_IN_VSYNC: "n"
+      CONFIG_LCD_RGB_ISR_IRAM_SAFE: "y"
+      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: "y"
+      CONFIG_SPIRAM_RODATA: "y"
+
+# ---------------------------------------------------------------------------
+# External component
+# ---------------------------------------------------------------------------
+external_components:
+  - source:
+      type: git
+      url: ${espcontrol_component_url}
+      ref: ${espcontrol_component_ref}
+      path: components
+    components: [espcontrol, web_server_idf, artwork_image]
+    refresh: 1s
+
+espcontrol:
+  id: espcontrol_app
+# ---------------------------------------------------------------------------
+# ESPHome core (device name from substitutions)
+# ---------------------------------------------------------------------------
+# The Waveshare 7" panel runs close to the internal RAM limit once the RGB
+# display, LVGL, web UI, and API are all active. Keep the native API connection
+# pool modest, but allow one spare slot so Home Assistant can reconnect after an
+# abrupt OTA reset while the ESPHome dashboard/logger still has a socket open.
+# ---------------------------------------------------------------------------
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  build_flags:
+    - "-DESPCONTROL_DISABLE_TODO=1"
+    - "-DESPCONTROL_MAX_GRID_SLOTS=15"
+    - "-DESPCONTROL_LOW_HEAP_MEDIA_CONTROL=1"
+    - "-DESPCONTROL_LOW_HEAP_COVER_ART=1"
+    - "-DESPCONTROL_DISABLE_WEATHER_FORECAST=1"
+    # Keep C++ literals close to their functions on the S3 firmware image;
+    # the modal code is large enough to otherwise trip Xtensa l32r range limits.
+    - "-mtext-section-literals"
+  on_boot:
+    - priority: 800
+      then:
+        - lambda: |-
+            auto reason = esp_reset_reason();
+            if (reason == ESP_RST_USB || reason == ESP_RST_SW) {
+              esp_sleep_enable_timer_wakeup(100000);
+              esp_deep_sleep_start();
+            }
+    - priority: -100
+      then:
+        - lambda: 'id(screen_rotation_ready) = true;'
+        - script.execute: apply_screen_rotation
+        - script.execute: clock_bar_apply
+
+# ---------------------------------------------------------------------------
+# PSRAM (video frame buffer memory)
+# ---------------------------------------------------------------------------
+psram:
+  mode: octal
+  speed: 80MHz
+
+# ---------------------------------------------------------------------------
+# OTA updates (ESPHome native + HTTP-based)
+# ---------------------------------------------------------------------------
+ota:
+  - platform: esphome
+    on_begin:
+      then:
+        - script.execute: show_update_writing
+        - script.wait: show_update_writing
+    on_end:
+      then:
+        - globals.set:
+            id: firmware_update_complete_pending
+            value: 'true'
+        - lambda: 'global_preferences->sync();'
+        - lambda: |-
+            esp_sleep_enable_timer_wakeup(100000);
+            esp_deep_sleep_start();
+    on_error:
+      then:
+        - script.execute: show_update_failed
+  - platform: http_request
+    on_begin:
+      then:
+        - script.execute: show_update_writing
+        - script.wait: show_update_writing
+    on_end:
+      then:
+        - globals.set:
+            id: firmware_update_complete_pending
+            value: 'true'
+        - lambda: 'global_preferences->sync();'
+        - lambda: |-
+            esp_sleep_enable_timer_wakeup(100000);
+            esp_deep_sleep_start();
+    on_error:
+      then:
+        - script.execute: show_update_failed
+
+# ---------------------------------------------------------------------------
+# Shared infrastructure (API, logging, web server, restart button)
+# ---------------------------------------------------------------------------
+packages:
+  core_infra: !include ../../../common/device/core_infra.yaml
+
+api:
+  listen_backlog: 4
+  max_connections: 3
+  max_send_queue: 12
+
+# The Waveshare USB-C port is exposed as UART0 through a USB-UART bridge.
+logger:
+  hardware_uart: UART0
+
+wifi:
+  use_psram: true
+
+# ---------------------------------------------------------------------------
+# CH422G I/O expander (I2C)
+# ---------------------------------------------------------------------------
+# Drives the display backlight enable (DISP / EXIO2 -> pin 2) and the GT911
+# touch reset (TP_RST / EXIO1 -> pin 1). The mipi_rgb driver toggles the
+# display enable on pin 2 during setup via this same hub.
+ch422g:
+  - id: waveshare_io
+
+# ---------------------------------------------------------------------------
+# Backlight (CH422G pin 2 = DISP/EXIO2)
+# ---------------------------------------------------------------------------
+# The panel backlight is driven through the CH422G I/O expander, which only
+# supports binary on/off (no PWM). The platform screensaver/clock code expects
+# a FloatOutput (it ramps gpio_backlight_pwm with output.set_level), so we
+# expose a template float output that snaps the binary CH422G pin at 50%:
+# any non-zero level turns the backlight on, zero turns it off. This keeps the
+# shared backlight scripts working while matching the board's binary hardware.
+output:
+  - platform: template
+    id: gpio_backlight_pwm
+    type: float
+    write_action:
+      - if:
+          condition:
+            lambda: 'return state > 0.0f;'
+          then:
+            - output.turn_on: gpio_backlight_binary
+          else:
+            - output.turn_off: gpio_backlight_binary
+  - platform: gpio
+    id: gpio_backlight_binary
+    pin:
+      ch422g: waveshare_io
+      number: 2
+      mode:
+        output: true
+
+light:
+  - platform: monochromatic
+    output: gpio_backlight_pwm
+    name: Display Backlight
+    icon: mdi:lightbulb-on
+    id: display_backlight
+    restore_mode: RESTORE_DEFAULT_ON
+    default_transition_length: 0s
+    gamma_correct: 1.0
+    on_turn_on:
+      then:
+        - if:
+            condition:
+              lambda: |-
+                auto now = panel_time_or_fallback(id(panel_time).now(), id(homeassistant_time).now());
+                return (id(espcontrol_app).display().target_source_is(
+                            espcontrol::DisplayRequestSource::SCREEN_SCHEDULE) &&
+                        id(espcontrol_app).display().target_mode_is(
+                            espcontrol::DisplayMode::DISPLAY_OFF)) ||
+                       screen_schedule_waiting_for_time(
+                         id(screen_schedule_trigger).state,
+                         id(schedule_enabled).state,
+                         now.is_valid());
+            then:
+              - script.execute: backlight_force_display_off
+            else:
+              - if:
+                  condition:
+                    lambda: |-
+                      return id(espcontrol_app).display().current_mode_is(
+                          espcontrol::DisplayMode::DISPLAY_OFF);
+                  then:
+                    - script.execute: screensaver_wake
+    on_turn_off:
+      then:
+        - script.execute: display_backlight_handle_off
+
+# ---------------------------------------------------------------------------
+# I2C bus and touchscreen (GT911 capacitive, wakes screensaver on touch)
+# ---------------------------------------------------------------------------
+# SDA/SCL follow the Waveshare ESP32-S3 wiring (GPIO8/GPIO9). The GT911 reset
+# is routed through the CH422G expander pin 1 (TP_RST / EXIO1); the interrupt
+# is a direct ESP32-S3 GPIO (TP_IRQ -> GPIO4).
+i2c:
+  - id: bus_a
+    sda: GPIO8
+    scl: GPIO9
+    frequency: 400kHz
+    sda_pullup_enabled: False
+    scl_pullup_enabled: False
+
+touchscreen:
+  - platform: gt911
+    id: my_touchscreen
+    display: my_display
+    i2c_id: bus_a
+    reset_pin:
+      ch422g: waveshare_io
+      number: 1
+      mode:
+        output: true
+    interrupt_pin: GPIO4
+    update_interval: 16ms
+    transform:
+      mirror_x: false
+      mirror_y: false
+    on_touch:
+      - script.execute: cover_art_pause_after_touch
+      - script.wait: cover_art_pause_after_touch
+      - script.execute: screensaver_wake
+
+# ---------------------------------------------------------------------------
+# Display (7" 1024x600 RGB DPI panel)
+# ---------------------------------------------------------------------------
+# Model WAVESHARE-5-1024X600 defines the data/control pins that match this
+# panel and routes the display enable through the CH422G expander (pin 2).
+# Only the pixel clock and porch values are overridden to the known-good
+# timings from the original waveshare-7-inch branch.
+display:
+  - platform: mipi_rgb
+    model: WAVESHARE-5-1024X600
+    id: my_display
+    # Start WiFi before the RGB panel allocates its frame buffers; otherwise the
+    # WiFi driver can fail to claim enough internal RX buffers on fresh boots.
+    setup_priority: 240
+    # Keep the S3 RGB clock conservative while lifting the panel scan rate above
+    # the visibly shimmery 8MHz setting. Higher clocks have caused screen shifts
+    # and pixel breakup when WiFi, flash, and web traffic compete for PSRAM.
+    pclk_frequency: 30MHz
+    hsync_pulse_width: 162
+    hsync_back_porch: 152
+    hsync_front_porch: 48
+    vsync_pulse_width: 45
+    vsync_back_porch: 13
+    vsync_front_porch: 3
+    transform:
+      mirror_x: false
+      mirror_y: false
+
+# ---------------------------------------------------------------------------
+# LVGL base (display binding, must be before any page definitions)
+# ---------------------------------------------------------------------------
+lvgl:
+  id: main_lvgl
+  # Keep LVGL after WiFi and after the display driver.
+  setup_priority: 230
+  buffer_size: 12%
+  displays: my_display
+  rotation: 180
+  touchscreens:
+    - touchscreen_id: my_touchscreen
+      long_press_time: 3s
+
+script:
+  - id: apply_screen_rotation
+    then:
+      - if:
+          condition:
+            lambda: 'return id(screen_rotation_select).current_option() == "90";'
+          then:
+            - lvgl.display.set_rotation: 270
+          else:
+            - if:
+                condition:
+                  lambda: 'return id(screen_rotation_select).current_option() == "180";'
+                then:
+                  - lvgl.display.set_rotation: 0
+                else:
+                  - if:
+                      condition:
+                        lambda: 'return id(screen_rotation_select).current_option() == "270";'
+                      then:
+                        - lvgl.display.set_rotation: 90
+                      else:
+                        - lvgl.display.set_rotation: 180
+
+select:
+  - platform: template
+    name: "${entity_screen_rotation}"
+    internal: true
+    disabled_by_default: true
+    id: screen_rotation_select
+    entity_category: config
+    icon: "mdi:screen-rotation"
+    optimistic: true
+    restore_value: true
+    initial_option: "180"
+    options:
+      - "0"
+      - "90"
+      - "180"
+      - "270"
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: 'return id(screen_rotation_ready);'
+            then:
+              - script.execute: apply_screen_rotation
+              - script.execute: clock_bar_apply
